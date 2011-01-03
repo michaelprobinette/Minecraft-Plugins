@@ -1,5 +1,8 @@
 import java.util.logging.Logger;
 
+/**
+ * @author Vandolis
+ */
 public class PlayerTele extends Plugin {
 	private Listener				l		= new Listener(this);
 	protected static final Logger	log		= Logger.getLogger("Minecraft");
