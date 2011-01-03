@@ -7,6 +7,12 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/*
+ * 12/01/2010 Mind the idiot style of programming, as this is what a program that is not planned out looks like. Pretty much all of it was
+ * added on as I went, so it is NOT the best solution and I plan on rewritting it for Bukkit. If this code helps you in any way be sure to
+ * let me know!
+ */
+
 /**
  * @author Vandolis
  */
@@ -52,9 +58,6 @@ public class CommandOn extends Plugin {
 	
 	// Hacked vars
 	private static String				login				= "";
-	// private static String spamName = "";
-	// private static long spamTime = 0;
-	// private static ArrayList<String> battles = new ArrayList<String>();
 	private static ArrayList<Battle>	currentBattles		= new ArrayList<Battle>();
 	
 	public void enable() {
@@ -365,18 +368,6 @@ public class CommandOn extends Plugin {
 		String message = "";
 		message = "";
 		for (int m = 1; m < tempMessage.length; m++) {
-			// if (tempMessage[m].equalsIgnoreCase("[NAME]")) {
-			// message += name;
-			// }
-			// else if (tempMessage[m].equalsIgnoreCase("[Defender]")) {
-			// message += def;
-			// }
-			// else if (tempMessage[m].equalsIgnoreCase("[Attacker]")) {
-			// message += att;
-			// }
-			// else {
-			// message += tempMessage[m];
-			// }
 			message += tempMessage[m];
 			if ((m + 1) < tempMessage.length) {
 				message += " ";
@@ -445,18 +436,6 @@ public class CommandOn extends Plugin {
 		else {
 			message = "";
 			for (int m = 0; m < tempMessage.length; m++) {
-				// if (tempMessage[m].equalsIgnoreCase("[NAME]")) {
-				// message += name;
-				// }
-				// else if (tempMessage[m].equalsIgnoreCase("[Defender]")) {
-				// message += def;
-				// }
-				// else if (tempMessage[m].equalsIgnoreCase("[Attacker]")) {
-				// message += att;
-				// }
-				// else {
-				// message += tempMessage[m];
-				// }
 				message += tempMessage[m];
 				if ((m + 1) < tempMessage.length) {
 					message += " ";
@@ -494,27 +473,6 @@ public class CommandOn extends Plugin {
 					});
 					String command = "";
 					for (int e = 0; e < tempCommand.length; e++) {
-						// if (tempCommand[e].equalsIgnoreCase("[NAME]")) {
-						// command += player.getName();
-						// }
-						// else if (tempCommand[e].equalsIgnoreCase("[PlayerX]")) {
-						// command += player.getX();
-						// }
-						// else if (tempCommand[e].equalsIgnoreCase("[PlayerY]")) {
-						// command += player.getY();
-						// }
-						// else if (tempCommand[e].equalsIgnoreCase("[PlayerZ")) {
-						// command += player.getZ();
-						// }
-						// else if (tempCommand[e].equalsIgnoreCase("[Attacker]")) {
-						// command += att;
-						// }
-						// else if (tempCommand[e].equalsIgnoreCase("[Defender]")) {
-						// command += def;
-						// }
-						// else {
-						// command += tempCommand[e];
-						// }
 						command += tempCommand[e];
 						if ((e + 1) < tempCommand.length) {
 							command += " ";
@@ -536,7 +494,6 @@ public class CommandOn extends Plugin {
 					player.command(command);
 				}
 				else if (tempCommand[0].charAt(0) == '#') {
-					// TODO: Run server commands
 					String serverCommand = "";
 					for (int loop = 0; loop < tempCommand.length; loop++) {
 						serverCommand += tempCommand[loop] + " ";
@@ -550,27 +507,6 @@ public class CommandOn extends Plugin {
 				else if (tempCommand[0].charAt(0) == '@') {
 					String message = "";
 					for (int m = 1; m < tempCommand.length; m++) {
-						// if (tempCommand[m].equalsIgnoreCase("[NAME]")) {
-						// message += player.getName();
-						// }
-						// else if (tempCommand[m].equalsIgnoreCase("[PlayerX]")) {
-						// message += player.getX();
-						// }
-						// else if (tempCommand[m].equalsIgnoreCase("[PlayerY]")) {
-						// message += player.getY();
-						// }
-						// else if (tempCommand[m].equalsIgnoreCase("[PlayerZ")) {
-						// message += player.getZ();
-						// }
-						// else if (tempCommand[m].equalsIgnoreCase("[Attacker]")) {
-						// message += att;
-						// }
-						// else if (tempCommand[m].equalsIgnoreCase("[Defender]")) {
-						// message += def;
-						// }
-						// else {
-						// message += tempCommand[m];
-						// }
 						message += tempCommand[m];
 						if ((m + 1) < tempCommand.length) {
 							message += " ";
@@ -639,27 +575,6 @@ public class CommandOn extends Plugin {
 					else {
 						message = "";
 						for (int m = 0; m < tempCommand.length; m++) {
-							// if (tempCommand[m].equalsIgnoreCase("[NAME]")) {
-							// message += player.getName();
-							// }
-							// else if (tempCommand[m].equalsIgnoreCase("[PlayerX]")) {
-							// message += player.getX();
-							// }
-							// else if (tempCommand[m].equalsIgnoreCase("[PlayerY]")) {
-							// message += player.getY();
-							// }
-							// else if (tempCommand[m].equalsIgnoreCase("[PlayerZ")) {
-							// message += player.getZ();
-							// }
-							// else if (tempCommand[m].equalsIgnoreCase("[Attacker]")) {
-							// message += att;
-							// }
-							// else if (tempCommand[m].equalsIgnoreCase("[Defender]")) {
-							// message += def;
-							// }
-							// else {
-							// message += tempCommand[m];
-							// }
 							message += tempCommand[m];
 							if ((m + 1) < tempCommand.length) {
 								message += " ";
@@ -1012,18 +927,6 @@ public class CommandOn extends Plugin {
 			if (insideArr(TAGS, tag)) {
 				player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "]     " + arr[0] + ":" + msg);
 			}
-			// if (tag.equalsIgnoreCase("onlogin")) {
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "]     " + arr[0] + ":" + msg);
-			// }
-			// else if (tag.equalsIgnoreCase("onlogout")) {
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "]     " + arr[0] + ":" + msg);
-			// }
-			// else if (tag.equalsIgnoreCase("ondeath")) {
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "]     " + arr[0] + ":" + msg);
-			// }
-			// else if (tag.equalsIgnoreCase("onrespawn")) {
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "]     " + arr[0] + ":" + msg);
-			// }
 		}
 		return isCom;
 	}
@@ -1106,13 +1009,6 @@ public class CommandOn extends Plugin {
 		return isCom;
 	}
 	
-	public void showHelp(Player player) {
-		player.sendMessage("[" + Colors.Yellow + "CommandOn" + Colors.White + "] /co [command] [tag] [section]");
-		player.sendMessage("[" + Colors.Yellow + "CommandOn" + Colors.White + "]    [command] ignore allow list help");
-		player.sendMessage("[" + Colors.Yellow + "CommandOn" + Colors.White + "]    [tag] onlogin onlogout ondeath group name default all");
-		player.sendMessage("[" + Colors.Yellow + "CommandOn" + Colors.White + "]    [section] group name default all");
-	}
-	
 	public void list(Player player, final String tag) {
 		// List the commands for each tag
 		if (tag.equalsIgnoreCase("all")) {
@@ -1120,47 +1016,6 @@ public class CommandOn extends Plugin {
 				player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for " + tagIter);
 				checkCommands(player, tagIter, "all", null);
 			}
-			
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnLogin");
-			// checkCommands(player, "onlogin", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnLogout");
-			// checkCommands(player, "onlogout", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeath");
-			// checkCommands(player, "ondeath", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathFall");
-			// checkCommands(player, "ondeathfall", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathWater");
-			// checkCommands(player, "ondeathwater", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathLava");
-			// checkCommands(player, "ondeathlava", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathFire");
-			// checkCommands(player, "ondeathfire", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathMob");
-			// checkCommands(player, "ondeathmob", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathCactus");
-			// checkCommands(player, "ondeathcactus", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathExplosion");
-			// checkCommands(player, "ondeathexplosion", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathCreeper");
-			// checkCommands(player, "ondeathcreeper", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathSpider");
-			// checkCommands(player, "ondeathspider", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathSkeleton");
-			// checkCommands(player, "ondeathskeleton", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathZombie");
-			// checkCommands(player, "ondeathzombie", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnRespawn");
-			// checkCommands(player, "onrespawn", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnServerStart");
-			// checkCommands(player, "onserverstart", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnPvPKill");
-			// checkCommands(player, "onpvpkill", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnPvPDeath");
-			// checkCommands(player, "onpvpdeath", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnPvPStart");
-			// checkCommands(player, "onpvpstart", "all", null);
-			// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnPvPEnd");
-			// checkCommands(player, "onpvpend", "all", null);
 		}
 		else if (insideArr(TAGS, tag)) {
 			for (int i = 0; i < TAGS.length; i++) {
@@ -1173,88 +1028,6 @@ public class CommandOn extends Plugin {
 		else {
 			help(player, "coa list");
 		}
-		
-		// if (tag.equalsIgnoreCase("onlogin")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnLogin");
-		// checkCommands(player, "onlogin", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("onlogout")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnLogout");
-		// checkCommands(player, "onlogout", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeath")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeath");
-		// checkCommands(player, "ondeath", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("onrespawn")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnRespawn");
-		// checkCommands(player, "onrespawn", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeathfall")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathFall");
-		// checkCommands(player, "ondeathfall", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeathwater")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathWater");
-		// checkCommands(player, "ondeathwater", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeathlava")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathLava");
-		// checkCommands(player, "ondeathlava", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeathfire")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathFire");
-		// checkCommands(player, "ondeathfire", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeathexplosion")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathExplosion");
-		// checkCommands(player, "ondeathexplosion", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeathmob")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathMob");
-		// checkCommands(player, "ondeathmob", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeathcactus")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathCactus");
-		// checkCommands(player, "ondeathcactus", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("onpvpkill")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnPvPKill");
-		// checkCommands(player, "onpvpkill", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("onpvpdeath")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnPvPDeath");
-		// checkCommands(player, "onpvpdeath", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("onpvpstart")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnPvPStart");
-		// checkCommands(player, "onpvpstart", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("onpvpend")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnPvPEnd");
-		// checkCommands(player, "onpvpend", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeathskeleton")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathSkeleton");
-		// checkCommands(player, "ondeathskeleton", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeathzombie")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathZombie");
-		// checkCommands(player, "ondeathzombie", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeathspider")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathSpider");
-		// checkCommands(player, "ondeathspider", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("ondeathcreeper")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnDeathCreeper");
-		// checkCommands(player, "ondeathcreeper", "all", null);
-		// }
-		// else if (tag.equalsIgnoreCase("onserverstart")) {
-		// player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Listing commands for OnServerStart");
-		// checkCommands(player, "onserverstart", "all", null);
-		// }
-		
 	}
 	
 	public void help(Player player, final String command) {
@@ -1634,11 +1407,6 @@ public class CommandOn extends Plugin {
 			login = player.getName();
 			checkCommands(player, "OnLogin", "", null);
 			if (startCommandQue != null) {
-				// log.log(Level.INFO, "The que is:");
-				// for (int i = 0; i < startCommandQue.length; i++) {
-				// log.log(Level.INFO, startCommandQue[i]);
-				// }
-				// log.log(Level.INFO, "Running the que.");
 				runCommands(player, startCommandQue, null);
 				startCommandQue = null;
 			}
