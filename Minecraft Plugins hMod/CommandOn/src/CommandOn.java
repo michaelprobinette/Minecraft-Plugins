@@ -1884,9 +1884,25 @@ public class CommandOn extends Plugin {
 										if (split.length >= 4) {
 											if (split[3].equalsIgnoreCase("true")) {
 												debug = true;
+												player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White
+														+ "] Debug is now set to true.");
 											}
 											else {
 												debug = false;
+												player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White
+														+ "] Debug is now set to false.");
+											}
+										}
+										else {
+											if (debug) {
+												debug = false;
+												player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White
+														+ "] Debug is now set to false.");
+											}
+											else {
+												debug = true;
+												player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White
+														+ "] Debug is now set to true.");
 											}
 										}
 									}
