@@ -20,7 +20,7 @@ public class CommandOn extends Plugin {
 	private Listener					l					= new Listener(this);
 	protected static final Logger		log					= Logger.getLogger("Minecraft");
 	private static final String			name				= "CommandOn";
-	private static final String			version				= "v1.1.5";
+	private static final String			version				= "v1.1.6";
 	private static final String[]		COMMAND_TEMPLATE	= {
 			"## OnLogin", "default:", "## OnLogout", "default:", "## OnDeath", "default:", "## OnRespawn", "default:"
 															};
@@ -30,13 +30,14 @@ public class CommandOn extends Plugin {
 	private static final String			TAGS[]				= {
 			"OnLogin", "OnLogout", "OnDeath", "OnDeathFall", "OnDeathCactus", "OnDeathWater", "OnDeathMob", "OnDeathFire", "OnDeathLava",
 			"OnDeathCreeper", "OnDeathExplosion", "OnRespawn", "OnServerStart", "OnPvPKill", "OnPvPDeath", "OnPvPEnd", "OnPvPStart",
-			"OnDeathZombie", "OnDeathSpider", "OnDeathSkeleton"
+			"OnDeathZombie", "OnDeathSpider", "OnDeathSkeleton", "OnDeathPigZombie", "OnDeathGhast", "OnDeathSlime", "OnDeathOther",
+			"OnDeathSuicide"
 															};
 	private static final String			SECTIONS[]			= {
-			"Group", "Name", "Default", "All", "Nogroup"
+			"Group", "Name", "Default", "All", "NoGroup"
 															};
 	private static final String			VARS[]				= {
-			"[NAME]", "[PLAYERX]", "[PLAYERY]", "[PLAYERZ]", "[ATTACKER]", "[DEFENDER]", "[WINNER]", "[LOOSER]", "[CAUSE]"
+			"[NAME]", "[PLAYERX]", "[PLAYERY]", "[PLAYERZ]", "[ATTACKER]", "[DEFENDER]", "[WINNER]", "[LOSER]", "[CAUSE]"
 															};
 	
 	private static PropertiesFile		props				= new PropertiesFile("CommandOn.properties");
@@ -382,7 +383,7 @@ public class CommandOn extends Plugin {
 			message = message.replace("[ATTACKER]", batt.getAtt());
 			message = message.replace("[DEFENDER]", batt.getDef());
 			message = message.replace("[WINNER]", batt.getWin());
-			message = message.replace("[LOOSER]", batt.getLooser());
+			message = message.replace("[LOSER]", batt.getLooser());
 			message = message.replace("[CAUSE]", batt.getCause());
 		}
 		if (tempMessage[0].equalsIgnoreCase("%BLACK")) {
@@ -450,7 +451,7 @@ public class CommandOn extends Plugin {
 				message = message.replace("[ATTACKER]", batt.getAtt());
 				message = message.replace("[DEFENDER]", batt.getDef());
 				message = message.replace("[WINNER]", batt.getWin());
-				message = message.replace("[LOOSER]", batt.getLooser());
+				message = message.replace("[LOSER]", batt.getLooser());
 				message = message.replace("[CAUSE]", batt.getCause());
 			}
 			message = message.replaceFirst("%", ""); // Removes the % from the
@@ -487,7 +488,7 @@ public class CommandOn extends Plugin {
 						command = command.replace("[ATTACKER]", batt.getAtt());
 						command = command.replace("[DEFENDER]", batt.getDef());
 						command = command.replace("[WINNER]", batt.getWin());
-						command = command.replace("[LOOSER]", batt.getLooser());
+						command = command.replace("[LOSER]", batt.getLooser());
 						command = command.replace("[CAUSE]", batt.getCause());
 					}
 					// log.log(Level.INFO, "Running: " + command);
@@ -521,7 +522,7 @@ public class CommandOn extends Plugin {
 						message = message.replace("[ATTACKER]", batt.getAtt());
 						message = message.replace("[DEFENDER]", batt.getDef());
 						message = message.replace("[WINNER]", batt.getWin());
-						message = message.replace("[LOOSER]", batt.getLooser());
+						message = message.replace("[LOSER]", batt.getLooser());
 						message = message.replace("[CAUSE]", batt.getCause());
 					}
 					if (tempCommand[0].equalsIgnoreCase("@BLACK")) {
@@ -589,7 +590,7 @@ public class CommandOn extends Plugin {
 							message = message.replace("[ATTACKER]", batt.getAtt());
 							message = message.replace("[DEFENDER]", batt.getDef());
 							message = message.replace("[WINNER]", batt.getWin());
-							message = message.replace("[LOOSER]", batt.getLooser());
+							message = message.replace("[LOSER]", batt.getLooser());
 							message = message.replace("[CAUSE]", batt.getCause());
 						}
 						message = message.replaceFirst("@", "");
@@ -1077,7 +1078,7 @@ public class CommandOn extends Plugin {
 			player.sendMessage("[" + Colors.Yellow + "CommandOn" + Colors.White + "] Useage is \"/co me [ignore,command]\"");
 		}
 		else if (command.equalsIgnoreCase("admin")) {
-			player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] /co admin [wipe,add,remove,list]");
+			player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] /co admin [add,remove,list]");
 		}
 		else if (command.equalsIgnoreCase("vars")) {
 			player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White
@@ -1138,11 +1139,13 @@ public class CommandOn extends Plugin {
 		for (int xl = 0; xl < arr.length; xl++) {
 			if (arr[xl][0][0].equalsIgnoreCase(x)) {
 				xpos = xl;
-				// log.log(Level.INFO, "Xpos is: " + xpos);
+				if (debug)
+					log.log(Level.INFO, "Xpos is: " + xpos);
 				for (int yl = 0; yl < arr[xl].length; yl++) {
 					if (arr[xl][yl][0].equalsIgnoreCase(y) && (ypos == -1)) {
 						ypos = yl;
-						// log.log(Level.INFO, "990 Ypos is: " + ypos);
+						if (debug)
+							log.log(Level.INFO, "990 Ypos is: " + ypos);
 						for (int zl = 0; zl < arr[xl][yl].length; zl++) {
 							if (arr[xl][yl][zl].equalsIgnoreCase("")) {
 								zpos = zl;
@@ -1155,7 +1158,8 @@ public class CommandOn extends Plugin {
 					}
 					else if (arr[xl][yl][0].equalsIgnoreCase("") && (ypos == -1)) {
 						ypos = yl;
-						// log.log(Level.INFO, "1003 Ypos is: " + ypos);
+						if (debug)
+							log.log(Level.INFO, "1003 Ypos is: " + ypos);
 						for (int zl = 0; zl < arr[xl][yl].length; zl++) {
 							if (arr[xl][yl][zl].equalsIgnoreCase("")) {
 								zpos = zl;
@@ -1168,7 +1172,8 @@ public class CommandOn extends Plugin {
 					}
 					else if ((yl == arr[xl].length - 1) && (ypos == -1)) {
 						ypos = ydim;
-						// log.log(Level.INFO, "1016 Ypos is: " + ypos);
+						if (debug)
+							log.log(Level.INFO, "1016 Ypos is: " + ypos);
 						ydim++;
 						if (zdim < 2) {
 							zdim++;
@@ -1199,7 +1204,8 @@ public class CommandOn extends Plugin {
 		removeNull(tarr);
 		// printArray(tarr);
 		arr = tarr;
-		// printArray(arr);
+		if (debug)
+			printArray(arr);
 		return shrink(arr);
 	}
 	
@@ -1426,14 +1432,22 @@ public class CommandOn extends Plugin {
 						// log.log(Level.INFO, "Found death, executing...");
 						// Check if PvP kill
 						if (td.getBattle().getPvP()) {
-							// PvP kill
-							log.log(Level.INFO, "PvP battle line 1837");
-							checkCommands(td.getBattle().getWinnerP(), "OnPvPKill", "", td.getBattle());
-							checkCommands(td.getBattle().getLooserP(), "OnPvPDeath", "", td.getBattle());
-							checkCommands(player, "OnPvPEnd", "", td.getBattle());
-							currentBattles.remove(td.getBattle());
-							deaths.remove(td);
-							break; // Done
+							if (td.getBattle().getAtt().equalsIgnoreCase(td.getBattle().getDef())) {
+								
+								checkCommands(player, "OnDeathSuicide", "", td.getBattle());
+								break;
+							}
+							else {
+								// PvP kill
+								if (debug)
+									log.log(Level.INFO, "PvP battle line 1837");
+								checkCommands(td.getBattle().getWinnerP(), "OnPvPKill", "", td.getBattle());
+								checkCommands(td.getBattle().getLooserP(), "OnPvPDeath", "", td.getBattle());
+								checkCommands(player, "OnPvPEnd", "", td.getBattle());
+								currentBattles.remove(td.getBattle());
+								deaths.remove(td);
+								break; // Done
+							}
 						}
 						else if (td.getBattle().getPvW()) {
 							// Other
@@ -1459,6 +1473,9 @@ public class CommandOn extends Plugin {
 							else if (td.getBattle().getCause().equalsIgnoreCase("WATER")) {
 								checkCommands(td.getPlayer(), "OnDeathwater", "", td.getBattle());
 							}
+							else {
+								checkCommands(td.getPlayer(), "OnDeathOther", "", td.getBattle());
+							}
 							deaths.remove(td);
 							break; // Done
 						}
@@ -1476,9 +1493,18 @@ public class CommandOn extends Plugin {
 							else if (td.getBattle().getMob().getName().equalsIgnoreCase("Spider")) {
 								checkCommands(td.getPlayer(), "OnDeathspider", "", td.getBattle());
 							}
+							else if (td.getBattle().getMob().getName().equalsIgnoreCase("Ghast")) {
+								checkCommands(td.getPlayer(), "OnDeathGhast", "", td.getBattle());
+							}
+							else if (td.getBattle().getMob().getName().equalsIgnoreCase("PigZombie")) {
+								checkCommands(td.getPlayer(), "OnDeathPigZombie", "", td.getBattle());
+							}
+							else if (td.getBattle().getMob().getName().equalsIgnoreCase("Slime")) {
+								checkCommands(td.getPlayer(), "OnDeathSlime", "", td.getBattle());
+							}
 							else {
 								// Default
-								checkCommands(td.getPlayer(), "OnDeathmob", "", td.getBattle());
+								checkCommands(td.getPlayer(), "OnDeathMob", "", td.getBattle());
 							}
 							deaths.remove(td);
 							break; // Done
@@ -1509,8 +1535,9 @@ public class CommandOn extends Plugin {
 									temp.setWinner(att);
 									temp.setLooser(def);
 									
-									log.log(Level.INFO, "Adding new death: " + def.getName() + " time: " + time + " pvp cause: "
-											+ att.getName());
+									if (debug)
+										log.log(Level.INFO, "Adding new death: " + def.getName() + " time: " + time + " pvp cause: "
+												+ att.getName());
 									
 									// Remove time outs
 									for (int i = 0; i < deaths.size(); i++) {
@@ -1526,7 +1553,8 @@ public class CommandOn extends Plugin {
 										}
 									}
 									if (!found) {
-										log.log(Level.INFO, "Death not found, adding.");
+										if (debug)
+											log.log(Level.INFO, "Death not found, adding.");
 										deaths.add(new Death(def, time, temp));
 									}
 									break;
@@ -1556,7 +1584,12 @@ public class CommandOn extends Plugin {
 								// Add the battle
 								Battle tempB = new Battle(att, def, etc.getServer().getTime());
 								currentBattles.add(tempB);
-								checkCommands(attacker.getPlayer(), "OnPvPStart", "", tempB);
+								if (att.getName().equalsIgnoreCase(def.getName())) {
+									// Maybe add something here?
+								}
+								else {
+									checkCommands(attacker.getPlayer(), "OnPvPStart", "", tempB);
+								}
 							}
 						}
 					}
@@ -1616,7 +1649,9 @@ public class CommandOn extends Plugin {
 					
 					if (!found) {
 						Death td = new Death(def, time, new Battle(def, type.toString(), time));
-						// log.log(Level.INFO, "Adding new death: " + td.getName() + " time: " + td.getTime() + " cause: " + td.getCause());
+						if (debug)
+							log.log(Level.INFO, "Adding new death: " + td.getName() + " time: " + td.getTime() + " cause: "
+									+ td.getBattle().getCause());
 						deaths.add(td);
 					}
 				}
@@ -1630,14 +1665,14 @@ public class CommandOn extends Plugin {
 		
 		public boolean onCommand(Player player, String[] split) {
 			if (split.length >= 1) {
-				// if (split[0].equalsIgnoreCase("/test")) {
-				// test(player);
-				// return true;
-				// }
-				// if (split[0].equalsIgnoreCase("/st")) {
-				// player.sendMessage("The server time is: " + etc.getServer().getTime());
-				// return true;
-				// }
+				if (split[0].equalsIgnoreCase("/test") && debug) {
+					test(player);
+					return true;
+				}
+				if (split[0].equalsIgnoreCase("/st") && debug) {
+					player.sendMessage("The server time is: " + etc.getServer().getTime());
+					return true;
+				}
 				if (isAbb(split[0]) && (player.canUseCommand("/commandon") || player.canUseCommand("/con") || player.canUseCommand("/co"))) {
 					if (split.length == 1) {
 						help(player, "general");
@@ -1844,6 +1879,16 @@ public class CommandOn extends Plugin {
 										writeToFile(gC, command_file);
 										writeToFile(pI, player_file);
 										player.sendMessage("[" + Colors.Red + "CommandOnAdmin" + Colors.White + "] Files updated!");
+									}
+									else if (split[2].equalsIgnoreCase("debug") && isAdmin(player)) {
+										if (split.length >= 4) {
+											if (split[3].equalsIgnoreCase("true")) {
+												debug = true;
+											}
+											else {
+												debug = false;
+											}
+										}
 									}
 									else {
 										help(player, "admin");

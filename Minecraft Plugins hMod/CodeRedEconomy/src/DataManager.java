@@ -19,9 +19,45 @@ public class DataManager {
 	private static ArrayList<ShopItem>	itemList		= new ArrayList<ShopItem>();
 	
 	// Player data
+	private static File					file_playerData	= new File(LOC + "playerData.txt");
+	private static ArrayList<User>		users			= new ArrayList<User>();
 	
 	public DataManager() {
 		readPrivFile();
+		readUserFile();
+	}
+	
+	private void readUserFile() {
+		BufferedReader reader;
+		String raw = "";
+		
+		try {
+			reader = new BufferedReader(new FileReader(file_playerData));
+			
+			while ((raw = reader.readLine()) != null) {
+				String split[] = raw.split(" ");
+				if (split.length >= 1) {
+					String name = split[0];
+					if (split.length >= 2) {
+						int amount = Integer.valueOf(split[1]);
+						
+					}
+				}
+			}
+		}
+		catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	private void readPrivFile() {
