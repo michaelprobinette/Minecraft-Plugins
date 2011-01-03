@@ -1433,7 +1433,7 @@ public class CommandOn extends Plugin {
 						// Check if PvP kill
 						if (td.getBattle().getPvP()) {
 							if (td.getBattle().getAtt().equalsIgnoreCase(td.getBattle().getDef())) {
-								
+								// Suicide
 								checkCommands(player, "OnDeathSuicide", "", td.getBattle());
 								break;
 							}

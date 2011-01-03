@@ -63,7 +63,7 @@ Examples: "@red This is in red.", "@blue This is in blue.", "%gold This is in go
 
 You can now use a couple of variables in your commands. These are: 
 
-"[NAME]", "[PLAYERX]", "[PLAYERY]", "[PLAYERZ]", "[ATTACKER]", "[DEFENDER]", "[WINNER]", "[LOOSER]", "[CAUSE]". 
+"[NAME]", "[PLAYERX]", "[PLAYERY]", "[PLAYERZ]", "[ATTACKER]", "[DEFENDER]", "[WINNER]", "[LOSER]", "[CAUSE]". 
 Please note that they are case sensitive and must be in all caps.
 
 [NAME] - Inserts the players name here.
@@ -73,7 +73,7 @@ Please note that they are case sensitive and must be in all caps.
 [ATTACKER] - Inserts the attackers name here. For PvP.
 [DEFENDER] - Inserts the defenders name here. For PvP.
 [WINNER] - Inserts the winners name here. For PvP.
-[LOOSER] - Inserts the loosers name here. For PvP.
+[LOSER] - Inserts the loosers name here. For PvP.
 [CAUSE] - Inserts the cause of death here. For deaths due to things like falling, burning, etc.
 
 You can now specify server console commands to be ran by adding '#' before a console command. Also added the OnServerStart tag which is run on the plugins initialization. Only use the default section for this tag. You can use both '#' commands and '/' commands, and any '/' commands will be added to a que that is ran by the first person to log on.
@@ -140,10 +140,14 @@ OnDeathCreeper - Called when the player is killed by a creeper. Ran with OnDeath
 OnDeathSkeleton - Called when the player is killed by a skeleton. Ran with OnDeathMob.
 OnDeathSpider - Called when the player is killed by a spider. Ran with OnDeathMob.
 OnDeathZombie - Called when the player is killed by a zombie. Ran with OnDeathMob.
+OnDeathPigZombie - Called when the player is killed by a pig zombie. Ran with OnDeathMob.
+OnDeathSlime - Called when the player is killed by a slime. Ran with OnDeathMob.
+OnDeathGhast - Called when the player is killed by a Ghast. Ran with OnDeathMob.
 OnPvPStart - Called when a player starts to fight another player. Use [ATTACKER] and [DEFENDER].
 OnPvPEnd - Called when the battle has ended. Use [WINNER] and [LOOSER].
 OnPvPKill - Called by the winner of the battle.
 OnPvPDeath - Called by the looser of the battle.
+OnDeathSuicide - Called when a player kills himself.
 
 
 *** Sections ***
@@ -154,8 +158,9 @@ Nogroup - Ran by anyone without a group.
 
 
 *** Changelog: ***
-v1.1.5: Fixed the /co me command. Took out a good deal of unnessesary code. Added a readme to slim down the post on hey0.net. Includes a couple example commands.
+v1.1.6: More bug fixes that Slowriot noticed. Added Ondeath(PigZombie, Ghast, Slime). Added OnDeathSuicide. Source is now available on Github.
 
+v1.1.5: Fixed the /co me command. Took out a good deal of unnessesary code. Added a readme to slim down the post on hey0.net. Includes a couple example commands.
 v1.1.4: Fixed the pvp tags.
 v1.1.3: Fixed a BUNCH of bugs that Slowriot found, thank you very much for that. These include some spamming problems with the new tags, and I can promise that it will not spam anymore, I felt like an idiot when I found the right solution. Played around with the pvp tags a bit, new variables [WINNER] and [LOOSER] were added, might add a weapon next build, but I am feeling tired :/ Also added a [CAUSE] variable that will give the cause of the death, for mob tags use [ATTACKER]. Now has mob specific tags, as well as a general mob tag. Specific mob tags are OnDeathCreeper, OnDeathZombie, OnDeathSpider, OnDeathSkeleton, OnDeathMob. Will add nether mobs next release.
 v1.1.2: Disregard this, was a complete failure and didn't make it to mediashare, might have snuck out on Updatr.
