@@ -5,16 +5,9 @@ import java.util.logging.Logger;
 public class Shop extends EconEntity {
 	private static ArrayList<ShopItemStack>	availableItems	= new ArrayList<ShopItemStack>();
 	private boolean							infAmount		= true;
-	private DataManager						data			= null;
 	protected static final Logger			log				= Logger.getLogger("Minecraft");
 	
 	public Shop() {
-		initialize();
-	}
-	
-	public Shop(DataManager dataman) {
-		// TODO Auto-generated constructor stub
-		this.data = dataman;
 		initialize();
 	}
 	
@@ -62,8 +55,11 @@ public class Shop extends EconEntity {
 						if (user.getMoney().getAmount() < inCart.getTotalPrice()) {
 							user.getPlayer().sendMessage(DataManager.getPluginMessage() + "You do not have enough money.");
 						}
-						else if (amount > iter.getAmountAvail()) {
+						else if (amount > iter.getAmountAvail() && iter.getAmountAvail() != -1337) {
 							user.sendMessage(DataManager.getPluginMessage() + "There are too few items.");
+						}
+						else if (!user.canBuy(inCart)) {
+							user.sendMessage(DataManager.getPluginMessage() + "You are not allowed to buy that.");
 						}
 					}
 				}

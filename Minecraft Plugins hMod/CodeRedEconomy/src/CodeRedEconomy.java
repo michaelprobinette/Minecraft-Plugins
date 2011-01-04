@@ -23,7 +23,7 @@ public class CodeRedEconomy extends Plugin {
 		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, l, this, PluginListener.Priority.MEDIUM);
 		
 		data = new DataManager();
-		shop = new Shop(data);
+		shop = new Shop();
 		prices = new PriceList();
 	}
 	
@@ -72,9 +72,7 @@ public class CodeRedEconomy extends Plugin {
 				if (split[0].equalsIgnoreCase("/prices")) {
 					if (split.length >= 2) {
 						int page = Integer.valueOf(split[1]);
-						if (page < PriceList.getNumPages()) {
-							PriceList.priceList(player, page);
-						}
+						PriceList.priceList(player, page);
 					}
 					else {
 						PriceList.priceList(player, 1);
@@ -84,6 +82,5 @@ public class CodeRedEconomy extends Plugin {
 			}
 			return false;
 		}
-		
 	}
 }

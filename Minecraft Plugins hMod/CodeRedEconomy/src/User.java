@@ -26,7 +26,7 @@ public class User extends EconEntity {
 	 * @param user
 	 */
 	public User(User user) {
-		super(user.getMoney(), user.getPrivLevel());
+		super(user.getMoney());
 		this.player = user.getPlayer();
 		name = user.getPlayer().getName();
 	}
@@ -34,11 +34,9 @@ public class User extends EconEntity {
 	public User(String saveString) {
 		// Split it and grab the data
 		String split[] = saveString.split(":");
-		if (split.length >= 3) {
+		if (split.length >= 2) {
 			name = split[0];
 			int temp = Integer.valueOf(split[1]);
-			privLevel = temp;
-			temp = Integer.valueOf(split[2]);
 			money.setAmount(temp);
 		}
 	}
@@ -49,6 +47,11 @@ public class User extends EconEntity {
 	
 	public void setPlayer(Player player) {
 		this.player = player;
+		if (player.getGroups().length >= 1) {
+			groupName = player.getGroups()[0];
+		}
+		else
+			groupName = "nogroup";
 	}
 	
 	public String getName() {
@@ -91,6 +94,7 @@ public class User extends EconEntity {
 	}
 	
 	public boolean canBuy(ShopItemStack shopItemStack) {
+		
 		if (DataManager.allowedBlock(groupName, shopItemStack.getShopItem().getItemID())
 				&& shopItemStack.getTotalPrice() <= money.getAmount()) {
 			return true;
@@ -111,6 +115,6 @@ public class User extends EconEntity {
 	
 	@Override
 	public String toString() {
-		return name + ":" + privLevel + ":" + money.getAmount();
+		return name + ":" + money.getAmount();
 	}
 }

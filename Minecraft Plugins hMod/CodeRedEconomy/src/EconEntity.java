@@ -1,10 +1,8 @@
 public abstract class EconEntity {
-	protected Money	money		= new Money();
-	protected int	privLevel	= 0;
+	protected Money	money	= new Money();
 	
-	public EconEntity(Money money, int privLevel) {
+	public EconEntity(Money money) {
 		this.money = money;
-		this.privLevel = privLevel;
 	}
 	
 	public EconEntity() {
@@ -12,10 +10,6 @@ public abstract class EconEntity {
 	
 	public Money getMoney() {
 		return money;
-	}
-	
-	public int getPrivLevel() {
-		return privLevel;
 	}
 	
 	public Money giveMoney(int amount) {

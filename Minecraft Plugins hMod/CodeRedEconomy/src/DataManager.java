@@ -17,12 +17,12 @@ public class DataManager {
 	protected static final Logger		log				= Logger.getLogger("Minecraft");
 	private static final String			LOC				= "Econ/";
 	private static PropertiesFile		props			= new PropertiesFile(LOC + "data.properties");
-	private static String				moneyName		= "Strypes";
+	private static String				moneyName		= "";
 	private static final String			pluginMessage	= "[§cCodeRedEconomy§f] ";
 	
 	// Privilege stuff
 	private static File					file_privGroups	= new File(LOC + "privGroups.txt");
-	private static ArrayList<Group>		privGroups		= new ArrayList<Group>();
+	private static ArrayList<ShopGroup>	privGroups		= new ArrayList<ShopGroup>();
 	
 	// Items
 	private static File					file_itemlist	= new File(LOC + "items.txt");
@@ -54,6 +54,7 @@ public class DataManager {
 		}
 		User temp = new User(player); // Not found, make a new user
 		addUser(temp); // Add user to the users list
+		write("player");
 		return temp;
 	}
 	
@@ -83,6 +84,7 @@ public class DataManager {
 					users.add(new User(raw));
 				}
 			}
+			reader.close();
 		}
 		catch (FileNotFoundException e) {
 			BufferedWriter writer;
@@ -147,7 +149,7 @@ public class DataManager {
 		return itemList;
 	}
 	
-	public static ArrayList<Group> getGroups() {
+	public static ArrayList<ShopGroup> getGroups() {
 		return privGroups;
 	}
 	
@@ -202,9 +204,6 @@ public class DataManager {
 					if (split.length >= 2) {
 						String groupName = split[0];
 						String a[] = split[1].split(",");
-						for (String iter : a) {
-							iter = iter.trim();
-						}
 						int blocks[] = new int[a.length];
 						int count = 0;
 						for (String iter : a) {
@@ -213,9 +212,17 @@ public class DataManager {
 							blocks[count] = temp;
 							count++;
 						}
-						privGroups.add(new Group(groupName, blocks));
+						ShopGroup temp = new ShopGroup(groupName, blocks);
+						privGroups.add(temp);
 					}
 				}
+			}
+			catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				read.close();
 			}
 			catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -261,8 +268,8 @@ public class DataManager {
 		return moneyName;
 	}
 	
-	public static Group getGroup(String groupName) {
-		for (Group iter : privGroups) {
+	public static ShopGroup getGroup(String groupName) {
+		for (ShopGroup iter : privGroups) {
 			if (iter.getGroupName().equalsIgnoreCase(groupName)) {
 				return iter;
 			}
@@ -271,7 +278,8 @@ public class DataManager {
 	}
 	
 	public static boolean allowedBlock(String group, int itemID) {
-		for (Group iter : privGroups) {
+		for (ShopGroup iter : privGroups) {
+			log.log(Level.INFO, "Checking " + iter.getGroupName() + " against " + group);
 			if (iter.getGroupName().equalsIgnoreCase(group)) {
 				for (int biter : iter.getAllowed()) {
 					if (biter == itemID) {
