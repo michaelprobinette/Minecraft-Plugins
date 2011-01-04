@@ -2,7 +2,8 @@ public class ShopItem {
 	private final int				itemID;
 	private final String			itemName;
 	// private final int privLevel;
-	private final int				price;
+	private final int				buyPrice;
+	private final int				sellPrice;
 	private static final String[]	blockNames		= {
 			"Air", "Stone", "Grass", "Dirt", "Cobblestone", "Wood", "Sapling", "Bedrock", "Water", "Stationary Water", "Lava",
 			"Stationary Lava", "Sand", "Gravel", "Gold Ore", "Iron Ore", "Coal Ore", "Log", "Leaves", "Sponge", "Glass", "Red Cloth",
@@ -37,20 +38,30 @@ public class ShopItem {
 		itemID = 0;
 		itemName = "Air";
 		// privLevel = 0;
-		price = 0;
+		buyPrice = 0;
+		sellPrice = 0;
 	}
 	
 	public ShopItem(int itemID) {
 		this.itemID = itemID;
 		itemName = getName(itemID);
 		// privLevel = 0;
-		price = DataManager.getPrice(itemID);
+		buyPrice = DataManager.getBuyPrice(itemID);
+		sellPrice = DataManager.getSellPrice(itemID);
 	}
 	
-	public ShopItem(int itemID, int price) {
+	public ShopItem(int itemID, int buyPrice) {
 		this.itemID = itemID;
 		itemName = getName(itemID);
-		this.price = price;
+		this.buyPrice = buyPrice;
+		sellPrice = DataManager.getSellPrice(itemID);
+	}
+	
+	public ShopItem(int itemID, int buyPrice, int sellPrice) {
+		this.itemID = itemID;
+		itemName = getName(itemID);
+		this.buyPrice = buyPrice;
+		this.sellPrice = sellPrice;
 	}
 	
 	public String getName() {
@@ -65,8 +76,12 @@ public class ShopItem {
 	// return privLevel;
 	// }
 	
-	public int getPrice() {
-		return price;
+	public int getBuyPrice() {
+		return buyPrice;
+	}
+	
+	public int getSellPrice() {
+		return sellPrice;
 	}
 	
 	private String getName(int itemID) {

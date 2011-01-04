@@ -42,4 +42,9 @@ public class Money {
 	public static String getMoneyName() {
 		return name;
 	}
+	
+	@Override
+	public String toString() {
+		return amount + " " + name;
+	}
 }

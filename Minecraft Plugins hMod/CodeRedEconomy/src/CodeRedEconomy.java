@@ -6,7 +6,7 @@ public class CodeRedEconomy extends Plugin {
 	private String					name	= "CodeRedEconomy";
 	private String					version	= "v0.0.1";
 	private Shop					shop;
-	public static boolean			debug	= true;
+	public static boolean			debug;
 	private static DataManager		data	= new DataManager();
 	
 	public void enable() {
@@ -35,14 +35,13 @@ public class CodeRedEconomy extends Plugin {
 		public boolean onCommand(Player player, String[] split) {
 			if (split.length >= 1) {
 				if (split[0].equalsIgnoreCase("/buy")) {
-					User user = DataManager.getUser(player);
-					shop.buy(user, split);
+					shop.buy(DataManager.getUser(player), split);
 					return true;
 				}
-				// if (split[0].equalsIgnoreCase("/sell") && player.canUseCommand("/sell")) {
-				// shop.sell(player, split);
-				// return true;
-				// }
+				if (split[0].equalsIgnoreCase("/sell")) {
+					shop.sell(DataManager.getUser(player), split);
+					return true;
+				}
 				// if (split[0].equalsIgnoreCase("/trade") && player.canUseCommand("/trade")) {
 				//					
 				// return true;
@@ -74,6 +73,10 @@ public class CodeRedEconomy extends Plugin {
 					else {
 						PriceList.priceList(player, 1);
 					}
+					return true;
+				}
+				if (split[0].equalsIgnoreCase("/undo")) {
+					DataManager.getUser(player).undoLastTrans();
 					return true;
 				}
 			}

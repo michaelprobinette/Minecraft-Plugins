@@ -1,8 +1,9 @@
 public class ShopItemStack {
-	private int			itemID		= 0;
-	private int			amountAvail	= 0;
-	private ShopItem	shopItem	= null;
-	private int			totalPrice	= 0;
+	private int			itemID			= 0;
+	private int			amountAvail		= 0;
+	private ShopItem	shopItem		= null;
+	private int			totalBuyPrice	= 0;
+	private int			totalSellPrice	= 0;
 	
 	/**
 	 * @deprecated
@@ -26,9 +27,11 @@ public class ShopItemStack {
 	}
 	
 	public ShopItemStack(ShopItem shopItem, int amountAvail) {
+		itemID = shopItem.getItemID();
 		this.shopItem = shopItem;
 		this.amountAvail = amountAvail;
-		this.totalPrice = shopItem.getPrice() * amountAvail;
+		this.totalBuyPrice = shopItem.getBuyPrice() * amountAvail;
+		this.totalSellPrice = shopItem.getSellPrice() * amountAvail;
 	}
 	
 	public int getItemID() {
@@ -43,7 +46,19 @@ public class ShopItemStack {
 		return shopItem;
 	}
 	
-	public int getTotalPrice() {
-		return totalPrice;
+	public int getTotalBuyPrice() {
+		return totalBuyPrice;
+	}
+	
+	public int getTotalSellPrice() {
+		return totalSellPrice;
+	}
+	
+	public void addAmountAvail(int amount) {
+		amountAvail += amount;
+	}
+	
+	public void setAmountAvail(int amount) {
+		amountAvail = amount;
 	}
 }

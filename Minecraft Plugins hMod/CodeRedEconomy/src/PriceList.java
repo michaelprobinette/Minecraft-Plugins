@@ -22,7 +22,8 @@ public class PriceList {
 		String page[] = new String[7];
 		for (ShopItem iter : items) {
 			String temp = "";
-			temp += iter.getName() + ": " + iter.getPrice() + " " + Money.getMoneyName();
+			temp += iter.getName() + ": " + iter.getBuyPrice() + " " + Money.getMoneyName();
+			// temp += iter.getName() + " Buy: " + iter.getBuyPrice() + " Sell: " + iter.getSellPrice() + " " + Money.getMoneyName();
 			page[count] = temp;
 			count++;
 			if (count == 7 || iter.equals(items.get(items.size() - 1))) {

@@ -18,8 +18,8 @@ public class DataManager {
 	private static final String			LOC				= "Econ/";
 	private static PropertiesFile		props			= new PropertiesFile(LOC + "data.properties");
 	private static String				moneyName		= "";
-	private static boolean				debug			= true;
-	private static final String			pluginMessage	= "[§cCodeRedEconomy§f] ";
+	private static boolean				debug			= false;
+	private static final String			pluginMessage	= "[§cCodeRedEcon§f] ";
 	
 	// Privilege stuff
 	private static File					file_privGroups	= new File(LOC + "privGroups.txt");
@@ -47,6 +47,9 @@ public class DataManager {
 		if (props.containsKey("debug")) {
 			debug = props.getBoolean("debug");
 		}
+		else {
+			props.setBoolean("debug", debug);
+		}
 	}
 	
 	public static User getUser(Player player) {
@@ -69,6 +72,17 @@ public class DataManager {
 			}
 		}
 		User temp = new User(name); // Not found, make a new user
+		addUser(temp); // Add user to the users list
+		return temp;
+	}
+	
+	public static User getUser(EconEntity ent) {
+		for (User iter : users) {
+			if (iter.getName().equalsIgnoreCase(ent.getName())) {
+				return iter;
+			}
+		}
+		User temp = new User(ent.getName()); // Not found, make a new user
 		addUser(temp); // Add user to the users list
 		return temp;
 	}
@@ -123,11 +137,11 @@ public class DataManager {
 			while ((raw = reader.readLine()) != null) {
 				
 				String split[] = raw.split(":");
-				ShopItem temp = new ShopItem(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
+				ShopItem temp = new ShopItem(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
 				itemList.add(temp);
 				if (CodeRedEconomy.debug) {
 					log.log(Level.INFO, "Raw item data read: " + raw);
-					log.log(Level.INFO, "Item data: " + temp.getName() + " price: " + temp.getPrice());
+					log.log(Level.INFO, "Item data: " + temp.getName() + " price: " + temp.getBuyPrice());
 				}
 			}
 			reader.close();
@@ -198,7 +212,7 @@ public class DataManager {
 		}
 	}
 	
-	public void readPrivFile() {
+	private void readPrivFile() {
 		try {
 			BufferedReader read = new BufferedReader(new FileReader(file_privGroups));
 			String raw = "";
@@ -246,10 +260,19 @@ public class DataManager {
 		}
 	}
 	
-	public static int getPrice(int itemID) {
+	public static int getBuyPrice(int itemID) {
 		for (ShopItem iter : itemList) {
 			if (iter.getItemID() == itemID) {
-				return iter.getPrice();
+				return iter.getBuyPrice();
+			}
+		}
+		return 0;
+	}
+	
+	public static int getSellPrice(int itemID) {
+		for (ShopItem iter : itemList) {
+			if (iter.getItemID() == itemID) {
+				return iter.getSellPrice();
 			}
 		}
 		return 0;
@@ -262,9 +285,16 @@ public class DataManager {
 	}
 	
 	public void load() {
+		// Read data from properties file
 		readProps();
+		
+		// Read from the items file
 		readItemFile();
+		
+		// Read from the users file
 		readUserFile();
+		
+		// Read from the group priv file
 		readPrivFile();
 	}
 	
