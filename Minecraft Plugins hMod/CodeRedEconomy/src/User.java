@@ -93,8 +93,12 @@ public class User extends EconEntity {
 		player.sendMessage(DataManager.getPluginMessage() + "Your balance is: " + money.getAmount() + " " + money.getMoneyName());
 	}
 	
+	public void sendMessage(String message) {
+		player.sendMessage(message);
+	}
+	
 	@Override
 	public String toString() {
-		return player.getName() + ":" + privLevel + ":" + money.getAmount();
+		return name + ":" + privLevel + ":" + money.getAmount();
 	}
 }

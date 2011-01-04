@@ -1,7 +1,7 @@
 public class Money {
-	private int		amount	= 0;
-	private boolean	valid	= true;
-	private String	name	= "";
+	private int				amount	= 0;
+	private boolean			valid	= true;
+	private static String	name	= "";
 	
 	public Money() {
 		name = DataManager.getMoneyName();
@@ -39,7 +39,7 @@ public class Money {
 		return valid;
 	}
 	
-	public String getMoneyName() {
+	public static String getMoneyName() {
 		return name;
 	}
 }

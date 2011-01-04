@@ -143,7 +143,7 @@ public class PlayerTele extends Plugin {
 		
 		public boolean onCommand(Player player, java.lang.String[] split) {
 			if (split.length >= 1) {
-				if (split[0].equalsIgnoreCase("/tele") && player.canUseCommand("/tele")) {
+				if (split[0].equalsIgnoreCase("/tele")) {
 					if (split.length >= 2) {
 						telePlayer(player, split);
 					}
