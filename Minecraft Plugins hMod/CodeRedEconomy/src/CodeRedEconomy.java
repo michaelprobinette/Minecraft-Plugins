@@ -5,11 +5,9 @@ public class CodeRedEconomy extends Plugin {
 	protected static final Logger	log		= Logger.getLogger("Minecraft");
 	private String					name	= "CodeRedEconomy";
 	private String					version	= "v0.0.1";
-	private PropertiesFile			props	= new PropertiesFile(name + ".properties");
-	private static DataManager		data;
 	private Shop					shop;
-	private PriceList				prices;
 	public static boolean			debug	= true;
+	private static DataManager		data	= new DataManager();
 	
 	public void enable() {
 	}
@@ -22,9 +20,8 @@ public class CodeRedEconomy extends Plugin {
 		
 		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, l, this, PluginListener.Priority.MEDIUM);
 		
-		data = new DataManager();
+		debug = data.getDebug();
 		shop = new Shop();
-		prices = new PriceList();
 	}
 	
 	public class Listener extends PluginListener {
@@ -66,7 +63,7 @@ public class CodeRedEconomy extends Plugin {
 					return true;
 				}
 				if (split[0].equalsIgnoreCase("/save") && debug) {
-					data.save();
+					DataManager.save();
 					return true;
 				}
 				if (split[0].equalsIgnoreCase("/prices")) {

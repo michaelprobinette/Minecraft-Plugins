@@ -94,8 +94,7 @@ public class User extends EconEntity {
 	}
 	
 	public boolean canBuy(ShopItemStack shopItemStack) {
-		
-		if (DataManager.allowedBlock(groupName, shopItemStack.getShopItem().getItemID())
+		if ((player.isInGroup(DataManager.getReqGroup(shopItemStack.getShopItem().getItemID())))
 				&& shopItemStack.getTotalPrice() <= money.getAmount()) {
 			return true;
 		}
@@ -106,7 +105,7 @@ public class User extends EconEntity {
 	}
 	
 	public void showBalance() {
-		player.sendMessage(DataManager.getPluginMessage() + "Your balance is: " + money.getAmount() + " " + money.getMoneyName());
+		player.sendMessage(DataManager.getPluginMessage() + "Your balance is: " + money.getAmount() + " " + Money.getMoneyName());
 	}
 	
 	public void sendMessage(String message) {

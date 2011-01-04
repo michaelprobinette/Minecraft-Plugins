@@ -18,6 +18,7 @@ public class DataManager {
 	private static final String			LOC				= "Econ/";
 	private static PropertiesFile		props			= new PropertiesFile(LOC + "data.properties");
 	private static String				moneyName		= "";
+	private static boolean				debug			= true;
 	private static final String			pluginMessage	= "[§cCodeRedEconomy§f] ";
 	
 	// Privilege stuff
@@ -42,6 +43,9 @@ public class DataManager {
 		}
 		else {
 			props.setString("moneyname", moneyName);
+		}
+		if (props.containsKey("debug")) {
+			debug = props.getBoolean("debug");
 		}
 	}
 	
@@ -251,7 +255,7 @@ public class DataManager {
 		return 0;
 	}
 	
-	public void save() {
+	public static void save() {
 		// Perform save actions
 		write("player");
 		write("item");
@@ -291,4 +295,18 @@ public class DataManager {
 		return false;
 	}
 	
+	public static String getReqGroup(int itemID) {
+		for (ShopGroup iter : privGroups) {
+			for (int biter : iter.getAllowed()) {
+				if (biter == itemID) {
+					return iter.getGroupName();
+				}
+			}
+		}
+		return "default";
+	}
+	
+	public boolean getDebug() {
+		return debug;
+	}
 }
