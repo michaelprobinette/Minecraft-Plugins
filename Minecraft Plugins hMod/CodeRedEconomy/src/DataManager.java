@@ -42,7 +42,8 @@ public class DataManager {
 	
 	public static User getUser(Player player) {
 		for (User iter : users) {
-			if (iter.getPlayer().getName().equalsIgnoreCase(player.getName())) {
+			if (iter.getName().equalsIgnoreCase(player.getName())) {
+				iter.setPlayer(player);
 				return iter;
 			}
 		}
@@ -59,14 +60,7 @@ public class DataManager {
 			reader = new BufferedReader(new FileReader(file_playerData));
 			
 			while ((raw = reader.readLine()) != null) {
-				String split[] = raw.split(" ");
-				if (split.length >= 1) {
-					String name = split[0];
-					if (split.length >= 2) {
-						int amount = Integer.valueOf(split[1]);
-						
-					}
-				}
+				users.add(new User(raw));
 			}
 		}
 		catch (FileNotFoundException e) {
@@ -177,7 +171,7 @@ public class DataManager {
 			try {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(file_playerData));
 				for (User iter : users) {
-					writer.write(iter.getPlayer().getName());
+					writer.write(iter.toString());
 					writer.newLine();
 				}
 				writer.close();

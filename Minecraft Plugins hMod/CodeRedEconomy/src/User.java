@@ -1,5 +1,6 @@
 public class User extends EconEntity {
 	private Player	player	= null;
+	private String	name	= "";
 	
 	/**
 	 * New player
@@ -9,6 +10,7 @@ public class User extends EconEntity {
 	public User(Player player) {
 		super();
 		this.player = player;
+		name = player.getName();
 		DataManager.addUser(this);
 	}
 	
@@ -20,10 +22,31 @@ public class User extends EconEntity {
 	public User(User user) {
 		super(user.getMoney(), user.getPrivLevel());
 		this.player = user.getPlayer();
+		name = user.getPlayer().getName();
+	}
+	
+	public User(String saveString) {
+		// Split it and grab the data
+		String split[] = saveString.split(":");
+		if (split.length >= 3) {
+			name = split[0];
+			int temp = Integer.valueOf(split[1]);
+			privLevel = temp;
+			temp = Integer.valueOf(split[2]);
+			money.setAmount(temp);
+		}
 	}
 	
 	public User() {
 		super();
+	}
+	
+	public void setPlayer(Player player) {
+		this.player = player;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public boolean canBuy(ShopItem item) {
@@ -68,5 +91,10 @@ public class User extends EconEntity {
 	
 	public void showBalance() {
 		player.sendMessage(DataManager.getPluginMessage() + "Your balance is: " + money.getAmount() + " " + money.getMoneyName());
+	}
+	
+	@Override
+	public String toString() {
+		return player.getName() + ":" + privLevel + ":" + money.getAmount();
 	}
 }
