@@ -1,7 +1,7 @@
 public class ShopItem {
 	private final int				itemID;
 	private final String			itemName;
-	private final int				privLevel;
+	// private final int privLevel;
 	private final int				price;
 	private static final String[]	blockNames		= {
 			"Air", "Stone", "Grass", "Dirt", "Cobblestone", "Wood", "Sapling", "Bedrock", "Water", "Stationary Water", "Lava",
@@ -36,28 +36,20 @@ public class ShopItem {
 	public ShopItem() {
 		itemID = 0;
 		itemName = "Air";
-		privLevel = 0;
+		// privLevel = 0;
 		price = 0;
 	}
 	
 	public ShopItem(int itemID) {
 		this.itemID = itemID;
 		itemName = getName(itemID);
-		privLevel = 0;
+		// privLevel = 0;
 		price = DataManager.getPrice(itemID);
 	}
 	
-	public ShopItem(int itemID, int privLevel) {
+	public ShopItem(int itemID, int price) {
 		this.itemID = itemID;
 		itemName = getName(itemID);
-		this.privLevel = privLevel;
-		price = DataManager.getPrice(itemID);
-	}
-	
-	public ShopItem(int itemID, int price, int privLevel) {
-		this.itemID = itemID;
-		itemName = getName(itemID);
-		this.privLevel = privLevel;
 		this.price = price;
 	}
 	
@@ -69,9 +61,9 @@ public class ShopItem {
 		return itemID;
 	}
 	
-	public int getPrivLevel() {
-		return privLevel;
-	}
+	// public int getPrivLevel() {
+	// return privLevel;
+	// }
 	
 	public int getPrice() {
 		return price;

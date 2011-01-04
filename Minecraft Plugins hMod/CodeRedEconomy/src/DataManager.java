@@ -20,6 +20,10 @@ public class DataManager {
 	private static String				moneyName		= "Strypes";
 	private static final String			pluginMessage	= "[§cCodeRedEconomy§f] ";
 	
+	// Privilege stuff
+	private static File					file_privGroups	= new File(LOC + "privGroups.txt");
+	private static ArrayList<Group>		privGroups		= new ArrayList<Group>();
+	
 	// Items
 	private static File					file_itemlist	= new File(LOC + "items.txt");
 	private static ArrayList<ShopItem>	itemList		= new ArrayList<ShopItem>();
@@ -75,7 +79,9 @@ public class DataManager {
 				if (CodeRedEconomy.debug) {
 					log.log(Level.INFO, "Raw user data read: " + raw);
 				}
-				users.add(new User(raw));
+				if (!raw.split(":")[0].equalsIgnoreCase("")) {
+					users.add(new User(raw));
+				}
 			}
 		}
 		catch (FileNotFoundException e) {
@@ -111,41 +117,12 @@ public class DataManager {
 			while ((raw = reader.readLine()) != null) {
 				
 				String split[] = raw.split(":");
-				ShopItem temp = new ShopItem(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+				ShopItem temp = new ShopItem(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
 				itemList.add(temp);
 				if (CodeRedEconomy.debug) {
 					log.log(Level.INFO, "Raw item data read: " + raw);
-					log.log(Level.INFO, "Item data: " + temp.getName() + " price: " + temp.getPrice() + " privLevel: "
-							+ temp.getPrivLevel());
+					log.log(Level.INFO, "Item data: " + temp.getName() + " price: " + temp.getPrice());
 				}
-				
-				// String split[] = raw.split(" ");
-				// if (split.length >= 1) {
-				// if (split[0].length() >= 1) {
-				// if (split[0].charAt(0) != '#') {
-				// // Get the itemID
-				// int id = Integer.valueOf(split[0]);
-				// if (split.length >= 2) {
-				// // Get the price
-				// int price = Integer.valueOf(split[1]);
-				// if (split.length >= 3) {
-				// // Get the priv level
-				// int priv = Integer.valueOf(split[2]);
-				// itemList.add(new ShopItem(id, price, priv));
-				// }
-				// else {
-				// itemList.add(new ShopItem(id, price, 0));
-				// }
-				// }
-				// else {
-				// itemList.add(new ShopItem(id, 0, 0));
-				// }
-				// }
-				// else {
-				// // Comment, ignore
-				// }
-				// }
-				// }
 			}
 			reader.close();
 		}
@@ -159,7 +136,7 @@ public class DataManager {
 			catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -168,6 +145,10 @@ public class DataManager {
 	
 	public static ArrayList<ShopItem> getItemList() {
 		return itemList;
+	}
+	
+	public static ArrayList<Group> getGroups() {
+		return privGroups;
 	}
 	
 	public static String getPluginMessage() {
@@ -211,6 +192,49 @@ public class DataManager {
 		}
 	}
 	
+	public void readPrivFile() {
+		try {
+			BufferedReader read = new BufferedReader(new FileReader(file_privGroups));
+			String raw = "";
+			try {
+				while ((raw = read.readLine()) != null) {
+					String split[] = raw.split(":");
+					if (split.length >= 2) {
+						String groupName = split[0];
+						String a[] = split[1].split(",");
+						for (String iter : a) {
+							iter = iter.trim();
+						}
+						int blocks[] = new int[a.length];
+						int count = 0;
+						for (String iter : a) {
+							iter = iter.trim();
+							int temp = Integer.valueOf(iter);
+							blocks[count] = temp;
+							count++;
+						}
+						privGroups.add(new Group(groupName, blocks));
+					}
+				}
+			}
+			catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		catch (FileNotFoundException e) {
+			try {
+				// File not found, create empty file
+				BufferedWriter writer = new BufferedWriter(new FileWriter(file_privGroups));
+				writer.newLine();
+				writer.close();
+			}
+			catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+	}
+	
 	public static int getPrice(int itemID) {
 		for (ShopItem iter : itemList) {
 			if (iter.getItemID() == itemID) {
@@ -230,9 +254,33 @@ public class DataManager {
 		readProps();
 		readItemFile();
 		readUserFile();
+		readPrivFile();
 	}
 	
 	public static String getMoneyName() {
 		return moneyName;
 	}
+	
+	public static Group getGroup(String groupName) {
+		for (Group iter : privGroups) {
+			if (iter.getGroupName().equalsIgnoreCase(groupName)) {
+				return iter;
+			}
+		}
+		return null;
+	}
+	
+	public static boolean allowedBlock(String group, int itemID) {
+		for (Group iter : privGroups) {
+			if (iter.getGroupName().equalsIgnoreCase(group)) {
+				for (int biter : iter.getAllowed()) {
+					if (biter == itemID) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
 }

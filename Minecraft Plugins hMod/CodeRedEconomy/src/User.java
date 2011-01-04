@@ -1,6 +1,7 @@
 public class User extends EconEntity {
-	private Player	player	= null;
-	private String	name	= "";
+	private Player	player		= null;
+	private String	name		= "";
+	private String	groupName	= "";
 	
 	/**
 	 * New player
@@ -11,6 +12,11 @@ public class User extends EconEntity {
 		super();
 		this.player = player;
 		name = player.getName();
+		if (player.getGroups().length >= 1) {
+			groupName = player.getGroups()[0];
+		}
+		else
+			groupName = "nogroup";
 		DataManager.addUser(this);
 	}
 	
@@ -49,13 +55,18 @@ public class User extends EconEntity {
 		return name;
 	}
 	
+	public String getGroupName() {
+		return groupName;
+	}
+	
 	public boolean canBuy(ShopItem item) {
 		if (item.getPrice() > money.getAmount()) {
 			return false;
 		}
-		else if (item.getPrivLevel() > privLevel) {
-			return false;
-		}
+		
+		// else if (item.getPrivLevel() > privLevel) {
+		// return false;
+		// }
 		return true;
 	}
 	
@@ -80,13 +91,14 @@ public class User extends EconEntity {
 	}
 	
 	public boolean canBuy(ShopItemStack shopItemStack) {
-		if (shopItemStack.getTotalPrice() > money.getAmount()) {
-			return false;
+		if (DataManager.allowedBlock(groupName, shopItemStack.getShopItem().getItemID())
+				&& shopItemStack.getTotalPrice() <= money.getAmount()) {
+			return true;
 		}
-		else if (shopItemStack.getShopItem().getPrivLevel() > privLevel) {
-			return false;
-		}
-		return true;
+		// else if (shopItemStack.getShopItem().getPrivLevel() < privLevel) {
+		// return false;
+		// }
+		return false;
 	}
 	
 	public void showBalance() {
