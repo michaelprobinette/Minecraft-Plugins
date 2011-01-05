@@ -1,108 +1,156 @@
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class Shop extends EconEntity {
-	private boolean					infAmount	= false;
-	private int						stdAmount	= 64;
-	protected static final Logger	log			= Logger.getLogger("Minecraft");
+	private boolean	infItems	= false;
 	
 	public Shop() {
 		initialize();
 	}
 	
+	/**
+	 * @param infItems
+	 * @param infMoney
+	 */
+	public Shop(boolean infItems) {
+		this.infItems = infItems;
+		initialize();
+	}
+	
+	public Shop(String name, boolean infItems, int amountMoney) {
+		this.infItems = infItems;
+		this.name = name;
+		this.money.setAmount(amountMoney);
+		initialize();
+	}
+	
+	/**
+	 * Use to set infItems and to set the base amount of money use DataManager.getInfValue() in the amountMoney for infMoney
+	 * 
+	 * @param infItems
+	 * @param amountMoney
+	 */
+	public Shop(boolean infItems, int amountMoney) {
+		this.infItems = infItems;
+		this.money.setAmount(amountMoney);
+		initialize();
+	}
+	
 	private void initialize() {
+		// Load all of the implemented items from the DataManager
 		for (ShopItem iter : DataManager.getItemList()) {
-			if (infAmount) {
-				availableItems.add(new ShopItemStack(iter, -1337));
+			if (infItems) {
+				availableItems.add(new ShopItemStack(iter, DataManager.getInfValue())); // Inf items value
 			}
 			else {
-				availableItems.add(new ShopItemStack(iter, stdAmount));
+				availableItems.add(new ShopItemStack(iter, iter.getMaxAvail()));
 			}
 		}
-		money.setAmount(-1337);
 	}
 	
 	public void sell(User user, String[] split) {
 		String itemName = "";
-		if (split.length >= 3) {
-			int amount = Integer.valueOf(split[1]);
-			for (int i = 2; i < split.length; i++) {
-				itemName += split[i] + " ";
-			}
-			itemName = itemName.trim();
-			if (CodeRedEconomy.debug) {
-				log.log(Level.INFO, "Item name is: " + itemName);
-			}
-			// Update the users availableItems array
-			user.updateArray();
-			for (ShopItemStack iter : user.availableItems) {
-				if (iter.getShopItem().getName().equalsIgnoreCase(itemName)) {
-					// Item found, check amount
-					if (amount <= iter.getAmountAvail()) {
-						// Enough to sell
-						user.sendMessage("Selling " + amount + " " + itemName);
-						Transaction.transaction(new Transaction(user, this, new ShopItemStack(new ShopItem(iter.getItemID()), amount)));
-						user.sendMessage("Your new balance is: " + user.getMoney().toString());
-						// user.sell(new Transaction(user, this, new ShopItemStack(new ShopItem(iter.getItemID()), amount)));
-					}
-					else {
-						// Too few items
+		int amount = 0;
+		if (split.length >= 2) {
+			try {
+				for (String iter : split) {
+					if (!iter.equalsIgnoreCase(split[0])) {
+						// It is not the /sell part
+						// Try and convert to a number
+						
+						try {
+							amount = Integer.valueOf(iter);
+						}
+						catch (NumberFormatException e) {
+							// Not a number, add to name
+							itemName += iter + " ";
+						}
 					}
 				}
+				if (amount == 0) {
+					amount = 1;
+				}
+				itemName = itemName.trim();
+				if (CodeRedEconomy.debug) {
+					System.out.println("Item name is: " + itemName);
+				}
+				
+				Transaction.process(new Transaction(user, this, new ShopItemStack(DataManager.getItem(itemName), amount)));
 			}
+			catch (NumberFormatException e1) {
+				user.sendMessage("The correct use is \"/sell [item name] [amount]\"");
+			}
+		}
+		else {
+			user.sendMessage("The correct use is \"/sell [item name] [amount]\"");
 		}
 	}
 	
 	public void buy(User user, String[] split) {
 		// Check players balance, find what they want to buy, check priv level, buy
 		String itemName = "";
-		if (split.length >= 3) {
-			int amount = Integer.valueOf(split[1]);
-			for (int i = 2; i < split.length; i++) {
-				itemName += split[i] + " ";
-			}
-			itemName = itemName.trim();
-			if (CodeRedEconomy.debug) {
-				log.log(Level.INFO, "Item name is: " + itemName);
-			}
-			for (ShopItemStack iter : availableItems) {
-				if (iter.getShopItem().getName().equalsIgnoreCase(itemName)) {
-					if (iter.getAmountAvail() >= amount || iter.getAmountAvail() == -1337) {
-						// This is a valid name, check if player can buy
-						ShopItemStack inCart = new ShopItemStack(iter.getShopItem(), amount);
-						if (user.canBuy(inCart)) {
-							// Buy it
-							user.sendMessage("Here are your items. Please come again.");
-							
-							System.out.println("Buying " + inCart.getShopItem().getName() + " amount: " + inCart.getAmountAvail());
-							Transaction.transaction(new Transaction(this, user, inCart));
-							// user.buy(new Transaction(this, user, inCart));
-							// user.pay(this, inCart);
-							user.sendMessage("Your new balance is: " + user.getMoney().getAmount() + " " + Money.getMoneyName());
-							break;
+		int amount = 0;
+		if (split.length >= 2) {
+			try {
+				for (String iter : split) {
+					if (!iter.equalsIgnoreCase(split[0])) {
+						// It is not the /sell part
+						// Try and convert to a number
+						
+						try {
+							amount = Integer.valueOf(iter);
 						}
-						else {
-							// Can't buy
-							if (user.getMoney().getAmount() < inCart.getTotalBuyPrice()) {
-								user.sendMessage("You do not have enough money.");
-							}
-							else if (amount > iter.getAmountAvail() && iter.getAmountAvail() != -1337) {
-								user.sendMessage("There are too few items.");
-							}
-							else if (!user.canBuy(inCart)) {
-								user.sendMessage("You are not allowed to buy that.");
-							}
-							break;
+						catch (NumberFormatException e) {
+							// Not a number, add to name
+							itemName += iter + " ";
 						}
 					}
-					else if (amount > iter.getAmountAvail() && iter.getAmountAvail() != -1337) {
-						user.sendMessage("There are only " + iter.getAmountAvail() + " available.");
-					}
 				}
-				else {
-					
+				if (amount == 0) {
+					amount = 1;
 				}
+				itemName = itemName.trim();
+				if (CodeRedEconomy.debug) {
+					System.out.println("Item name is: " + itemName);
+				}
+				
+				Transaction.process(new Transaction(this, user, new ShopItemStack(DataManager.getItem(itemName), amount)));
+			}
+			catch (NumberFormatException e1) {
+				user.sendMessage("The correct use is \"/buy [item name] [amount]\"");
 			}
 		}
+		else {
+			user.sendMessage("The correct use is \"/buy [item name] [amount]\"");
+		}
 	}
+	// String itemName = "";
+	// if (split.length >= 3) {
+	// try {
+	// int amount = Integer.valueOf(split[1]);
+	// for (int i = 2; i < split.length; i++) {
+	// itemName += split[i] + " ";
+	// }
+	// itemName = itemName.trim();
+	// if (CodeRedEconomy.debug) {
+	// System.out.println("Item name is: " + itemName);
+	// }
+	// for (ShopItemStack iter : availableItems) {
+	// if (iter.getShopItem().getName().equalsIgnoreCase(itemName)) {
+	// if (iter.getAmountAvail() >= amount || iter.getAmountAvail() == DataManager.getInfValue()) {
+	// // This is a valid name, check if player can buy
+	// ShopItemStack inCart = new ShopItemStack(iter.getShopItem(), amount);
+	// Transaction.process(new Transaction(this, user, inCart));
+	// }
+	// else if (amount > iter.getAmountAvail() && iter.getAmountAvail() != DataManager.getInfValue()) {
+	// user.sendMessage("There are only " + iter.getAmountAvail() + " available.");
+	// }
+	// }
+	// }
+	// }
+	// catch (NumberFormatException e) {
+	// user.sendMessage("The correct use is \"/buy [item name] [amount]\"");
+	// }
+	// }
+	// else {
+	// user.sendMessage("The correct use is \"/buy [item name] [amount]\"");
+	// }
+	// }
 }

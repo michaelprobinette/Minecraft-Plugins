@@ -6,30 +6,34 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Vandolis Used to load all of the data needed to run the plugin.
  */
 public class DataManager {
-	// General
-	protected static final Logger		log				= Logger.getLogger("Minecraft");
-	private static final String			LOC				= "Econ/";
-	private static PropertiesFile		props			= new PropertiesFile(LOC + "data.properties");
-	private static String				moneyName		= "";
+	// General stuff
+	private static final String			LOC				= "Econ/";										// Location of all of the files
+	private static PropertiesFile		props			= new PropertiesFile(LOC + "data.properties");	// Properties file
 	private static boolean				debug			= false;
 	private static final String			pluginMessage	= "[§cCodeRedEcon§f] ";
+	private static final int			infValue		= -1;
+	
+	// Money stuff
+	private static String				moneyName		= "";
+	
+	// Shop stuff
+	// Holds all of the shops, might use to make different shops based on location or something, might use in the future. Or right now.
+	ArrayList<Shop>						shops			= new ArrayList<Shop>();
 	
 	// Privilege stuff
 	private static File					file_privGroups	= new File(LOC + "privGroups.txt");
 	private static ArrayList<ShopGroup>	privGroups		= new ArrayList<ShopGroup>();
 	
-	// Items
+	// Items stuff
 	private static File					file_itemlist	= new File(LOC + "items.txt");
 	private static ArrayList<ShopItem>	itemList		= new ArrayList<ShopItem>();
 	
-	// Player data
+	// Player data... stuff
 	private static File					file_playerData	= new File(LOC + "playerData.txt");
 	private static ArrayList<User>		users			= new ArrayList<User>();
 	
@@ -76,6 +80,10 @@ public class DataManager {
 		return temp;
 	}
 	
+	public static ArrayList<User> getUsers() {
+		return users;
+	}
+	
 	public static User getUser(EconEntity ent) {
 		for (User iter : users) {
 			if (iter.getName().equalsIgnoreCase(ent.getName())) {
@@ -96,7 +104,7 @@ public class DataManager {
 			
 			while ((raw = reader.readLine()) != null) {
 				if (CodeRedEconomy.debug) {
-					log.log(Level.INFO, "Raw user data read: " + raw);
+					System.out.println("Raw user data read: " + raw);
 				}
 				if (!raw.split(":")[0].equalsIgnoreCase("")) {
 					users.add(new User(raw));
@@ -105,6 +113,7 @@ public class DataManager {
 			reader.close();
 		}
 		catch (FileNotFoundException e) {
+			// File not found, try to make the file
 			BufferedWriter writer;
 			try {
 				writer = new BufferedWriter(new FileWriter(file_playerData));
@@ -112,22 +121,19 @@ public class DataManager {
 				writer.close();
 			}
 			catch (IOException e1) {
-				// TODO Auto-generated catch block
+				// FFFFFFFFUUUUUUUUU
 				e1.printStackTrace();
 			}
-			// e.printStackTrace();
-		}
-		catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 	}
 	
+	/**
+	 * Item file formatting is "itemID:buyPrice:sellPrice:maxAvail"
+	 */
 	private void readItemFile() {
 		BufferedReader reader;
 		String raw = "";
@@ -137,11 +143,12 @@ public class DataManager {
 			while ((raw = reader.readLine()) != null) {
 				
 				String split[] = raw.split(":");
-				ShopItem temp = new ShopItem(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]));
+				ShopItem temp = new ShopItem(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]), Integer
+						.valueOf(split[3]));
 				itemList.add(temp);
 				if (CodeRedEconomy.debug) {
-					log.log(Level.INFO, "Raw item data read: " + raw);
-					log.log(Level.INFO, "Item data: " + temp.getName() + " price: " + temp.getBuyPrice());
+					System.out.println("Raw item data read: " + raw);
+					System.out.println("Item data: " + temp.getName() + " price: " + temp.getBuyPrice());
 				}
 			}
 			reader.close();
@@ -203,12 +210,22 @@ public class DataManager {
 				writer.close();
 			}
 			catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		else if (fileName.equalsIgnoreCase("item")) {
 			// Write item file
+			try {
+				BufferedWriter writer = new BufferedWriter(new FileWriter(file_itemlist));
+				for (ShopItem iter : itemList) {
+					writer.write(iter.toString());
+					writer.newLine();
+				}
+				writer.close();
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -236,14 +253,12 @@ public class DataManager {
 				}
 			}
 			catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				read.close();
 			}
 			catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -313,7 +328,7 @@ public class DataManager {
 	
 	public static boolean allowedBlock(String group, int itemID) {
 		for (ShopGroup iter : privGroups) {
-			log.log(Level.INFO, "Checking " + iter.getGroupName() + " against " + group);
+			System.out.println("Checking " + iter.getGroupName() + " against " + group);
 			if (iter.getGroupName().equalsIgnoreCase(group)) {
 				for (int biter : iter.getAllowed()) {
 					if (biter == itemID) {
@@ -338,5 +353,27 @@ public class DataManager {
 	
 	public boolean getDebug() {
 		return debug;
+	}
+	
+	public static int getMaxAvail(int itemID) {
+		for (ShopItem iter : itemList) {
+			if (iter.getItemID() == itemID) {
+				return iter.getMaxAvail();
+			}
+		}
+		return 0;
+	}
+	
+	public static ShopItem getItem(String itemName) {
+		for (ShopItem iter : itemList) {
+			if (iter.getName().equalsIgnoreCase(itemName)) {
+				return iter;
+			}
+		}
+		return null;
+	}
+	
+	public static int getInfValue() {
+		return infValue;
 	}
 }

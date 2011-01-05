@@ -6,11 +6,11 @@ public class PriceList {
 	public PriceList() {
 	}
 	
-	private static void populate(Player player) {
+	private static void populate(User user, Shop shop) {
 		pages = new ArrayList<String[]>();
 		ArrayList<ShopItem> items = new ArrayList<ShopItem>();
 		for (ShopGroup giter : DataManager.getGroups()) {
-			if (player.isInGroup(giter.getGroupName())) {
+			if (user.getPlayer().isInGroup(giter.getGroupName())) {
 				for (int i : giter.getAllowed()) {
 					items.add(new ShopItem(i));
 				}
@@ -22,32 +22,53 @@ public class PriceList {
 		String page[] = new String[7];
 		for (ShopItem iter : items) {
 			String temp = "";
-			temp += iter.getName() + ": " + iter.getBuyPrice() + " " + Money.getMoneyName();
+			int amount = 0;
+			for (ShopItemStack iters : shop.getAvailItems()) {
+				if (iters.getItemID() == iter.getItemID()) {
+					amount = iters.getAmountAvail();
+				}
+			}
+			if (amount != DataManager.getInfValue()) {
+				temp += iter.getName() + ": §a" + iter.getBuyPrice() + " §c" + iter.getSellPrice() + " §e" + amount;
+			}
+			else {
+				temp += iter.getName() + ": §a" + iter.getBuyPrice() + " §c" + iter.getSellPrice() + " §eInfinite";
+			}
+			// temp += iter.getName() + ": " + iter.getBuyPrice() + " " + Money.getMoneyName();
 			// temp += iter.getName() + " Buy: " + iter.getBuyPrice() + " Sell: " + iter.getSellPrice() + " " + Money.getMoneyName();
 			page[count] = temp;
 			count++;
 			if (count == 7 || iter.equals(items.get(items.size() - 1))) {
 				// System.out.println("Adding a page.");
-				pages.add(page);
-				count = 0;
-				page = new String[7];
+				
+				if (page[0] != null) {
+					pages.add(page);
+					count = 0;
+					page = new String[7];
+				}
 			}
 		}
 	}
 	
-	public static void priceList(Player player, int page) {
-		populate(player);
-		if (pages.size() >= page && page > 0) {
-			player.sendMessage(DataManager.getPluginMessage() + "Price List: (Page " + page + " of " + pages.size() + ")");
+	public static void priceList(User user, int page, Shop shop) {
+		populate(user, shop);
+		if (pages.size() >= page && page > 0 && pages.size() != 0) {
+			user.sendMessage(DataManager.getPluginMessage() + "Price List: (Page " + page + " of " + pages.size() + ")");
 			for (String iter : pages.get(page - 1)) {
 				if (iter != null) {
 					// Send the line
-					player.sendMessage(DataManager.getPluginMessage() + "   " + iter);
+					user.sendMessage("   " + iter);
 				}
 			}
 		}
+		else if (pages.size() == 0) {
+			user.sendMessage("There are no items you can buy.");
+		}
+		else if (pages.size() >= 1) {
+			user.sendMessage("Page numbers are 1 - " + pages.size());
+		}
 		else {
-			player.sendMessage(DataManager.getPluginMessage() + "Page numbers are 1 - " + pages.size());
+			System.out.println("Uknown situation in priceList");
 		}
 	}
 	

@@ -4,6 +4,7 @@ public class ShopItem {
 	// private final int privLevel;
 	private final int				buyPrice;
 	private final int				sellPrice;
+	private final int				maxAvail;
 	private static final String[]	blockNames		= {
 			"Air", "Stone", "Grass", "Dirt", "Cobblestone", "Wood", "Sapling", "Bedrock", "Water", "Stationary Water", "Lava",
 			"Stationary Lava", "Sand", "Gravel", "Gold Ore", "Iron Ore", "Coal Ore", "Log", "Leaves", "Sponge", "Glass", "Red Cloth",
@@ -40,6 +41,7 @@ public class ShopItem {
 		// privLevel = 0;
 		buyPrice = 0;
 		sellPrice = 0;
+		maxAvail = 0;
 	}
 	
 	public ShopItem(int itemID) {
@@ -48,6 +50,7 @@ public class ShopItem {
 		// privLevel = 0;
 		buyPrice = DataManager.getBuyPrice(itemID);
 		sellPrice = DataManager.getSellPrice(itemID);
+		maxAvail = DataManager.getMaxAvail(itemID);
 	}
 	
 	public ShopItem(int itemID, int buyPrice) {
@@ -55,6 +58,7 @@ public class ShopItem {
 		itemName = getName(itemID);
 		this.buyPrice = buyPrice;
 		sellPrice = DataManager.getSellPrice(itemID);
+		maxAvail = DataManager.getMaxAvail(itemID);
 	}
 	
 	public ShopItem(int itemID, int buyPrice, int sellPrice) {
@@ -62,10 +66,23 @@ public class ShopItem {
 		itemName = getName(itemID);
 		this.buyPrice = buyPrice;
 		this.sellPrice = sellPrice;
+		maxAvail = DataManager.getMaxAvail(itemID);
+	}
+	
+	public ShopItem(int itemID, int buyPrice, int sellPrice, int maxAvail) {
+		this.itemID = itemID;
+		itemName = getName(itemID);
+		this.buyPrice = buyPrice;
+		this.sellPrice = sellPrice;
+		this.maxAvail = maxAvail;
 	}
 	
 	public String getName() {
 		return itemName;
+	}
+	
+	public int getMaxAvail() {
+		return maxAvail;
 	}
 	
 	public int getItemID() {
@@ -96,5 +113,10 @@ public class ShopItem {
 		}
 		
 		return "Air";
+	}
+	
+	@Override
+	public String toString() {
+		return itemID + ":" + buyPrice + ":" + sellPrice + ":" + maxAvail;
 	}
 }

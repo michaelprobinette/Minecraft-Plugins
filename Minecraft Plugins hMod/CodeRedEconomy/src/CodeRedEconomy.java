@@ -6,7 +6,7 @@ public class CodeRedEconomy extends Plugin {
 	private String					name	= "CodeRedEconomy";
 	private String					version	= "v0.0.1";
 	private Shop					shop;
-	public static boolean			debug;
+	public static boolean			debug	= true;
 	private static DataManager		data	= new DataManager();
 	
 	public void enable() {
@@ -19,9 +19,10 @@ public class CodeRedEconomy extends Plugin {
 		log.info(name + " " + version + " initialized");
 		
 		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, l, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.SERVERCOMMAND, l, this, PluginListener.Priority.MEDIUM);
 		
-		debug = data.getDebug();
-		shop = new Shop();
+		// debug = data.getDebug();
+		shop = new Shop("The Shop", false, DataManager.getInfValue());
 	}
 	
 	public class Listener extends PluginListener {
@@ -30,6 +31,17 @@ public class CodeRedEconomy extends Plugin {
 		// This controls the accessability of functions / variables from the main class.
 		public Listener(CodeRedEconomy plugin) {
 			p = plugin;
+		}
+		
+		public boolean onConsoleCommand(String[] split) {
+			if (split.length >= 1) {
+				if (split[0].equalsIgnoreCase("save-all")) {
+					DataManager.save();
+					return true;
+				}
+			}
+			
+			return false;
 		}
 		
 		public boolean onCommand(Player player, String[] split) {
@@ -50,6 +62,24 @@ public class CodeRedEconomy extends Plugin {
 					DataManager.getUser(player).showBalance();
 					return true;
 				}
+				if (split[0].equalsIgnoreCase("/pay")) {
+					User user = DataManager.getUser(player);
+					if (split.length >= 3) {
+						User target = DataManager.getUser(split[1].trim());
+						try {
+							// The way it is formatted the person receiving money is the seller, and the person loosing money is the buyer,
+							// so this is formatted target, user so the money goes from the user to the target
+							Transaction.process(new Transaction(target, user, new Money(Integer.valueOf(split[2]))));
+						}
+						catch (NumberFormatException e) {
+							user.sendMessage("The correct use is \"/pay [name] [amount]\"");
+						}
+					}
+					else {
+						user.sendMessage("Correct use is \"/pay [player] [amount]\"");
+					}
+					return true;
+				}
 				if (split[0].equalsIgnoreCase("/add") && debug) {
 					if (split.length >= 2) {
 						if (split.length >= 3) {
@@ -61,17 +91,28 @@ public class CodeRedEconomy extends Plugin {
 					}
 					return true;
 				}
-				if (split[0].equalsIgnoreCase("/save") && debug) {
+				if (split[0].equalsIgnoreCase("/shop") && debug) {
+					for (ShopItemStack iter : shop.getAvailItems()) {
+						System.out.println(iter.getShopItem().toString() + " " + iter.getAmountAvail());
+					}
+					return true;
+				}
+				if (split[0].equalsIgnoreCase("/balall")) {
+					for (User iter : DataManager.getUsers()) {
+						System.out.println(iter.getName() + iter.getMoney().toString());
+					}
+				}
+				if (split[0].equalsIgnoreCase("/saveredeco")) {
 					DataManager.save();
 					return true;
 				}
 				if (split[0].equalsIgnoreCase("/prices")) {
 					if (split.length >= 2) {
 						int page = Integer.valueOf(split[1]);
-						PriceList.priceList(player, page);
+						PriceList.priceList(DataManager.getUser(player), page, shop);
 					}
 					else {
-						PriceList.priceList(player, 1);
+						PriceList.priceList(DataManager.getUser(player), 1, shop);
 					}
 					return true;
 				}

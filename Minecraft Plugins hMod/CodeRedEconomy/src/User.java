@@ -20,6 +20,7 @@ public class User extends EconEntity {
 			groupName = "nogroup";
 		
 		isPlayer = true;
+		setUser(this);
 		DataManager.addUser(this);
 	}
 	
@@ -32,6 +33,7 @@ public class User extends EconEntity {
 		super(user.getMoney());
 		this.player = user.getPlayer();
 		name = user.getPlayer().getName();
+		setUser(this);
 	}
 	
 	/**
@@ -45,6 +47,7 @@ public class User extends EconEntity {
 			int temp = Integer.valueOf(split[1]);
 			money.setAmount(temp);
 		}
+		setUser(this);
 	}
 	
 	/**
@@ -52,6 +55,7 @@ public class User extends EconEntity {
 	 */
 	public User() {
 		super();
+		setUser(this);
 	}
 	
 	/**
@@ -76,21 +80,6 @@ public class User extends EconEntity {
 	}
 	
 	/**
-	 * @param item
-	 * @return
-	 */
-	public boolean canBuy(ShopItem item) {
-		if (item.getBuyPrice() > money.getAmount()) {
-			return false;
-		}
-		
-		// else if (item.getPrivLevel() > privLevel) {
-		// return false;
-		// }
-		return true;
-	}
-	
-	/**
 	 * @return
 	 */
 	public Player getPlayer() {
@@ -105,102 +94,20 @@ public class User extends EconEntity {
 	}
 	
 	/**
-	 * @param trans
-	 * @return
-	 */
-	// public boolean buy(Transaction trans) {
-	// money.removeAmount(trans.getStack().getTotalBuyPrice());
-	// if (money.isValid()) {
-	// // Take care of the seller
-	// trans.getSeller().recieveMoney(new Money(trans.getStack().getTotalBuyPrice()));
-	// for (ShopItemStack iter : trans.getSeller().getAvailItems()) {
-	// if (iter.getItemID() == trans.getStack().getItemID()) {
-	// if (iter.getAmountAvail() != -1337) {
-	// // Remove the items
-	// iter.addAmountAvail(-trans.getStack().getAmountAvail());
-	// }
-	// }
-	// }
-	//			
-	// availableItems.add(trans.getStack());
-	// transferFromArray();
-	// // player.giveItem(trans.getStack().getShopItem().getItemID(), trans.getStack().getAmountAvail());
-	// lastTrans = trans;
-	// return true;
-	// }
-	// else {
-	// money.addAmount(trans.getStack().getTotalBuyPrice());
-	// return false;
-	// }
-	// }
-	
-	/**
-	 * @param shopItemStack
-	 * @return
-	 */
-	public boolean canBuy(ShopItemStack shopItemStack) {
-		if ((player.isInGroup(DataManager.getReqGroup(shopItemStack.getShopItem().getItemID())))
-				&& shopItemStack.getTotalBuyPrice() <= money.getAmount()) {
-			return true;
-		}
-		// else if (shopItemStack.getShopItem().getPrivLevel() < privLevel) {
-		// return false;
-		// }
-		return false;
-	}
-	
-	/**
 	 * 
 	 */
 	public void undoLastTrans() {
 		if (lastTrans != null) {
-			if (lastTrans.getBuyer().isPlayer()) {
-				DataManager.getUser(lastTrans.getBuyer().getName()).updateArray();
-			}
-			if (lastTrans.getBuyer().hasItems(lastTrans.getStack())) {
-				sendMessage("Undoing last transaction.");
-				
-				Transaction.undoTransaction(lastTrans);
-				
-				lastTrans = null;
-				sendMessage("Your new balance is: " + money.toString());
-			}
-			else {
-				sendMessage("You do not have the items.");
-			}
+			lastTrans = Transaction.undoTransaction(lastTrans);
 		}
 		else {
 			sendMessage("There is no last transaction to undo.");
 		}
 	}
 	
-	// /**
-	// * @param stack
-	// */
-	// private void removeFromInv(ShopItemStack stack) {
-	// int countRemoved = 0;
-	// for (Item iter : player.getInventory().getContents()) {
-	// if (iter != null) {
-	// if (iter.getItemId() == stack.getItemID()) {
-	// int amountPresent = iter.getAmount();
-	// // If there is more than what still needs to be removed in this one stack
-	// if (amountPresent >= stack.getAmountAvail() - countRemoved) {
-	// iter.setAmount(iter.getAmount() - stack.getAmountAvail() - countRemoved);
-	// countRemoved = stack.getAmountAvail() - countRemoved;
-	// }
-	// else {
-	// countRemoved = iter.getAmount();
-	// iter.setAmount(0);
-	// }
-	// }
-	// }
-	// }
-	// if (countRemoved != stack.getAmountAvail()) {
-	// // Did not remove everything, check hotbar
-	//			
-	// }
-	// }
-	
+	/**
+	 * Updates the availableItems array to the users current inventory. Used to check amounts easily before selling
+	 */
 	public void updateArray() {
 		availableItems = new ArrayList<ShopItemStack>();
 		for (Item iter : player.getInventory().getContents()) {
@@ -227,17 +134,17 @@ public class User extends EconEntity {
 	/**
 	 * Takes the items from the available items and adds it to the users inv
 	 */
-	public void transferFromArray() {
-		
-		for (ShopItemStack iter : availableItems) {
-			System.out.println("Amount adding is: " + iter.getAmountAvail());
-			if (iter.getAmountAvail() != 0) {
-				player.giveItem(iter.getItemID(), iter.getAmountAvail());
-			}
-			// player.giveItem(new Item(iter.getItemID(), iter.getAmountAvail()));
-			// player.giveItem(iter.getItemID(), iter.getAmountAvail());
-		}
-	}
+	// public void transferFromArray() {
+	//		
+	// for (ShopItemStack iter : availableItems) {
+	// System.out.println("Amount adding is: " + iter.getAmountAvail());
+	// if (iter.getAmountAvail() != 0) {
+	// player.giveItem(iter.getItemID(), iter.getAmountAvail());
+	// }
+	// // player.giveItem(new Item(iter.getItemID(), iter.getAmountAvail()));
+	// // player.giveItem(iter.getItemID(), iter.getAmountAvail());
+	// }
+	// }
 	
 	/**
 	 * 
@@ -260,35 +167,4 @@ public class User extends EconEntity {
 	public String toString() {
 		return name + ":" + money.getAmount();
 	}
-	
-	// public void sell(Transaction trans) {
-	// lastTrans = trans;
-	//		
-	// // Give the seller the money
-	// trans.getSeller().money.addAmount(trans.getStack().getTotalSellPrice());
-	//		
-	// // Check if an inf shop
-	// if (trans.getBuyer().getMoney().getAmount() != 1337) {
-	// // Subtract the money from the buyer
-	// trans.getBuyer().getMoney().addAmount(-trans.getStack().getTotalBuyPrice());
-	// }
-	//		
-	// // Add the items to the buyer
-	// if (trans.getBuyer().isPlayer()) {
-	// DataManager.getUser(trans.getBuyer().getName()).getPlayer().giveItem(trans.getStack().getItemID(),
-	// trans.getStack().getAmountAvail());
-	// }
-	// else {
-	// trans.getBuyer().addShopItems(trans.getStack());
-	// }
-	//		
-	// // Remove the items from the seller
-	// if (trans.getSeller().isPlayer()) {
-	// DataManager.getUser(trans.getSeller().getName()).getPlayer().getInventory().removeItem(trans.getStack().getItemID(),
-	// trans.getStack().getAmountAvail());
-	// }
-	// else {
-	// trans.getSeller().removeShopItems(trans.getStack());
-	// }
-	// }
 }
