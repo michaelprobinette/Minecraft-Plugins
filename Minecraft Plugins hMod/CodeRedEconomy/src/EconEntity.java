@@ -19,6 +19,7 @@ public abstract class EconEntity {
 	protected boolean					isPlayer		= false;
 	protected Transaction				lastTrans		= null;
 	private User						user			= null;
+	private long						lastAutoDeposit	= 0;
 	
 	public EconEntity(Money money) {
 		this.money = money;
@@ -29,6 +30,16 @@ public abstract class EconEntity {
 	
 	public Money getMoney() {
 		return money;
+	}
+	
+	public long getLastAutoDeposit() {
+		return lastAutoDeposit;
+	}
+	
+	public void autoDesposit(long serverTime) {
+		if (serverTime - lastAutoDeposit >= DataManager.getAutoDepositTime()) {
+			money.addAmount(DataManager.getAutoDepositAmount());
+		}
 	}
 	
 	public void recieveMoney(Money money) {

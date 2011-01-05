@@ -62,6 +62,10 @@ public class Transaction {
 		EconEntity seller = trans.getSeller();
 		ShopItemStack stack = trans.getStack();
 		
+		// Check if autoDeposit
+		buyer.autoDesposit(etc.getServer().getTime());
+		seller.autoDesposit(etc.getServer().getTime());
+		
 		if (!seller.isPlayer) {
 			// Check for restock
 			DataManager.getShop(seller).restock();

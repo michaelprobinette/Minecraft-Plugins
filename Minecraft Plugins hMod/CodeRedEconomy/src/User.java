@@ -166,6 +166,7 @@ public class User extends EconEntity {
 	 * 
 	 */
 	public void showBalance() {
+		autoDesposit(etc.getServer().getTime());
 		sendMessage("Your balance is: " + money.toString());
 	}
 	

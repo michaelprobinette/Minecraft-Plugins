@@ -23,36 +23,38 @@ import java.util.ArrayList;
  */
 public class DataManager {
 	// General stuff
-	private static String				LOC				= "Econ/";										// Location of all of the files
-	private static PropertiesFile		props			= new PropertiesFile(LOC + "data.properties");	// Properties file
-	private static boolean				debug			= false;
-	private static String				pluginMessage	= "[§cCodeRedEcon§f] ";
-	private static int					infValue		= -1;
+	private static String				LOC					= "Econ/";										// Location of all of the files
+	private static PropertiesFile		props				= new PropertiesFile(LOC + "data.properties");	// Properties file
+	private static boolean				debug				= false;
+	private static String				pluginMessage		= "[§cCodeRedEcon§f] ";
+	private static int					infValue			= -1;
 	
 	// Money stuff
-	private static String				moneyName		= "Strypes";
+	private static String				moneyName			= "Strypes";
 	
 	// Shop stuff
 	// Holds all of the shops, might use to make different shops based on location or something, might use in the future. Or right now.
-	static ArrayList<Shop>				shops			= new ArrayList<Shop>();
-	private static long					restockTime		= 60000;
-	private static final File			file_shop		= new File(LOC + "shops.txt");
+	static ArrayList<Shop>				shops				= new ArrayList<Shop>();
+	private static long					restockTime			= 60000;
+	private static final File			file_shop			= new File(LOC + "shops.txt");
 	
 	// Privilege stuff
-	private static final File			file_privGroups	= new File(LOC + "privGroups.txt");
-	private static ArrayList<ShopGroup>	privGroups		= new ArrayList<ShopGroup>();
+	private static final File			file_privGroups		= new File(LOC + "privGroups.txt");
+	private static ArrayList<ShopGroup>	privGroups			= new ArrayList<ShopGroup>();
 	
 	// Items stuff
-	private static final File			file_itemlist	= new File(LOC + "items.txt");
-	private static ArrayList<ShopItem>	itemList		= new ArrayList<ShopItem>();
+	private static final File			file_itemlist		= new File(LOC + "items.txt");
+	private static ArrayList<ShopItem>	itemList			= new ArrayList<ShopItem>();
 	
 	// Player data... stuff
-	private static final File			file_playerData	= new File(LOC + "playerData.txt");
-	private static ArrayList<User>		users			= new ArrayList<User>();
+	private static final File			file_playerData		= new File(LOC + "playerData.txt");
+	private static ArrayList<User>		users				= new ArrayList<User>();
+	private static long					autoDepositTime		= 60000;
+	private static int					autoDepositAmount	= 50;
 	
 	// Stats stuff
-	private static boolean				useStats		= true;
-	private static final File			file_stats		= new File(LOC + "stats.txt");
+	private static boolean				useStats			= true;
+	private static final File			file_stats			= new File(LOC + "stats.txt");
 	
 	public DataManager() {
 		load();
@@ -106,6 +108,20 @@ public class DataManager {
 		}
 		else {
 			props.setBoolean("usestats", useStats);
+		}
+		
+		if (props.containsKey("autodeposittime")) {
+			autoDepositTime = props.getLong("autodeposittime");
+		}
+		else {
+			props.setLong("autodeposittime", autoDepositTime);
+		}
+		
+		if (props.containsKey("autodepositamount")) {
+			autoDepositAmount = props.getInt("autodepositamount");
+		}
+		else {
+			props.setInt("autodepositamount", autoDepositAmount);
 		}
 	}
 	
@@ -543,5 +559,13 @@ public class DataManager {
 		Shop temp = new Shop(name, false, -1);
 		addShop(temp);
 		return temp;
+	}
+	
+	public static long getAutoDepositTime() {
+		return autoDepositTime;
+	}
+	
+	public static int getAutoDepositAmount() {
+		return autoDepositAmount;
 	}
 }
