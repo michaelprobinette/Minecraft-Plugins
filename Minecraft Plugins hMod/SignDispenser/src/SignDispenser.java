@@ -1,18 +1,30 @@
+/*
+ * Minecraft plugin that allows signs to give items on right click. Copyright (C) 2010 Michael Robinette
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>
+ */
+
 import java.util.logging.Logger;
 
 /**
  * @author Vandolis
  */
 public class SignDispenser extends Plugin {
-	private Listener l = new Listener(this);
-	protected static final Logger log = Logger.getLogger("Minecraft");
-	private String name = "SignDispenser";
-	private String version = "v1.6.0";
-	private static boolean useNames = false;
-	private static String[] useGroups = null;
-	private static String[] destroyGroups = null;
-	private static String[] createGroups = null;
-	private static final String[] blockNames = {
+	private Listener				l				= new Listener(this);
+	protected static final Logger	log				= Logger.getLogger("Minecraft");
+	private String					name			= "SignDispenser";
+	private String					version			= "v1.6.0";
+	private static boolean			useNames		= false;
+	private static String[]			useGroups		= null;
+	private static String[]			destroyGroups	= null;
+	private static String[]			createGroups	= null;
+	private static final String[]	blockNames		= {
 			"Air", "Stone", "Grass", "Dirt", "Cobblestone", "Wood", "Sapling", "Bedrock", "Water", "StationaryWater", "Lava",
 			"StationaryLava", "Sand", "Gravel", "GoldOre", "IronOre", "CoalOre", "Log", "Leaves", "Sponge", "Glass", "RedCloth",
 			"OrangeCloth", "YellowCloth", "LimeCloth", "GreenCloth", "AquagreenCloth", "CyanCloth", "BlueCloth", "PurpleCloth",
@@ -23,8 +35,8 @@ public class SignDispenser extends Plugin {
 			"MinecartTracks", "CobbleStairs", "WallSign", "Lever", "StonePressure", "IronDoor", "WoodenPressure", "RedstoneOre",
 			"GlowingRedstone", "RedstoneTorchOf", "RedstoneTorchOn", "StoneButton", "Snow", "Ice", "SnowBlock", "Cactus", "Clay", "Reed",
 			"Jukebox", "Fence", "Pumpkin", "Netherrack", "SoulSand", "Glowstone", "Portal", "Jack-O-Lantern"
-	};
-	private static final String[] itemNames = {
+													};
+	private static final String[]	itemNames		= {
 			"IronShovel", "IronPickaxe", "IronAxe", "FlintandSteel", "Apple", "Bow", "Arrow", "Coal", "Diamond", "IronIngot", "GoldIngot",
 			"IronSword", "WoodenSword", "WoodernShovel", "WoodenPickaxe", "WoodenAxe", "StoneSword", "StoneShovel", "StonePickaxe",
 			"StoneAxe", "DiamondSword", "DiamondShovel", "DiamondPickaxe", "DiamondAxe", "Stick", "Bowl", "MushroomSoup", "GoldSword",
@@ -36,25 +48,25 @@ public class SignDispenser extends Plugin {
 			"Minecart", "Saddle", "IronDoor", "Redstone", "Snowball", "Boat", "Leather", "Milk", "ClayBrick", "ClayBalls", "Reed", "Paper",
 			"Book", "Slimeball", "StorageMinecart", "PoweredMinecart", "Egg", "Compass", "FishingRod", "Clock", "GlowstoneDust", "RawFish",
 			"CookedFish"
-	};
-	private static final String[] specialItems = {
+													};
+	private static final String[]	specialItems	= {
 			"GoldMusicDisk", "GreenMusicDisk"
-	};
-	private PropertiesFile props = new PropertiesFile("SignDispenser.properties");
-
+													};
+	private PropertiesFile			props			= new PropertiesFile("SignDispenser.properties");
+	
 	public void enable() {
 	}
-
+	
 	public void disable() {
 	}
-
+	
 	public void initialize() {
 		log.info(name + " " + version + " initialized");
-
+		
 		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_DESTROYED, l, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.SIGN_CHANGE, l, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_RIGHTCLICKED, l, this, PluginListener.Priority.MEDIUM);
-
+		
 		if (!props.containsKey("usegroups")) {
 			props.setString("usegroups", "all");
 			props.save();
@@ -89,7 +101,7 @@ public class SignDispenser extends Plugin {
 		}
 		useNames = props.getBoolean("useitemnames");
 	}
-
+	
 	public int getArrayIndex(String[] arr, String str) {
 		for (int i = 0; i < arr.length; i++) {
 			if (arr[i].equalsIgnoreCase(str)) {
@@ -98,7 +110,7 @@ public class SignDispenser extends Plugin {
 		}
 		return -1;
 	}
-
+	
 	public String getName(int itemID) {
 		if (itemID < 255) {
 			return blockNames[itemID];
@@ -109,23 +121,23 @@ public class SignDispenser extends Plugin {
 		else if (itemID < 3000) {
 			return specialItems[itemID - 2256];
 		}
-
+		
 		return "";
 	}
-
+	
 	// Sends a message to all players!
 	public void broadcast(String message) {
 		etc.getServer().messageAll(message);
 	}
-
+	
 	public class Listener extends PluginListener {
-		SignDispenser p;
-
+		SignDispenser	p;
+		
 		// This controls the accessability of functions / variables from the main class.
 		public Listener(SignDispenser plugin) {
 			p = plugin;
 		}
-
+		
 		public void onBlockRightClicked(Player player, Block blockClicked, Item item) {
 			if (blockClicked != null) {
 				int x;
@@ -136,7 +148,7 @@ public class SignDispenser extends Plugin {
 				for (int b = 0; b < useGroups.length; b++) {
 					useGroups[b] = useGroups[b].trim();
 				}
-
+				
 				// Check if player is in group
 				for (int n = 0; n < useGroups.length; n++) {
 					if (useGroups[n].equalsIgnoreCase("all")) {
@@ -153,7 +165,7 @@ public class SignDispenser extends Plugin {
 					x = blockClicked.getX();
 					y = blockClicked.getY();
 					z = blockClicked.getZ();
-
+					
 					try {
 						Sign si = (Sign) (etc.getServer().getComplexBlock(x, y, z));
 						si.update();
@@ -208,17 +220,17 @@ public class SignDispenser extends Plugin {
 				}
 				if (((blockClicked.getType() == 63) || (blockClicked.getType() == 68))
 						&& ((blockClicked.getStatus() == 0) || (blockClicked.getStatus() == 1) || (blockClicked.getStatus() == 3))) {
-
+					
 					x = blockClicked.getX();
 					y = blockClicked.getY();
 					z = blockClicked.getZ();
-
+					
 					try {
 						boolean canDestroy = false;
 						for (int b = 0; b < destroyGroups.length; b++) {
 							destroyGroups[b] = destroyGroups[b].trim();
 						}
-
+						
 						// Check if player is in group
 						for (int n = 0; n < destroyGroups.length; n++) {
 							if (destroyGroups[n].equalsIgnoreCase("all")) {
@@ -228,11 +240,11 @@ public class SignDispenser extends Plugin {
 								canDestroy = true;
 							}
 						}
-
+						
 						Sign si = (Sign) (etc.getServer().getComplexBlock(x, y, z));
 						// Get the sign text
 						line1 = si.getText(0);
-
+						
 						if (line1.equalsIgnoreCase("Item ID") && !canDestroy) {
 							si.update();
 						}
@@ -242,9 +254,9 @@ public class SignDispenser extends Plugin {
 					}
 				}
 			}
-
+			
 		}
-
+		
 		public boolean onBlockDestroy(Player player, Block block) {
 			int x = 0;
 			int y = 0;
@@ -266,11 +278,11 @@ public class SignDispenser extends Plugin {
 			if (block != null) {
 				if (((block.getType() == 63) || (block.getType() == 68))
 						&& ((block.getStatus() == 0) || (block.getStatus() == 1) || (block.getStatus() == 3))) {
-
+					
 					x = block.getX();
 					y = block.getY();
 					z = block.getZ();
-
+					
 					try {
 						Sign si = (Sign) (etc.getServer().getComplexBlock(x, y, z));
 						// Get the sign text
@@ -279,7 +291,7 @@ public class SignDispenser extends Plugin {
 							for (int b = 0; b < destroyGroups.length; b++) {
 								destroyGroups[b] = destroyGroups[b].trim();
 							}
-
+							
 							// Check if player is in group
 							for (int n = 0; n < destroyGroups.length; n++) {
 								if (destroyGroups[n].equalsIgnoreCase("all")) {
@@ -329,16 +341,16 @@ public class SignDispenser extends Plugin {
 			}
 			return false;
 		}
-
+		
 		public boolean onSignChange(Player player, Sign s) {
 			String groups[];
 			boolean admin = false;
 			boolean canCreate = false;
-
+			
 			for (int b = 0; b < createGroups.length; b++) {
 				createGroups[b] = createGroups[b].trim();
 			}
-
+			
 			// Check if player is in group
 			for (int n = 0; n < createGroups.length; n++) {
 				if (createGroups[n].equalsIgnoreCase("all")) {
@@ -348,7 +360,7 @@ public class SignDispenser extends Plugin {
 					canCreate = true;
 				}
 			}
-
+			
 			if (player.isAdmin()) {
 				admin = true;
 			}
@@ -360,7 +372,7 @@ public class SignDispenser extends Plugin {
 					}
 				}
 			}
-
+			
 			if (!admin && !canCreate) {
 				String line1 = s.getText(0);
 				if (line1.equalsIgnoreCase("Item ID") || line1.equalsIgnoreCase("Right Click:")) {
