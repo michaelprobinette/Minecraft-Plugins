@@ -5,8 +5,6 @@ public class CodeRedEconomy extends Plugin {
 	protected static final Logger	log		= Logger.getLogger("Minecraft");
 	private String					name	= "CodeRedEconomy";
 	private String					version	= "v0.0.1";
-	private Shop					shop;
-	public static boolean			debug	= true;
 	private static DataManager		data	= new DataManager();
 	
 	public void enable() {
@@ -21,8 +19,7 @@ public class CodeRedEconomy extends Plugin {
 		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, l, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.SERVERCOMMAND, l, this, PluginListener.Priority.MEDIUM);
 		
-		// debug = data.getDebug();
-		shop = new Shop("The Shop", false, DataManager.getInfValue());
+		// DataManager.getDebug() = data.getDataManager.getDebug()();
 	}
 	
 	public class Listener extends PluginListener {
@@ -47,11 +44,11 @@ public class CodeRedEconomy extends Plugin {
 		public boolean onCommand(Player player, String[] split) {
 			if (split.length >= 1) {
 				if (split[0].equalsIgnoreCase("/buy")) {
-					shop.buy(DataManager.getUser(player), split);
+					DataManager.getShop("The Shop").buy(DataManager.getUser(player), split);
 					return true;
 				}
 				if (split[0].equalsIgnoreCase("/sell")) {
-					shop.sell(DataManager.getUser(player), split);
+					DataManager.getShop("The Shop").sell(DataManager.getUser(player), split);
 					return true;
 				}
 				// if (split[0].equalsIgnoreCase("/trade") && player.canUseCommand("/trade")) {
@@ -60,6 +57,10 @@ public class CodeRedEconomy extends Plugin {
 				// }
 				if (split[0].equalsIgnoreCase("/balance")) {
 					DataManager.getUser(player).showBalance();
+					return true;
+				}
+				if (split[0].equalsIgnoreCase("/test") && DataManager.getDebug()) {
+					player.sendMessage("Time is: " + etc.getServer().getTime());
 					return true;
 				}
 				if (split[0].equalsIgnoreCase("/pay")) {
@@ -80,7 +81,7 @@ public class CodeRedEconomy extends Plugin {
 					}
 					return true;
 				}
-				if (split[0].equalsIgnoreCase("/add") && debug) {
+				if (split[0].equalsIgnoreCase("/add") && DataManager.getDebug()) {
 					if (split.length >= 2) {
 						if (split.length >= 3) {
 							DataManager.getUser(split[1]).getMoney().addAmount(Integer.valueOf(split[2]));
@@ -91,16 +92,18 @@ public class CodeRedEconomy extends Plugin {
 					}
 					return true;
 				}
-				if (split[0].equalsIgnoreCase("/shop") && debug) {
-					for (ShopItemStack iter : shop.getAvailItems()) {
-						System.out.println(iter.getShopItem().toString() + " " + iter.getAmountAvail());
+				if (split[0].equalsIgnoreCase("/shop") && DataManager.getDebug()) {
+					System.out.println("There are " + DataManager.getShops().size());
+					for (Shop iter : DataManager.getShops()) {
+						System.out.println(iter.getName());
 					}
 					return true;
 				}
-				if (split[0].equalsIgnoreCase("/balall")) {
+				if (split[0].equalsIgnoreCase("/balall") && DataManager.getDebug()) {
 					for (User iter : DataManager.getUsers()) {
 						System.out.println(iter.getName() + iter.getMoney().toString());
 					}
+					return true;
 				}
 				if (split[0].equalsIgnoreCase("/saveredeco")) {
 					DataManager.save();
@@ -109,10 +112,10 @@ public class CodeRedEconomy extends Plugin {
 				if (split[0].equalsIgnoreCase("/prices")) {
 					if (split.length >= 2) {
 						int page = Integer.valueOf(split[1]);
-						PriceList.priceList(DataManager.getUser(player), page, shop);
+						PriceList.priceList(DataManager.getUser(player), page, DataManager.getShop("The Shop"));
 					}
 					else {
-						PriceList.priceList(DataManager.getUser(player), 1, shop);
+						PriceList.priceList(DataManager.getUser(player), 1, DataManager.getShop("The Shop"));
 					}
 					return true;
 				}

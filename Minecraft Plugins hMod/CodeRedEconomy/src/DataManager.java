@@ -1,7 +1,6 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,30 +11,36 @@ import java.util.ArrayList;
  */
 public class DataManager {
 	// General stuff
-	private static final String			LOC				= "Econ/";										// Location of all of the files
+	private static String				LOC				= "Econ/";										// Location of all of the files
 	private static PropertiesFile		props			= new PropertiesFile(LOC + "data.properties");	// Properties file
 	private static boolean				debug			= false;
-	private static final String			pluginMessage	= "[§cCodeRedEcon§f] ";
-	private static final int			infValue		= -1;
+	private static String				pluginMessage	= "[§cCodeRedEcon§f] ";
+	private static int					infValue		= -1;
 	
 	// Money stuff
-	private static String				moneyName		= "";
+	private static String				moneyName		= "Strypes";
 	
 	// Shop stuff
 	// Holds all of the shops, might use to make different shops based on location or something, might use in the future. Or right now.
-	ArrayList<Shop>						shops			= new ArrayList<Shop>();
+	static ArrayList<Shop>				shops			= new ArrayList<Shop>();
+	private static long					restockTime		= 60000;
+	private static final File			file_shop		= new File(LOC + "shops.txt");
 	
 	// Privilege stuff
-	private static File					file_privGroups	= new File(LOC + "privGroups.txt");
+	private static final File			file_privGroups	= new File(LOC + "privGroups.txt");
 	private static ArrayList<ShopGroup>	privGroups		= new ArrayList<ShopGroup>();
 	
 	// Items stuff
-	private static File					file_itemlist	= new File(LOC + "items.txt");
+	private static final File			file_itemlist	= new File(LOC + "items.txt");
 	private static ArrayList<ShopItem>	itemList		= new ArrayList<ShopItem>();
 	
 	// Player data... stuff
-	private static File					file_playerData	= new File(LOC + "playerData.txt");
+	private static final File			file_playerData	= new File(LOC + "playerData.txt");
 	private static ArrayList<User>		users			= new ArrayList<User>();
+	
+	// Stats stuff
+	private static boolean				useStats		= true;
+	private static final File			file_stats		= new File(LOC + "stats.txt");
 	
 	public DataManager() {
 		load();
@@ -48,11 +53,47 @@ public class DataManager {
 		else {
 			props.setString("moneyname", moneyName);
 		}
+		
 		if (props.containsKey("debug")) {
 			debug = props.getBoolean("debug");
 		}
 		else {
 			props.setBoolean("debug", debug);
+		}
+		
+		if (props.containsKey("restocktime")) {
+			restockTime = props.getLong("restocktime");
+		}
+		else {
+			props.setLong("restocktime", restockTime);
+		}
+		
+		if (props.containsKey("ingamemessage")) {
+			pluginMessage = props.getString("ingamemessage");
+		}
+		else {
+			props.setString("ingamemessage", pluginMessage);
+		}
+		
+		if (props.containsKey("infvalue")) {
+			infValue = props.getInt("infvalue");
+		}
+		else {
+			props.setInt("infvalue", infValue);
+		}
+		
+		if (props.containsKey("filelocation")) {
+			LOC = props.getString("filelocation");
+		}
+		else {
+			props.setString("filelocation", LOC);
+		}
+		
+		if (props.containsKey("usestats")) {
+			useStats = props.getBoolean("usestats");
+		}
+		else {
+			props.setBoolean("usestats", useStats);
 		}
 	}
 	
@@ -103,7 +144,7 @@ public class DataManager {
 			reader = new BufferedReader(new FileReader(file_playerData));
 			
 			while ((raw = reader.readLine()) != null) {
-				if (CodeRedEconomy.debug) {
+				if (debug) {
 					System.out.println("Raw user data read: " + raw);
 				}
 				if (!raw.split(":")[0].equalsIgnoreCase("")) {
@@ -112,7 +153,7 @@ public class DataManager {
 			}
 			reader.close();
 		}
-		catch (FileNotFoundException e) {
+		catch (IOException e) {
 			// File not found, try to make the file
 			BufferedWriter writer;
 			try {
@@ -124,9 +165,6 @@ public class DataManager {
 				// FFFFFFFFUUUUUUUUU
 				e1.printStackTrace();
 			}
-		}
-		catch (IOException e) {
-			e.printStackTrace();
 		}
 		
 	}
@@ -146,14 +184,14 @@ public class DataManager {
 				ShopItem temp = new ShopItem(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]), Integer
 						.valueOf(split[3]));
 				itemList.add(temp);
-				if (CodeRedEconomy.debug) {
+				if (debug) {
 					System.out.println("Raw item data read: " + raw);
 					System.out.println("Item data: " + temp.getName() + " price: " + temp.getBuyPrice());
 				}
 			}
 			reader.close();
 		}
-		catch (FileNotFoundException e) {
+		catch (IOException e) {
 			try {
 				// File not found, create empty file
 				BufferedWriter writer = new BufferedWriter(new FileWriter(file_itemlist));
@@ -163,10 +201,6 @@ public class DataManager {
 			catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			// e.printStackTrace();
-		}
-		catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -180,6 +214,10 @@ public class DataManager {
 	
 	public static String getPluginMessage() {
 		return pluginMessage;
+	}
+	
+	public static boolean usingStats() {
+		return useStats;
 	}
 	
 	public static void addUser(User user) {
@@ -227,42 +265,61 @@ public class DataManager {
 				e.printStackTrace();
 			}
 		}
-	}
-	
-	private void readPrivFile() {
-		try {
-			BufferedReader read = new BufferedReader(new FileReader(file_privGroups));
-			String raw = "";
+		else if (fileName.equalsIgnoreCase("stats")) {
+			// Write stats file
 			try {
-				while ((raw = read.readLine()) != null) {
-					String split[] = raw.split(":");
-					if (split.length >= 2) {
-						String groupName = split[0];
-						String a[] = split[1].split(",");
-						int blocks[] = new int[a.length];
-						int count = 0;
-						for (String iter : a) {
-							iter = iter.trim();
-							int temp = Integer.valueOf(iter);
-							blocks[count] = temp;
-							count++;
-						}
-						ShopGroup temp = new ShopGroup(groupName, blocks);
-						privGroups.add(temp);
-					}
+				BufferedWriter writer = new BufferedWriter(new FileWriter(file_stats));
+				for (String iter : EconStats.statString()) {
+					writer.write(iter);
+					writer.newLine();
 				}
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-			try {
-				read.close();
+				writer.close();
 			}
 			catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		catch (FileNotFoundException e) {
+		else if (fileName.equalsIgnoreCase("shops")) {
+			// Write shops file
+			try {
+				BufferedWriter writer = new BufferedWriter(new FileWriter(file_shop));
+				for (Shop iter : shops) {
+					writer.write(iter.toString());
+					writer.newLine();
+				}
+				writer.close();
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void readPrivFile() {
+		BufferedReader reader;
+		String raw = "";
+		try {
+			reader = new BufferedReader(new FileReader(file_privGroups));
+			while ((raw = reader.readLine()) != null) {
+				String split[] = raw.split(":");
+				if (split.length >= 2) {
+					String groupName = split[0];
+					String a[] = split[1].split(",");
+					int blocks[] = new int[a.length];
+					int count = 0;
+					for (String iter : a) {
+						iter = iter.trim();
+						int temp = Integer.valueOf(iter);
+						blocks[count] = temp;
+						count++;
+					}
+					ShopGroup temp = new ShopGroup(groupName, blocks);
+					privGroups.add(temp);
+				}
+			}
+			reader.close();
+		}
+		catch (IOException e) {
 			try {
 				// File not found, create empty file
 				BufferedWriter writer = new BufferedWriter(new FileWriter(file_privGroups));
@@ -294,9 +351,12 @@ public class DataManager {
 	}
 	
 	public static void save() {
+		System.out.println("Saving player and item data.");
 		// Perform save actions
 		write("player");
 		write("item");
+		write("stats");
+		write("shops");
 	}
 	
 	public void load() {
@@ -311,6 +371,60 @@ public class DataManager {
 		
 		// Read from the group priv file
 		readPrivFile();
+		
+		// Read from the stats file
+		readStatsFile();
+		
+		// Read from the shop file
+		readShopFile();
+	}
+	
+	private void readShopFile() {
+		BufferedReader reader;
+		String raw = "";
+		try {
+			reader = new BufferedReader(new FileReader(file_shop));
+			while ((raw = reader.readLine()) != null) {
+				addShop(new Shop(raw));
+			}
+			reader.close();
+		}
+		catch (IOException e) {
+			try {
+				// File not found, create empty file
+				BufferedWriter writer = new BufferedWriter(new FileWriter(file_shop));
+				writer.newLine();
+				writer.close();
+			}
+			catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+	}
+	
+	private void readStatsFile() {
+		BufferedReader reader;
+		String raw = "";
+		try {
+			reader = new BufferedReader(new FileReader(file_stats));
+			ArrayList<String> data = new ArrayList<String>();
+			while ((raw = reader.readLine()) != null) {
+				data.add(raw);
+			}
+			EconStats.loadStats(data);
+			reader.close();
+		}
+		catch (IOException e) {
+			try {
+				// File not found, create empty file
+				BufferedWriter writer = new BufferedWriter(new FileWriter(file_privGroups));
+				writer.newLine();
+				writer.close();
+			}
+			catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
 	}
 	
 	public static String getMoneyName() {
@@ -351,7 +465,7 @@ public class DataManager {
 		return "default";
 	}
 	
-	public boolean getDebug() {
+	public static boolean getDebug() {
 		return debug;
 	}
 	
@@ -375,5 +489,47 @@ public class DataManager {
 	
 	public static int getInfValue() {
 		return infValue;
+	}
+	
+	public static Shop getShop(EconEntity ent) {
+		for (Shop iter : shops) {
+			if (iter.getName().equalsIgnoreCase(ent.getName())) {
+				return iter;
+			}
+		}
+		
+		// No shop found, make a new one with default values
+		Shop temp = new Shop(ent.getName(), false, -1);
+		addShop(temp);
+		return temp;
+	}
+	
+	public static long getRestockTime() {
+		return restockTime;
+	}
+	
+	public static ArrayList<Shop> getShops() {
+		return shops;
+	}
+	
+	public static void addShop(Shop shop) {
+		shops.add(shop);
+		write("shops");
+	}
+	
+	public static Shop getShop(String name) {
+		for (Shop iter : shops) {
+			if (iter.getName().equalsIgnoreCase(name)) {
+				if (debug) {
+					System.out.println("Shop found under the name of " + iter.getName() + " returning.");
+				}
+				return iter;
+			}
+		}
+		
+		// No shop found, make a new one with default values
+		Shop temp = new Shop(name, false, -1);
+		addShop(temp);
+		return temp;
 	}
 }

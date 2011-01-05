@@ -6,8 +6,8 @@ public class ShopItem {
 	private final int				sellPrice;
 	private final int				maxAvail;
 	private static final String[]	blockNames		= {
-			"Air", "Stone", "Grass", "Dirt", "Cobblestone", "Wood", "Sapling", "Bedrock", "Water", "Stationary Water", "Lava",
-			"Stationary Lava", "Sand", "Gravel", "Gold Ore", "Iron Ore", "Coal Ore", "Log", "Leaves", "Sponge", "Glass", "Red Cloth",
+			"Other", "Stone", "Grass", "Dirt", "Cobblestone", "Wooden Planks", "Sapling", "Bedrock", "Water", "Stationary Water", "Lava",
+			"Stationary Lava", "Sand", "Gravel", "Gold Ore", "Iron Ore", "Coal Ore", "Wood", "Leaves", "Sponge", "Glass", "Red Cloth",
 			"Orange Cloth", "Yellow Cloth", "Lime Cloth", "Green Cloth", "Aquagreen Cloth", "Cyan Cloth", "Blue Cloth", "Purple Cloth",
 			"Indigo Cloth", "Violet Cloth", "Magenta Cloth", "Pink Cloth", "Black Cloth", "Wool", "White Cloth", "Yellow Flower",
 			"Red Rose", "Brown Mushroom", "Red Mushroom", "Gold Block", "Iron Block", "Double Stone Slab", "Stone Slab", "Brick", "TNT",
@@ -34,6 +34,7 @@ public class ShopItem {
 	private static final String[]	specialItems	= {
 			"Gold Music Disk", "Green Music Disk"
 													};
+	private final Item				item;
 	
 	public ShopItem() {
 		itemID = 0;
@@ -42,6 +43,7 @@ public class ShopItem {
 		buyPrice = 0;
 		sellPrice = 0;
 		maxAvail = 0;
+		item = new Item();
 	}
 	
 	public ShopItem(int itemID) {
@@ -51,6 +53,7 @@ public class ShopItem {
 		buyPrice = DataManager.getBuyPrice(itemID);
 		sellPrice = DataManager.getSellPrice(itemID);
 		maxAvail = DataManager.getMaxAvail(itemID);
+		item = new Item(itemID, 1);
 	}
 	
 	public ShopItem(int itemID, int buyPrice) {
@@ -59,6 +62,7 @@ public class ShopItem {
 		this.buyPrice = buyPrice;
 		sellPrice = DataManager.getSellPrice(itemID);
 		maxAvail = DataManager.getMaxAvail(itemID);
+		item = new Item(itemID, 1);
 	}
 	
 	public ShopItem(int itemID, int buyPrice, int sellPrice) {
@@ -67,6 +71,7 @@ public class ShopItem {
 		this.buyPrice = buyPrice;
 		this.sellPrice = sellPrice;
 		maxAvail = DataManager.getMaxAvail(itemID);
+		item = new Item(itemID, 1);
 	}
 	
 	public ShopItem(int itemID, int buyPrice, int sellPrice, int maxAvail) {
@@ -75,6 +80,7 @@ public class ShopItem {
 		this.buyPrice = buyPrice;
 		this.sellPrice = sellPrice;
 		this.maxAvail = maxAvail;
+		item = new Item(itemID, 1);
 	}
 	
 	public String getName() {
@@ -87,6 +93,10 @@ public class ShopItem {
 	
 	public int getItemID() {
 		return itemID;
+	}
+	
+	public Item getItem() {
+		return item;
 	}
 	
 	// public int getPrivLevel() {

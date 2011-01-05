@@ -7,6 +7,7 @@ public class PriceList {
 	}
 	
 	private static void populate(User user, Shop shop) {
+		shop.restock(); // Restock the shop if needed
 		pages = new ArrayList<String[]>();
 		ArrayList<ShopItem> items = new ArrayList<ShopItem>();
 		for (ShopGroup giter : DataManager.getGroups()) {
@@ -53,7 +54,7 @@ public class PriceList {
 	public static void priceList(User user, int page, Shop shop) {
 		populate(user, shop);
 		if (pages.size() >= page && page > 0 && pages.size() != 0) {
-			user.sendMessage(DataManager.getPluginMessage() + "Price List: (Page " + page + " of " + pages.size() + ")");
+			user.sendMessage("Price List: (Page " + page + " of " + pages.size() + ")");
 			for (String iter : pages.get(page - 1)) {
 				if (iter != null) {
 					// Send the line

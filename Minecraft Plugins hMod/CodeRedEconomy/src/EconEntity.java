@@ -83,6 +83,13 @@ public abstract class EconEntity {
 		if (stack != null) {
 			// Check if the entity is a player
 			if (isPlayer) {
+				user.updateArray();
+				for (ShopItemStack iter : availableItems) {
+					if (iter.getItemID() == stack.getItemID()) {
+						// Check amount
+						return (stack.getAmountAvail() <= iter.getAmountAvail());
+					}
+				}
 				return user.getPlayer().getInventory().hasItem(stack.getItemID(), stack.getAmountAvail());
 			}
 			else {
@@ -104,10 +111,10 @@ public abstract class EconEntity {
 	public int numberOfItems(ShopItem item) {
 		if (isPlayer) {
 			user.updateArray(); // Grab the items from the players inventory
-			for (ShopItemStack iter : availableItems) {
-				if (iter.getItemID() == item.getItemID()) {
-					return iter.getAmountAvail();
-				}
+		}
+		for (ShopItemStack iter : availableItems) {
+			if (iter.getItemID() == item.getItemID()) {
+				return iter.getAmountAvail();
 			}
 		}
 		return 0;
@@ -131,9 +138,9 @@ public abstract class EconEntity {
 		boolean found = false;
 		for (ShopItemStack iter : availableItems) {
 			if (iter.getItemID() == stack.getItemID()) {
-				if (numberOfItems(iter.getShopItem()) != -1) {
+				found = true;
+				if (iter.getAmountAvail() != DataManager.getInfValue()) {
 					iter.addAmountAvail(stack.getAmountAvail());
-					found = true;
 				}
 				break;
 			}
@@ -145,7 +152,7 @@ public abstract class EconEntity {
 	
 	public void removeShopItems(ShopItemStack stack) {
 		for (ShopItemStack iter : availableItems) {
-			if (iter.getItemID() == stack.getItemID() && numberOfItems(iter.getShopItem()) != -1) {
+			if (iter.getItemID() == stack.getItemID() && iter.getAmountAvail() != -1) {
 				iter.addAmountAvail(-stack.getAmountAvail());
 				break;
 			}

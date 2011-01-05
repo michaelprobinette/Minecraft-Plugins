@@ -49,12 +49,19 @@ public class Transaction {
 		EconEntity buyer = trans.getBuyer();
 		EconEntity seller = trans.getSeller();
 		ShopItemStack stack = trans.getStack();
+		
+		if (!seller.isPlayer) {
+			// Check for restock
+			DataManager.getShop(seller).restock();
+		}
+		
 		boolean canBuy = buyer.canBuy(trans.getStack());
 		boolean canSell = seller.canSell(trans.getStack());
 		if (canBuy && canSell) {
-			buyer.setLastTrans(trans);
-			seller.setLastTrans(trans);
-			
+			if (!trans.cashOnly()) {
+				buyer.setLastTrans(trans);
+				seller.setLastTrans(trans);
+			}
 			if (seller.getMoney().getAmount() != DataManager.getInfValue() && !trans.cashOnly()) {
 				// Give the seller the money
 				seller.money.addAmount(trans.getStack().getTotalSellPrice().getAmount());
@@ -111,12 +118,14 @@ public class Transaction {
 				if (!undo) {
 					// Send messages to the seller and buyer telling the success
 					if (buyer.isPlayer()) {
+						EconStats.bought(stack);
 						buyer.getUser().sendMessage(
 								"You bought " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName()
 										+ " for " + trans.getStack().getTotalBuyPrice().toString());
 						buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
 					}
 					if (seller.isPlayer()) {
+						EconStats.sold(stack);
 						seller.getUser().sendMessage(
 								"You sold " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName() + " for "
 										+ trans.getStack().getTotalSellPrice().toString());
@@ -125,6 +134,8 @@ public class Transaction {
 				}
 				else {
 					if (buyer.isPlayer()) {
+						EconStats.undoSell(stack);
+						
 						buyer.getUser().sendMessage(
 								"The last transaction was undone. " + trans.getStack().getAmountAvail() + " "
 										+ trans.getStack().getShopItem().getName() + " has been refunded and "
@@ -132,6 +143,8 @@ public class Transaction {
 						buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
 					}
 					if (seller.isPlayer()) {
+						EconStats.undoBuy(stack);
+						
 						seller.getUser().sendMessage(
 								"The last transaction was undone. " + trans.getStack().getAmountAvail() + " "
 										+ trans.getStack().getShopItem().getName() + " has been removed and you have been refunded "
@@ -144,16 +157,22 @@ public class Transaction {
 				if (!undo) {
 					// Send messages to the seller and buyer telling the success
 					if (buyer.isPlayer()) {
+						EconStats.bought(stack);
+						
 						buyer.getUser().sendMessage("You have paid " + seller.getName() + " " + trans.getAmount().toString());
 						buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
 					}
 					if (seller.isPlayer()) {
+						EconStats.sold(stack);
+						
 						seller.getUser().sendMessage(buyer.getName() + " has paid you " + trans.getAmount().toString());
 						seller.getUser().sendMessage("Your new balance is: " + seller.getMoney().toString());
 					}
 				}
 				else {
 					if (buyer.isPlayer()) {
+						EconStats.undoSell(stack);
+						
 						buyer.getUser()
 								.sendMessage(
 										"The last transaction was undone. " + trans.getAmount().toString()
@@ -161,11 +180,14 @@ public class Transaction {
 						buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
 					}
 					if (seller.isPlayer()) {
+						EconStats.undoBuy(stack);
+						
 						seller.getUser().sendMessage(
 								"The last transaction was undone. " + trans.getAmount().toString() + " has been refunded to your account.");
 					}
 				}
 			}
+			DataManager.save(); // Save on each transaction
 			return 0; // Return 0 as it succeeded
 		}
 		// From here on handle problems with the transaction, telling players what went wrong.
@@ -202,35 +224,65 @@ public class Transaction {
 		}
 		else {
 			if (!canBuy && !canSell) {
-				if (buyer.isPlayer()) {
-					buyer.getUser().sendMessage("You do not have enough " + Money.getMoneyName());
+				if (stack.getItemID() != 0) {
+					if (buyer.isPlayer()) {
+						buyer.getUser().sendMessage("You do not have enough " + Money.getMoneyName());
+					}
+					if (seller.isPlayer()) {
+						seller.getUser().sendMessage(
+								"You do not have enough " + trans.getStack().getShopItem().getName() + " ("
+										+ seller.numberOfItems(stack.getShopItem()) + "/" + stack.getAmountAvail() + ")");
+					}
 				}
-				if (seller.isPlayer()) {
-					seller.getUser().sendMessage(
-							"You do not have enough " + trans.getStack().getShopItem().getName() + " ("
-									+ seller.numberOfItems(stack.getShopItem()) + "/" + stack.getAmountAvail() + ")");
+				else {
+					if (buyer.isPlayer()) {
+						buyer.getUser().sendMessage("You are not allowed to purchase this item.");
+					}
+					if (seller.isPlayer()) {
+						seller.getUser().sendMessage("You are not allowed to sell this item.");
+					}
 				}
 				return -3; // False because it failed
 			}
 			else if (!canBuy) {
-				if (buyer.isPlayer()) {
-					buyer.getUser().sendMessage("You do not have enough " + Money.getMoneyName());
+				if (stack.getItemID() != 0) {
+					if (buyer.isPlayer()) {
+						buyer.getUser().sendMessage("You do not have enough " + Money.getMoneyName());
+					}
+					if (seller.isPlayer()) {
+						seller.getUser().sendMessage(buyer.getName() + " does not have enough " + Money.getMoneyName());
+					}
 				}
-				if (seller.isPlayer()) {
-					seller.getUser().sendMessage(buyer.getName() + " does not have enough " + Money.getMoneyName());
+				else {
+					if (buyer.isPlayer()) {
+						buyer.getUser().sendMessage("You are not allowed to purchase this item.");
+					}
+					if (seller.isPlayer()) {
+						seller.getUser().sendMessage("You are not allowed to sell this item.");
+					}
 				}
 				return -1;
 			}
 			else if (!canSell) {
-				if (seller.isPlayer()) {
-					seller.getUser().sendMessage(
-							"You do not have enough " + trans.getStack().getShopItem().getName() + " ("
-									+ seller.numberOfItems(stack.getShopItem()) + "/" + stack.getAmountAvail() + ")");
+				if (stack.getItemID() != 0) {
+					if (seller.isPlayer()) {
+						seller.getUser().sendMessage(
+								"You do not have enough " + trans.getStack().getShopItem().getName() + " ("
+										+ seller.numberOfItems(stack.getShopItem()) + "/" + stack.getAmountAvail() + ")");
+					}
+					if (buyer.isPlayer()) {
+						buyer.getUser().getPlayer().sendMessage(
+								seller.getName() + " does not have enough " + stack.getShopItem().getName() + " ("
+										+ seller.numberOfItems(stack.getShopItem()) + "/" + stack.getAmountAvail() + ")");
+					}
 				}
-				if (buyer.isPlayer()) {
-					buyer.getUser().getPlayer().sendMessage(
-							seller.getName() + " does not have enough " + stack.getShopItem().getName() + " ("
-									+ seller.numberOfItems(stack.getShopItem()) + "/" + stack.getAmountAvail() + ")");
+				else {
+					if (buyer.isPlayer()) {
+						buyer.getUser().sendMessage("You are not allowed to purchase this item.");
+					}
+					if (seller.isPlayer()) {
+						seller.getUser().sendMessage("You are not allowed to sell this item.");
+					}
 				}
 				return -2;
 			}

@@ -47,6 +47,10 @@ public class User extends EconEntity {
 			int temp = Integer.valueOf(split[1]);
 			money.setAmount(temp);
 		}
+		else if (split.length == 1) {
+			// Came from a new user, only the name
+			name = saveString;
+		}
 		setUser(this);
 	}
 	
