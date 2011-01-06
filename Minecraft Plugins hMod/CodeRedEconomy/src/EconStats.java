@@ -10,22 +10,26 @@
  * You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>
  */
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class EconStats {
 	private static int						numTrans	= 0;
 	private static ArrayList<ShopItemStack>	itemsBought	= new ArrayList<ShopItemStack>();
 	private static ArrayList<ShopItemStack>	itemsSold	= new ArrayList<ShopItemStack>();
+	private static ArrayList<Transaction>	playersPaid	= new ArrayList<Transaction>();
 	
 	public static void bought(ShopItemStack stack) {
 		numTrans++;
 		// Find if it is in the bought array
 		boolean found = false;
 		for (ShopItemStack iter : itemsBought) {
-			if (iter.getItemID() == stack.getItemID()) {
-				found = true;
-				iter.addAmountAvail(stack.getAmountAvail());
-				break;
+			if (stack != null) {
+				if (iter.getItemID() == stack.getItemID()) {
+					found = true;
+					iter.addAmountAvail(stack.getAmountAvail());
+					break;
+				}
 			}
 		}
 		if (!found) {
@@ -45,6 +49,21 @@ public class EconStats {
 		}
 		if (!found) {
 			itemsSold.add(stack);
+		}
+	}
+	
+	public static void paid(Transaction trans) {
+		boolean found = false;
+		for (Transaction iter : playersPaid) {
+			if (iter.getBuyer().getName().equalsIgnoreCase(trans.getBuyer().getName())
+					&& iter.getSeller().getName().equalsIgnoreCase(trans.getSeller().getName())) {
+				// Same two people, add to the amount
+				iter.getAmount().addAmount(trans.getAmount().getAmount());
+				found = true;
+			}
+		}
+		if (!found) {
+			playersPaid.add(trans);
 		}
 	}
 	
@@ -72,7 +91,38 @@ public class EconStats {
 		for (String si : data) {
 			// Safety check
 			if (si.length() >= 1) {
-				if (si.charAt(0) == '%') {
+				if (si.charAt(0) == '&') {
+					// Player data
+					String colonSplit[] = si.split(":");
+					if (colonSplit.length >= 2) {
+						String buyerName = "";
+						for (String iter : colonSplit) {
+							if (DataManager.getDebug()) {
+								System.out.println("Loading stats. Player string is: " + iter);
+							}
+							if (iter.length() >= 1) {
+								if (iter.charAt(0) == '&') {
+									buyerName = iter.replace("&", "");
+									if (DataManager.getDebug()) {
+										System.out.println("Buyer name is: " + buyerName);
+									}
+								}
+								else {
+									
+									// Seller data
+									String spaceSplit[] = iter.split(" ");
+									if (DataManager.getDebug()) {
+										System.out.println("Loading stats. Adding new transaction: " + buyerName + " " + spaceSplit[0]);
+									}
+									playersPaid.add(new Transaction(DataManager.getUser(spaceSplit[0]), DataManager.getUser(buyerName),
+											new Money(Integer.valueOf(spaceSplit[1]))));
+								}
+							}
+						}
+					}
+				}
+				else if (si.charAt(0) == '%') {
+					// Num of transactions
 					si = si.replace("%", "");
 					numTrans = Integer.valueOf(si);
 				}
@@ -105,37 +155,53 @@ public class EconStats {
 		// ItemName Bought: Amount bought Sold: Amount Sold TotalSellPrice: totalSell TotalBuyPrice: totalBuy
 		ArrayList<String> results = new ArrayList<String>();
 		String temp = "";
-		int netGained = 0;
+		int totGained = 0;
+		int totSpent = 0;
+		
+		// Count totals
+		for (ShopItem iter : DataManager.getItemList()) {
+			for (ShopItemStack iter2 : itemsBought) {
+				if (iter2.getItemID() == iter.getItemID()) {
+					totSpent += iter2.getTotalBuyPrice().getAmount();
+				}
+			}
+			for (ShopItemStack iter3 : itemsSold) {
+				if (iter3.getItemID() == iter.getItemID()) {
+					totGained += iter3.getTotalSellPrice().getAmount();
+				}
+			}
+		}
 		
 		for (ShopItem iter : DataManager.getItemList()) {
 			String itemName = iter.getName();
 			int amountBought = 0;
 			int amountSold = 0;
-			int sellPrice = 0;
-			int buyPrice = 0;
+			double sellPrice = 0;
+			double buyPrice = 0;
 			for (ShopItemStack iter2 : itemsBought) {
 				if (iter2.getItemID() == iter.getItemID()) {
 					amountBought = iter2.getAmountAvail();
 					buyPrice = iter2.getTotalBuyPrice().getAmount();
-					netGained -= buyPrice;
 				}
 			}
 			for (ShopItemStack iter3 : itemsSold) {
 				if (iter3.getItemID() == iter.getItemID()) {
 					amountSold = iter3.getAmountAvail();
 					sellPrice = iter3.getTotalSellPrice().getAmount();
-					netGained += sellPrice;
 				}
 			}
+			DecimalFormat two = new DecimalFormat("#.##");
+			double spentP = (buyPrice / totSpent) * 100;
+			double gainedP = (sellPrice / totGained) * 100;
 			String part1 = "#" + itemName;
 			String part2mod = "";
 			String part2 = "Purchased: " + amountBought;
 			String part3mod = "";
 			String part3 = "Sold: " + amountSold;
 			String part4mod = "";
-			String part4 = "Total Money Spent: " + buyPrice;
+			String part4 = "Spent: " + (int) buyPrice + " (" + two.format(spentP) + "%)";
 			String part5mod = "";
-			String part5 = "Total Money Gained: " + sellPrice;
+			String part5 = "Gained: " + (int) sellPrice + " (" + two.format(gainedP) + "%)";
 			
 			if (part1.length() < 8) {
 				part2mod = "\t\t\t";
@@ -167,10 +233,10 @@ public class EconStats {
 				part4mod = "\t";
 			}
 			
-			if (part4.length() < 24) {
+			if (part4.length() < 16) {
 				part5mod = "\t\t\t";
 			}
-			else if (part4.length() < 32) {
+			else if (part4.length() < 24) {
 				part5mod = "\t\t";
 			}
 			else {
@@ -183,9 +249,38 @@ public class EconStats {
 		
 		// Give the Summary
 		// Total Transactions: tTot Total Undos: uTot NetMoneyGained: netGain
-		temp = "#Total Transactions (Does not include undone): " + numTrans + "\t\tNet Money Gained: " + netGained;
+		results.add(0, ""); // Empty line after summary
+		temp = "#Total Money Gained: " + totGained;
 		results.add(0, temp);
-		results.add(1, ""); // Empty line after summary
+		temp = "#Total Money Spent: " + totSpent;
+		results.add(0, temp);
+		temp = "#Total Transactions (Does not include undone or /pay): " + numTrans + "\t\tNet Money Gained: " + (totGained - totSpent);
+		results.add(0, temp);
+		
+		ArrayList<Transaction> skipT = new ArrayList<Transaction>();
+		results.add("");
+		results.add("#Player to Player payments:");
+		
+		// Player to player payment, lists only the people that paid somebody
+		for (Transaction iter : playersPaid) {
+			String payer = iter.getBuyer().getName();
+			boolean skip = false;
+			for (Transaction skipIter : skipT) {
+				if (payer.equalsIgnoreCase(skipIter.getBuyer().getName())) {
+					skip = true;
+				}
+			}
+			if (!skip) {
+				results.add("#\t" + payer + " has paid:");
+				for (Transaction iter2 : playersPaid) {
+					
+					if (iter2.getBuyer().getName().equalsIgnoreCase(payer)) {
+						results.add("#\t\t" + iter2.getSeller().getName() + " " + iter2.getAmount());
+						skipT.add(iter2);
+					}
+				}
+			}
+		}
 		
 		// Add the parsable stuff
 		// blockID : amount bought : amount sold
@@ -194,7 +289,7 @@ public class EconStats {
 		// Empty lines
 		results.add("");
 		results.add("");
-		results.add("Used for loading the stats again. Delete and then reload plugin if you want to start from scratch.");
+		results.add("#Used for loading the stats again. Delete and then reload plugin if you want to start from scratch.");
 		
 		results.add("%" + numTrans);
 		for (ShopItem iter : DataManager.getItemList()) {
@@ -213,6 +308,31 @@ public class EconStats {
 			}
 			temp = itemID + ":" + amountBought + ":" + amountSold;
 			results.add(temp);
+		}
+		
+		// player stuff
+		// &buyer:seller1 200:seller2 300:seller3 2
+		// &buyer2:seller4 100
+		skipT = new ArrayList<Transaction>();
+		for (Transaction iter : playersPaid) {
+			String payer = iter.getBuyer().getName();
+			boolean skip = false;
+			for (Transaction skipIter : skipT) {
+				if (iter.getBuyer().getName().equalsIgnoreCase(skipIter.getBuyer().getName())) {
+					skip = true;
+				}
+			}
+			if (!skip) {
+				temp = "";
+				temp += "&" + iter.getBuyer().getName();
+				for (Transaction iter2 : playersPaid) {
+					if (iter2.getBuyer().getName().equalsIgnoreCase(payer)) {
+						temp += ":" + iter2.getSeller().getName() + " " + iter2.getAmount().getAmount();
+						skipT.add(iter2);
+					}
+				}
+				results.add(temp);
+			}
 		}
 		
 		return results;

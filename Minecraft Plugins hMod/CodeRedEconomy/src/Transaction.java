@@ -52,6 +52,8 @@ public class Transaction {
 	}
 	
 	/**
+	 * For player to player payment the buyer pays the seller
+	 * 
 	 * @param trans
 	 * @param flag
 	 *            Undo trans or not. Changes the messages shown to the players
@@ -66,7 +68,7 @@ public class Transaction {
 		buyer.autoDesposit(etc.getServer().getTime());
 		seller.autoDesposit(etc.getServer().getTime());
 		
-		if (!seller.isPlayer) {
+		if (!seller.hasUser) {
 			// Check for restock
 			DataManager.getShop(seller).restock();
 		}
@@ -171,15 +173,14 @@ public class Transaction {
 			}
 			else {
 				if (!undo) {
+					EconStats.paid(trans);
 					// Send messages to the seller and buyer telling the success
 					if (buyer.isPlayer()) {
-						EconStats.bought(stack);
 						
 						buyer.getUser().sendMessage("You have paid " + seller.getName() + " " + trans.getAmount().toString());
 						buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
 					}
 					if (seller.isPlayer()) {
-						EconStats.sold(stack);
 						
 						seller.getUser().sendMessage(buyer.getName() + " has paid you " + trans.getAmount().toString());
 						seller.getUser().sendMessage("Your new balance is: " + seller.getMoney().toString());

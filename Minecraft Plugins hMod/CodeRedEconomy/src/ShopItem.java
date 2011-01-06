@@ -95,6 +95,15 @@ public class ShopItem {
 		item = new Item(itemID, 1);
 	}
 	
+	public ShopItem(String string, int amount, int amount2) {
+		this.itemID = 0;
+		itemName = string;
+		this.buyPrice = amount;
+		this.sellPrice = amount2;
+		this.maxAvail = 1;
+		this.item = null;
+	}
+	
 	public String getName() {
 		return itemName;
 	}

@@ -141,6 +141,9 @@ public class DataManager {
 	public static User getUser(String name) {
 		for (User iter : users) {
 			if (iter.getName().equalsIgnoreCase(name)) {
+				if (debug) {
+					System.out.println("Was looking for: " + name + " and found " + iter.getName());
+				}
 				return iter;
 			}
 		}
@@ -541,6 +544,9 @@ public class DataManager {
 	}
 	
 	public static void addShop(Shop shop) {
+		if (debug) {
+			System.out.println("Adding shop under the name of: " + shop.getName());
+		}
 		shops.add(shop);
 		write("shops");
 	}

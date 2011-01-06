@@ -20,9 +20,18 @@ public class CodeRedEconomy extends Plugin {
 	private static DataManager		data	= new DataManager();
 	
 	public void enable() {
+		etc.getInstance().addCommand("/pay", "- Pays the given player. /pay [name] [amount]");
+		etc.getInstance().addCommand("/buy", "- Buys the given item. /buy [itemName] [amount]");
+		etc.getInstance().addCommand("/sell", "- Sells the given item. /sell [itemName] [amount]");
+		etc.getInstance().addCommand("/prices", "- Displays the price list for the current shop. /prices [page]");
+		etc.getInstance().addCommand("/undo", "- Undoes the last item transaction. /undo");
 	}
 	
 	public void disable() {
+		etc.getInstance().removeCommand("/pay");
+		etc.getInstance().removeCommand("/buy");
+		etc.getInstance().removeCommand("/sell");
+		etc.getInstance().removeCommand("/undo");
 	}
 	
 	public void initialize() {
@@ -78,14 +87,21 @@ public class CodeRedEconomy extends Plugin {
 				if (split[0].equalsIgnoreCase("/pay")) {
 					User user = DataManager.getUser(player);
 					if (split.length >= 3) {
-						User target = DataManager.getUser(split[1].trim());
-						try {
-							// The way it is formatted the person receiving money is the seller, and the person loosing money is the buyer,
-							// so this is formatted target, user so the money goes from the user to the target
-							Transaction.process(new Transaction(target, user, new Money(Integer.valueOf(split[2]))));
+						String targetName = split[1].trim();
+						if (etc.getServer().getPlayer(targetName) != null) {
+							User target = DataManager.getUser(targetName);
+							try {
+								// The way it is formatted the person receiving money is the seller, and the person loosing money is the
+								// buyer,
+								// so this is formatted target, user so the money goes from the user to the target
+								Transaction.process(new Transaction(target, user, new Money(Integer.valueOf(split[2]))));
+							}
+							catch (NumberFormatException e) {
+								user.sendMessage("The correct use is \"/pay [name] [amount]\"");
+							}
 						}
-						catch (NumberFormatException e) {
-							user.sendMessage("The correct use is \"/pay [name] [amount]\"");
+						else {
+							user.sendMessage("The player you wish to pay must be online.");
 						}
 					}
 					else {

@@ -52,16 +52,25 @@ public class User extends EconEntity {
 	 * @param saveString
 	 */
 	public User(String saveString) {
+		super();
 		// Split it and grab the data
 		String split[] = saveString.split(":");
 		if (split.length >= 2) {
 			name = split[0];
 			int temp = Integer.valueOf(split[1]);
 			money.setAmount(temp);
+			if (split.length >= 3) {
+				lastAutoDeposit = Integer.valueOf(split[2]);
+			}
+			setPlayer(etc.getServer().getPlayer(name));
 		}
 		else if (split.length == 1) {
+			if (DataManager.getDebug()) {
+				System.out.println("Creating a new user with the name of " + name);
+			}
 			// Came from a new user, only the name
 			name = saveString;
+			setPlayer(etc.getServer().getPlayer(name));
 		}
 		setUser(this);
 	}
@@ -78,14 +87,16 @@ public class User extends EconEntity {
 	 * @param player
 	 */
 	public void setPlayer(Player player) {
-		this.player = player;
-		if (player.getGroups().length >= 1) {
-			groupName = player.getGroups()[0];
+		if (player != null) {
+			this.player = player;
+			if (player.getGroups().length >= 1) {
+				groupName = player.getGroups()[0];
+			}
+			else
+				groupName = "nogroup";
+			
+			isPlayer = true;
 		}
-		else
-			groupName = "nogroup";
-		
-		isPlayer = true;
 	}
 	
 	/**
@@ -182,6 +193,6 @@ public class User extends EconEntity {
 	 */
 	@Override
 	public String toString() {
-		return name + ":" + money.getAmount();
+		return name + ":" + money.getAmount() + ":" + lastAutoDeposit;
 	}
 }

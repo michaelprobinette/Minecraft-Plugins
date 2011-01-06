@@ -17,9 +17,10 @@ public abstract class EconEntity {
 	protected ArrayList<ShopItemStack>	availableItems	= new ArrayList<ShopItemStack>();
 	protected String					name			= "";
 	protected boolean					isPlayer		= false;
+	protected boolean					hasUser			= false;
 	protected Transaction				lastTrans		= null;
 	private User						user			= null;
-	private long						lastAutoDeposit	= 0;
+	protected long						lastAutoDeposit	= 0;
 	
 	public EconEntity(Money money) {
 		this.money = money;
@@ -63,6 +64,11 @@ public abstract class EconEntity {
 	
 	public void setUser(User user) {
 		this.user = user;
+		hasUser = true;
+	}
+	
+	public boolean hasUser() {
+		return hasUser;
 	}
 	
 	public User getUser() {
