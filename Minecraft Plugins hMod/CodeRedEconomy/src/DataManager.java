@@ -17,50 +17,65 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * @author Vandolis Used to load all of the data needed to run the plugin.
  */
 public class DataManager {
 	// General stuff
-	private static String				LOC					= "Econ/";										// Location of all of the files
-	private static PropertiesFile		props				= new PropertiesFile(LOC + "data.properties");	// Properties file
-	private static boolean				debug				= false;
-	private static String				pluginMessage		= "[§cCodeRedEcon§f] ";
-	private static int					infValue			= -1;
+	private static String					LOC					= "Econ/";
+	private static PropertiesFile			props				= new PropertiesFile(LOC + "data.properties");	// Properties file
+	private static boolean					debug				= false;
+	private static String					pluginMessage		= "[§cCodeRedEcon§f] ";
+	private static int						infValue			= -1;
+	
+	// Regex stuff
+	private static final String				PLAYER_REGEX		= ":";
+	private static final String				PLAYER2_REGEX		= " ";
+	private static final String				SHOP_REGEX			= ":";
+	private static final String				SHOP2_REGEX			= " ";
+	private static final String				STATS_REGEX			= ":";
+	private static final String				STATS2_REGEX		= " ";
+	private static final String				ITEM_REGEX			= ":";
 	
 	// Money stuff
-	private static String				moneyName			= "Strypes";
+	private static String					moneyName			= "Strypes";
 	
 	// Shop stuff
 	// Holds all of the shops, might use to make different shops based on location or something, might use in the future. Or right now.
-	static ArrayList<Shop>				shops				= new ArrayList<Shop>();
-	private static long					restockTime			= 60000;
-	private static final File			file_shop			= new File(LOC + "shops.txt");
+	static ArrayList<Shop>					shops				= new ArrayList<Shop>();
+	private static long						restockTime			= 60000;
+	private static final File				file_shop			= new File(LOC + "shops.txt");
 	
 	// Privilege stuff
-	private static final File			file_privGroups		= new File(LOC + "privGroups.txt");
-	private static ArrayList<ShopGroup>	privGroups			= new ArrayList<ShopGroup>();
+	private static final File				file_privGroups		= new File(LOC + "privGroups.txt");
+	private static ArrayList<ShopGroup>		privGroups			= new ArrayList<ShopGroup>();
 	
 	// Items stuff
-	private static final File			file_itemlist		= new File(LOC + "items.txt");
-	private static ArrayList<ShopItem>	itemList			= new ArrayList<ShopItem>();
+	private static final File				file_itemlist		= new File(LOC + "items.txt");
+	private static ArrayList<ShopItem>		itemList			= new ArrayList<ShopItem>();
 	
 	// Player data... stuff
-	private static final File			file_playerData		= new File(LOC + "playerData.txt");
-	private static ArrayList<User>		users				= new ArrayList<User>();
-	private static long					autoDepositTime		= 60000;
-	private static int					autoDepositAmount	= 50;
+	private static final File				file_playerData		= new File(LOC + "playerData.txt");
+	private static ArrayList<User>			users				= new ArrayList<User>();
+	private static long						autoDepositTime		= 60000;
+	private static int						autoDepositAmount	= 50;
 	
 	// Stats stuff
-	private static boolean				useStats			= true;
-	private static final File			file_stats			= new File(LOC + "stats.txt");
+	private static boolean					useStats			= true;
+	private static final File				file_stats			= new File(LOC + "stats.txt");
+	
+	// Bad word
+	private static HashMap<String, Integer>	badWords			= new HashMap<String, Integer>();
+	private static boolean					blockBadWords		= false;
+	private static final File				file_badWords		= new File(LOC + "badWords.txt");
 	
 	public DataManager() {
 		load();
 	}
 	
-	private void readProps() {
+	private static void readProps() {
 		if (props.containsKey("moneyname")) {
 			moneyName = props.getString("moneyname");
 		}
@@ -123,31 +138,45 @@ public class DataManager {
 		else {
 			props.setInt("autodepositamount", autoDepositAmount);
 		}
+		
+		if (props.containsKey("blockbadwords")) {
+			useStats = props.getBoolean("blockbadwords");
+		}
+		else {
+			props.setBoolean("blockbadwords", blockBadWords);
+		}
 	}
 	
 	public static User getUser(Player player) {
 		for (User iter : users) {
 			if (iter.getName().equalsIgnoreCase(player.getName())) {
 				iter.setPlayer(player);
+				iter.autoDesposit(etc.getServer().getTime());
 				return iter;
 			}
 		}
 		User temp = new User(player); // Not found, make a new user
+		temp.autoDesposit(etc.getServer().getTime()); // Starting money
 		addUser(temp); // Add user to the users list
 		write("player");
 		return temp;
 	}
 	
 	public static User getUser(String name) {
+		if (name.contains(":")) {
+			name = name.replace(":", "");
+		}
 		for (User iter : users) {
 			if (iter.getName().equalsIgnoreCase(name)) {
 				if (debug) {
 					System.out.println("Was looking for: " + name + " and found " + iter.getName());
 				}
+				iter.autoDesposit(etc.getServer().getTime());
 				return iter;
 			}
 		}
 		User temp = new User(name); // Not found, make a new user
+		temp.autoDesposit(etc.getServer().getTime()); // Starting money
 		addUser(temp); // Add user to the users list
 		return temp;
 	}
@@ -159,15 +188,17 @@ public class DataManager {
 	public static User getUser(EconEntity ent) {
 		for (User iter : users) {
 			if (iter.getName().equalsIgnoreCase(ent.getName())) {
+				iter.autoDesposit(etc.getServer().getTime());
 				return iter;
 			}
 		}
 		User temp = new User(ent.getName()); // Not found, make a new user
+		temp.autoDesposit(etc.getServer().getTime()); // Starting money
 		addUser(temp); // Add user to the users list
 		return temp;
 	}
 	
-	private void readUserFile() {
+	private static void readUserFile() {
 		BufferedReader reader;
 		String raw = "";
 		
@@ -203,21 +234,18 @@ public class DataManager {
 	/**
 	 * Item file formatting is "itemID:buyPrice:sellPrice:maxAvail"
 	 */
-	private void readItemFile() {
+	private static void readItemFile() {
 		BufferedReader reader;
 		String raw = "";
 		try {
 			reader = new BufferedReader(new FileReader(file_itemlist));
 			
 			while ((raw = reader.readLine()) != null) {
-				
-				String split[] = raw.split(":");
-				ShopItem temp = new ShopItem(Integer.valueOf(split[0]), Integer.valueOf(split[1]), Integer.valueOf(split[2]), Integer
-						.valueOf(split[3]));
+				ShopItem temp = new ShopItem(raw);
 				itemList.add(temp);
 				if (debug) {
 					System.out.println("Raw item data read: " + raw);
-					System.out.println("Item data: " + temp.getName() + " price: " + temp.getBuyPrice());
+					System.out.println("Item data: " + temp.toString());
 				}
 			}
 			reader.close();
@@ -252,10 +280,12 @@ public class DataManager {
 	}
 	
 	public static void addUser(User user) {
+		user.autoDesposit(etc.getServer().getTime());
 		// Check if user is already in there
 		boolean found = false;
 		for (User iter : users) {
 			if (iter.getName().equalsIgnoreCase(user.getName())) {
+				iter = user;
 				found = true;
 			}
 		}
@@ -265,6 +295,15 @@ public class DataManager {
 		
 		// Write to file
 		write("player");
+	}
+	
+	public static boolean validID(int itemID) {
+		for (ShopItem iter : itemList) {
+			if (iter.getItemID() == itemID) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private static void write(String fileName) {
@@ -326,7 +365,33 @@ public class DataManager {
 		}
 	}
 	
-	private void readPrivFile() {
+	private static void readBadWords() {
+		BufferedReader reader;
+		String raw = "";
+		try {
+			reader = new BufferedReader(new FileReader(file_badWords));
+			while ((raw = reader.readLine()) != null) {
+				String split[] = raw.split("=");
+				String word = split[0].trim();
+				int cost = Integer.valueOf(split[1].trim());
+				badWords.put(word, cost);
+			}
+			reader.close();
+		}
+		catch (IOException e) {
+			try {
+				// File not found, create empty file
+				BufferedWriter writer = new BufferedWriter(new FileWriter(file_badWords));
+				writer.newLine();
+				writer.close();
+			}
+			catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+	}
+	
+	private static void readPrivFile() {
 		BufferedReader reader;
 		String raw = "";
 		try {
@@ -390,7 +455,7 @@ public class DataManager {
 		write("shops");
 	}
 	
-	public void load() {
+	public static void load() {
 		// Read data from properties file
 		readProps();
 		
@@ -408,9 +473,12 @@ public class DataManager {
 		
 		// Read from the shop file
 		readShopFile();
+		
+		// Read bad words file
+		readBadWords();
 	}
 	
-	private void readShopFile() {
+	private static void readShopFile() {
 		BufferedReader reader;
 		String raw = "";
 		try {
@@ -433,7 +501,7 @@ public class DataManager {
 		}
 	}
 	
-	private void readStatsFile() {
+	private static void readStatsFile() {
 		BufferedReader reader;
 		String raw = "";
 		try {
@@ -573,5 +641,59 @@ public class DataManager {
 	
 	public static int getAutoDepositAmount() {
 		return autoDepositAmount;
+	}
+	
+	public static ShopItem getItem(int itemID) {
+		for (ShopItem iter : itemList) {
+			if (iter.getItemID() == itemID) {
+				return iter;
+			}
+		}
+		return null;
+	}
+	
+	public static String getBadWord(String message) {
+		for (String iter : badWords.keySet()) {
+			if (message.contains(iter)) {
+				return iter;
+			}
+		}
+		return "";
+	}
+	
+	public static HashMap<String, Integer> getBadWords() {
+		return badWords;
+	}
+	
+	public static boolean blockBadWords() {
+		return blockBadWords;
+	}
+	
+	public static String getPlayerRegex() {
+		return PLAYER_REGEX;
+	}
+	
+	public static String getPlayer2Regex() {
+		return PLAYER2_REGEX;
+	}
+	
+	public static String getShopRegex() {
+		return SHOP_REGEX;
+	}
+	
+	public static String getShop2Regex() {
+		return SHOP2_REGEX;
+	}
+	
+	public static String getStatsRegex() {
+		return STATS_REGEX;
+	}
+	
+	public static String getStats2Regex() {
+		return STATS2_REGEX;
+	}
+	
+	public static String getItemRegex() {
+		return ITEM_REGEX;
 	}
 }

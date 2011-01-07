@@ -13,8 +13,9 @@
 import java.util.ArrayList;
 
 public class User extends EconEntity {
-	private Player	player		= null;
-	private String	groupName	= "";
+	private final String	regex		= DataManager.getPlayerRegex();
+	private Player			player		= null;
+	private String			groupName	= "";
 	
 	/**
 	 * New player
@@ -54,7 +55,7 @@ public class User extends EconEntity {
 	public User(String saveString) {
 		super();
 		// Split it and grab the data
-		String split[] = saveString.split(":");
+		String split[] = saveString.split(regex);
 		if (split.length >= 2) {
 			name = split[0];
 			int temp = Integer.valueOf(split[1]);
@@ -125,7 +126,9 @@ public class User extends EconEntity {
 	 */
 	public void undoLastTrans() {
 		if (lastTrans != null) {
-			lastTrans = Transaction.undoTransaction(lastTrans);
+			if (Transaction.undoTransaction(lastTrans)) {
+				lastTrans = null;
+			}
 		}
 		else {
 			sendMessage("There is no last transaction to undo.");
@@ -150,28 +153,13 @@ public class User extends EconEntity {
 						}
 					}
 					// Add it to the array
-					if (!found) {
+					if (!found && DataManager.validID(iter.getItemId())) {
 						availableItems.add(new ShopItemStack(new ShopItem(iter.getItemId()), iter.getAmount()));
 					}
 				}
 			}
 		}
 	}
-	
-	/**
-	 * Takes the items from the available items and adds it to the users inv
-	 */
-	// public void transferFromArray() {
-	//		
-	// for (ShopItemStack iter : availableItems) {
-	// System.out.println("Amount adding is: " + iter.getAmountAvail());
-	// if (iter.getAmountAvail() != 0) {
-	// player.giveItem(iter.getItemID(), iter.getAmountAvail());
-	// }
-	// // player.giveItem(new Item(iter.getItemID(), iter.getAmountAvail()));
-	// // player.giveItem(iter.getItemID(), iter.getAmountAvail());
-	// }
-	// }
 	
 	/**
 	 * 
@@ -193,6 +181,7 @@ public class User extends EconEntity {
 	 */
 	@Override
 	public String toString() {
-		return name + ":" + money.getAmount() + ":" + lastAutoDeposit;
+		// name:money:lastdeposit
+		return name + regex + money.getAmount() + regex + lastAutoDeposit;
 	}
 }

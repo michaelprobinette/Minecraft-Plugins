@@ -47,6 +47,9 @@ public class ShopItem {
 			"Gold Music Disk", "Green Music Disk"
 													};
 	private final Item				item;
+	private final int				maxSell;
+	private final int				breakValue;
+	private final int				maxBuy;
 	
 	public ShopItem() {
 		itemID = 0;
@@ -56,25 +59,42 @@ public class ShopItem {
 		sellPrice = 0;
 		maxAvail = 0;
 		item = new Item();
+		maxSell = -1;
+		breakValue = 0;
+		maxBuy = -1;
 	}
 	
 	public ShopItem(int itemID) {
 		this.itemID = itemID;
 		itemName = getName(itemID);
 		// privLevel = 0;
-		buyPrice = DataManager.getBuyPrice(itemID);
-		sellPrice = DataManager.getSellPrice(itemID);
-		maxAvail = DataManager.getMaxAvail(itemID);
+		ShopItem temp = DataManager.getItem(itemID);
+		buyPrice = temp.getBuyPrice();
+		sellPrice = temp.getSellPrice();
+		maxAvail = temp.getMaxAvail();
 		item = new Item(itemID, 1);
+		maxSell = temp.getMaxSell();
+		breakValue = temp.getBreakValue();
+		maxBuy = temp.getMaxBuy();
 	}
 	
-	public ShopItem(int itemID, int buyPrice) {
-		this.itemID = itemID;
-		itemName = getName(itemID);
-		this.buyPrice = buyPrice;
-		sellPrice = DataManager.getSellPrice(itemID);
-		maxAvail = DataManager.getMaxAvail(itemID);
+	public ShopItem(String loadData) {
+		String split[] = loadData.split(":");
+		
+		itemID = Integer.valueOf(split[0]);
+		buyPrice = Integer.valueOf(split[1]);
+		sellPrice = Integer.valueOf(split[2]);
+		maxAvail = Integer.valueOf(split[3]);
+		maxSell = Integer.valueOf(split[4]);
+		maxBuy = Integer.valueOf(split[5]);
+		breakValue = Integer.valueOf(split[6]);
 		item = new Item(itemID, 1);
+		itemName = getName(itemID);
+	}
+	
+	@Override
+	public String toString() {
+		return itemID + ":" + buyPrice + ":" + sellPrice + ":" + maxAvail + ":" + maxSell + ":" + maxBuy + ":" + breakValue;
 	}
 	
 	public ShopItem(int itemID, int buyPrice, int sellPrice) {
@@ -82,26 +102,32 @@ public class ShopItem {
 		itemName = getName(itemID);
 		this.buyPrice = buyPrice;
 		this.sellPrice = sellPrice;
-		maxAvail = DataManager.getMaxAvail(itemID);
+		ShopItem temp = DataManager.getItem(itemID);
+		maxAvail = temp.getMaxAvail();
+		maxSell = temp.getMaxSell();
+		breakValue = temp.getBreakValue();
 		item = new Item(itemID, 1);
+		maxBuy = temp.getMaxBuy();
 	}
 	
-	public ShopItem(int itemID, int buyPrice, int sellPrice, int maxAvail) {
+	public ShopItem(int itemID, int buyPrice, int sellPrice, int maxAvail, int maxSell, int maxBuy, int breakValue) {
 		this.itemID = itemID;
 		itemName = getName(itemID);
 		this.buyPrice = buyPrice;
 		this.sellPrice = sellPrice;
 		this.maxAvail = maxAvail;
+		this.maxSell = maxSell;
+		this.breakValue = breakValue;
 		item = new Item(itemID, 1);
+		this.maxBuy = maxBuy;
 	}
 	
-	public ShopItem(String string, int amount, int amount2) {
-		this.itemID = 0;
-		itemName = string;
-		this.buyPrice = amount;
-		this.sellPrice = amount2;
-		this.maxAvail = 1;
-		this.item = null;
+	public int getBreakValue() {
+		return breakValue;
+	}
+	
+	public int getMaxSell() {
+		return maxSell;
 	}
 	
 	public String getName() {
@@ -132,6 +158,10 @@ public class ShopItem {
 		return sellPrice;
 	}
 	
+	public int getMaxBuy() {
+		return maxBuy;
+	}
+	
 	private String getName(int itemID) {
 		if (itemID < 255) {
 			return blockNames[itemID];
@@ -146,8 +176,7 @@ public class ShopItem {
 		return "Air";
 	}
 	
-	@Override
-	public String toString() {
-		return itemID + ":" + buyPrice + ":" + sellPrice + ":" + maxAvail;
+	public int getBuyMax() {
+		return maxBuy;
 	}
 }

@@ -18,8 +18,13 @@ public class EconStats {
 	private static ArrayList<ShopItemStack>	itemsBought	= new ArrayList<ShopItemStack>();
 	private static ArrayList<ShopItemStack>	itemsSold	= new ArrayList<ShopItemStack>();
 	private static ArrayList<Transaction>	playersPaid	= new ArrayList<Transaction>();
+	private static final String				regex		= DataManager.getStatsRegex();
+	private static final String				regex2		= DataManager.getStats2Regex();
 	
 	public static void bought(ShopItemStack stack) {
+		if (DataManager.getDebug()) {
+			System.out.println("Stats is processing a bought transaction");
+		}
 		numTrans++;
 		// Find if it is in the bought array
 		boolean found = false;
@@ -38,6 +43,9 @@ public class EconStats {
 	}
 	
 	public static void sold(ShopItemStack stack) {
+		if (DataManager.getDebug()) {
+			System.out.println("Stats is processing a sold transaction");
+		}
 		numTrans++;
 		boolean found = false;
 		for (ShopItemStack iter : itemsSold) {
@@ -53,6 +61,9 @@ public class EconStats {
 	}
 	
 	public static void paid(Transaction trans) {
+		if (DataManager.getDebug()) {
+			System.out.println("Stats is processing a /pay transaction");
+		}
 		boolean found = false;
 		for (Transaction iter : playersPaid) {
 			if (iter.getBuyer().getName().equalsIgnoreCase(trans.getBuyer().getName())
@@ -93,7 +104,7 @@ public class EconStats {
 			if (si.length() >= 1) {
 				if (si.charAt(0) == '&') {
 					// Player data
-					String colonSplit[] = si.split(":");
+					String colonSplit[] = si.split(regex);
 					if (colonSplit.length >= 2) {
 						String buyerName = "";
 						for (String iter : colonSplit) {
@@ -110,12 +121,24 @@ public class EconStats {
 								else {
 									
 									// Seller data
-									String spaceSplit[] = iter.split(" ");
-									if (DataManager.getDebug()) {
-										System.out.println("Loading stats. Adding new transaction: " + buyerName + " " + spaceSplit[0]);
+									String spaceSplit[] = iter.split(regex2);
+									int amount = 0;
+									String sellerName = "";
+									for (String spaceIter : spaceSplit) {
+										try {
+											amount = Integer.valueOf(spaceIter.trim());
+										}
+										catch (NumberFormatException e) {
+											sellerName += spaceIter + regex2;
+										}
 									}
-									playersPaid.add(new Transaction(DataManager.getUser(spaceSplit[0]), DataManager.getUser(buyerName),
-											new Money(Integer.valueOf(spaceSplit[1]))));
+									sellerName = sellerName.trim();
+									if (DataManager.getDebug()) {
+										System.out.println("Loading stats. Adding new transaction: " + buyerName + regex2 + sellerName
+												+ " amount: " + amount);
+									}
+									playersPaid.add(new Transaction(DataManager.getUser(sellerName), DataManager.getUser(buyerName),
+											new Money(amount)));
 								}
 							}
 						}
@@ -128,7 +151,7 @@ public class EconStats {
 				}
 				else if (si.charAt(0) != '#') {
 					// Data line, read and add it
-					String ssplit[] = si.split(":");
+					String ssplit[] = si.split(regex);
 					
 					// Safety check
 					if (ssplit.length == 3) {
@@ -275,7 +298,7 @@ public class EconStats {
 				for (Transaction iter2 : playersPaid) {
 					
 					if (iter2.getBuyer().getName().equalsIgnoreCase(payer)) {
-						results.add("#\t\t" + iter2.getSeller().getName() + " " + iter2.getAmount());
+						results.add("#\t\t" + iter2.getSeller().getName() + regex2 + iter2.getAmount());
 						skipT.add(iter2);
 					}
 				}
@@ -306,7 +329,7 @@ public class EconStats {
 					amountSold = iter3.getAmountAvail();
 				}
 			}
-			temp = itemID + ":" + amountBought + ":" + amountSold;
+			temp = itemID + regex + amountBought + regex + amountSold;
 			results.add(temp);
 		}
 		
@@ -327,7 +350,7 @@ public class EconStats {
 				temp += "&" + iter.getBuyer().getName();
 				for (Transaction iter2 : playersPaid) {
 					if (iter2.getBuyer().getName().equalsIgnoreCase(payer)) {
-						temp += ":" + iter2.getSeller().getName() + " " + iter2.getAmount().getAmount();
+						temp += regex + iter2.getSeller().getName() + regex2 + iter2.getAmount().getAmount();
 						skipT.add(iter2);
 					}
 				}

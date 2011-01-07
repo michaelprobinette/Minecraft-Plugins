@@ -16,8 +16,7 @@ public class CodeRedEconomy extends Plugin {
 	private Listener				l		= new Listener(this);
 	protected static final Logger	log		= Logger.getLogger("Minecraft");
 	private String					name	= "CodeRedEconomy";
-	private String					version	= "v0.0.1";
-	private static DataManager		data	= new DataManager();
+	private String					version	= "v0.5.0";
 	
 	public void enable() {
 		etc.getInstance().addCommand("/pay", "- Pays the given player. /pay [name] [amount]");
@@ -39,7 +38,10 @@ public class CodeRedEconomy extends Plugin {
 		
 		etc.getLoader().addListener(PluginLoader.Hook.COMMAND, l, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.SERVERCOMMAND, l, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.BLOCK_BROKEN, l, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.CHAT, l, this, PluginListener.Priority.MEDIUM);
 		
+		DataManager.load();
 		// DataManager.getDebug() = data.getDataManager.getDebug()();
 	}
 	
@@ -49,6 +51,32 @@ public class CodeRedEconomy extends Plugin {
 		// This controls the accessability of functions / variables from the main class.
 		public Listener(CodeRedEconomy plugin) {
 			p = plugin;
+		}
+		
+		public boolean onChat(Player player, String message) {
+			String badWord = "";
+			if (!(badWord = DataManager.getBadWord(message)).equalsIgnoreCase("")) {
+				User user = DataManager.getUser(player);
+				int penalty = DataManager.getBadWords().get(badWord);
+				User target = DataManager.getUser("BadWord- " + badWord);
+				if (Transaction.process(new Transaction(target, user, new Money(penalty)), false) == 0) {
+					// Sends a forced silent transaction. No messages and forces allowed
+					user.sendMessage("You have been penalized " + penalty + " " + Money.getMoneyName() + " for the use of the bad word \""
+							+ badWord + "\". Please refrain from using this word in the future.");
+					return DataManager.blockBadWords();
+				}
+			}
+			
+			return false;
+		}
+		
+		public boolean onBlockBreak(Player player, Block block) {
+			// Check if it is a valid block
+			if (DataManager.validID(block.getType())) {
+				DataManager.getUser(player).getMoney().addAmount(DataManager.getItem(block.getType()).getBreakValue());
+			}
+			
+			return false;
 		}
 		
 		public boolean onConsoleCommand(String[] split) {

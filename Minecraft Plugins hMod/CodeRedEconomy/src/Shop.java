@@ -11,8 +11,10 @@
  */
 
 public class Shop extends EconEntity {
-	private boolean	infItems	= false;
-	private long	lastRestock	= 0;
+	private final String	regex		= DataManager.getShopRegex();
+	private final String	regex2		= DataManager.getShop2Regex();
+	private boolean			infItems	= false;
+	private long			lastRestock	= 0;
 	
 	public Shop() {
 		initialize();
@@ -48,6 +50,7 @@ public class Shop extends EconEntity {
 	
 	public Shop(String saveData) {
 		load(saveData);
+		setShop(this);
 	}
 	
 	private void initialize() {
@@ -61,6 +64,7 @@ public class Shop extends EconEntity {
 			}
 		}
 		lastRestock = etc.getServer().getTime();
+		setShop(this);
 	}
 	
 	public void restock() {
@@ -78,7 +82,7 @@ public class Shop extends EconEntity {
 	
 	public void sell(User user, String[] split) {
 		String itemName = "";
-		int amount = 0;
+		int amount = -1;
 		if (split.length >= 2) {
 			try {
 				for (String iter : split) {
@@ -91,11 +95,11 @@ public class Shop extends EconEntity {
 						}
 						catch (NumberFormatException e) {
 							// Not a number, add to name
-							itemName += iter + " ";
+							itemName += iter + regex2;
 						}
 					}
 				}
-				if (amount == 0) {
+				if (amount == -1) {
 					amount = 1;
 				}
 				itemName = itemName.trim();
@@ -103,7 +107,12 @@ public class Shop extends EconEntity {
 					System.out.println("Item name is: " + itemName);
 				}
 				
-				Transaction.process(new Transaction(user, this, new ShopItemStack(DataManager.getItem(itemName), amount)));
+				if (amount > 0) {
+					Transaction.process(new Transaction(user, this, new ShopItemStack(DataManager.getItem(itemName), amount)));
+				}
+				else {
+					user.sendMessage("Please enter a valid amount.");
+				}
 			}
 			catch (NumberFormatException e1) {
 				user.sendMessage("The correct use is /sell [item name] [amount]");
@@ -130,7 +139,7 @@ public class Shop extends EconEntity {
 						}
 						catch (NumberFormatException e) {
 							// Not a number, add to name
-							itemName += iter + " ";
+							itemName += iter + regex2;
 						}
 					}
 				}
@@ -142,7 +151,12 @@ public class Shop extends EconEntity {
 					System.out.println("Item name is: " + itemName);
 				}
 				
-				Transaction.process(new Transaction(this, user, new ShopItemStack(DataManager.getItem(itemName), amount)));
+				if (amount > 0) {
+					Transaction.process(new Transaction(this, user, new ShopItemStack(DataManager.getItem(itemName), amount)));
+				}
+				else {
+					user.sendMessage("Please enter a valid amount.");
+				}
 			}
 			catch (NumberFormatException e1) {
 				user.sendMessage("The correct use is /buy [item name] [amount]");
@@ -156,15 +170,15 @@ public class Shop extends EconEntity {
 	public String toString() {
 		// Used for saving the shop, data needed is:
 		// Shop Name : Shop Money : infAmount : lastRestock : id amount : id amount : id amount
-		String temp = name + ":" + money.getAmount() + ":" + infItems + ":" + lastRestock;
+		String temp = name + regex + money.getAmount() + regex + infItems + regex + lastRestock;
 		for (ShopItemStack iter : availableItems) {
-			temp += ":" + iter.getItemID() + " " + iter.getAmountAvail();
+			temp += regex + iter.getItemID() + regex2 + iter.getAmountAvail();
 		}
 		return temp;
 	}
 	
 	public void load(String loadData) {
-		String sc[] = loadData.split(":"); // Split colon
+		String sc[] = loadData.split(DataManager.getShopRegex()); // Split colon
 		
 		if (DataManager.getDebug()) {
 			System.out.println("Loading a shop named " + sc[0]);
@@ -179,7 +193,7 @@ public class Shop extends EconEntity {
 			for (String iter : sc) {
 				if (!iter.equalsIgnoreCase(sc[0]) && !iter.equalsIgnoreCase(sc[1]) && !iter.equalsIgnoreCase(sc[2])
 						&& !iter.equalsIgnoreCase(sc[3])) {
-					String[] ss = iter.split(" ");
+					String[] ss = iter.split(regex2);
 					availableItems.add(new ShopItemStack(new ShopItem(Integer.valueOf(ss[0].trim())), Integer.valueOf(ss[1].trim())));
 				}
 			}
