@@ -32,7 +32,7 @@ public class CommandOn extends Plugin {
 	private Listener					l					= new Listener(this);
 	protected static final Logger		log					= Logger.getLogger("Minecraft");
 	private static final String			name				= "CommandOn";
-	private static final String			version				= "v1.1.6";
+	private static final String			version				= "v1.1.7";
 	private static final String[]		COMMAND_TEMPLATE	= {
 			"## OnLogin", "default:", "## OnLogout", "default:", "## OnDeath", "default:", "## OnRespawn", "default:"
 															};
@@ -133,7 +133,7 @@ public class CommandOn extends Plugin {
 			String raw = "";
 			int count = -1;
 			int count2 = 0;
-			while ((raw = command_reader.readLine()) != null) {
+			while ((raw = command_reader.readLine()) != null && !raw.equalsIgnoreCase("") && !raw.equalsIgnoreCase(" ")) {
 				if (raw != null) {
 					// log.log(Level.INFO, raw);
 					if (raw.contains("##")) {
@@ -173,7 +173,7 @@ public class CommandOn extends Plugin {
 			command_reader.close();
 			count = -1;
 			count2 = 0;
-			while ((raw = player_reader.readLine()) != null) {
+			while ((raw = player_reader.readLine()) != null && !raw.equalsIgnoreCase("") && !raw.equalsIgnoreCase(" ")) {
 				if (raw != null) {
 					// log.log(Level.INFO, raw);
 					if (raw.contains("##")) {

@@ -16,14 +16,15 @@ import java.util.logging.Logger;
  * @author Vandolis
  */
 public class SignCensor extends Plugin {
-	private Listener				l			= new Listener(this);
-	protected static final Logger	log			= Logger.getLogger("Minecraft");
-	private String					name		= "SignCensor";
-	private String					version		= "v1.0.1";
-	private PropertiesFile			props		= new PropertiesFile("SignCensor.properties");
-	private String[]				bannedWords	= null;
-	private String					replaceWith	= "";
-	private boolean					destroy		= false;
+	private Listener				l				= new Listener(this);
+	protected static final Logger	log				= Logger.getLogger("Minecraft");
+	private String					name			= "SignCensor";
+	private String					version			= "v1.1.0";
+	private PropertiesFile			props			= new PropertiesFile("SignCensor.properties");
+	private String[]				bannedWords		= null;
+	private String					replaceWith		= "";
+	private boolean					destroy			= false;
+	private boolean					adminCanBypass	= false;
 	
 	public void enable() {
 		if (!props.containsKey("bannedwords")) {
@@ -35,9 +36,13 @@ public class SignCensor extends Plugin {
 		if (!props.containsKey("replacewith")) {
 			props.setString("replacewith", "");
 		}
+		if (!props.containsKey("adminbypass")) {
+			props.setBoolean("adminbypass", false);
+		}
 		replaceWith = props.getString("replacewith");
 		destroy = props.getBoolean("destroy");
 		bannedWords = props.getString("bannedwords").split(",");
+		adminCanBypass = props.getBoolean("adminbypass");
 		for (int i = 0; i < bannedWords.length; i++) {
 			bannedWords[i] = bannedWords[i].trim();
 		}
@@ -70,46 +75,48 @@ public class SignCensor extends Plugin {
 			// Get lines of the sign
 			String line1 = s.getText(0).toLowerCase(), line2 = s.getText(1).toLowerCase(), line3 = s.getText(2).toLowerCase(), line4 = s
 					.getText(3).toLowerCase();
-			for (String temp : bannedWords) {
-				temp = temp.toLowerCase();
-				if (line1.contains(temp)) {
-					if (destroy) {
-						etc.getServer().setBlockAt(0, s.getX(), s.getY(), s.getZ());
+			if (!(player.isAdmin() && adminCanBypass)) {
+				for (String temp : bannedWords) {
+					temp = temp.toLowerCase();
+					if (line1.contains(temp)) {
+						if (destroy) {
+							etc.getServer().setBlockAt(0, s.getX(), s.getY(), s.getZ());
+						}
+						else {
+							line1 = line1.replace(temp, replaceWith);
+							s.setText(0, line1);
+							s.update();
+						}
 					}
-					else {
-						line1 = line1.replace(temp, replaceWith);
-						s.setText(0, line1);
-						s.update();
+					if (line2.contains(temp)) {
+						if (destroy) {
+							etc.getServer().setBlockAt(0, s.getX(), s.getY(), s.getZ());
+						}
+						else {
+							line2 = line2.replace(temp, replaceWith);
+							s.setText(1, line2);
+							s.update();
+						}
 					}
-				}
-				if (line2.contains(temp)) {
-					if (destroy) {
-						etc.getServer().setBlockAt(0, s.getX(), s.getY(), s.getZ());
+					if (line3.contains(temp)) {
+						if (destroy) {
+							etc.getServer().setBlockAt(0, s.getX(), s.getY(), s.getZ());
+						}
+						else {
+							line3 = line3.replace(temp, replaceWith);
+							s.setText(2, line3);
+							s.update();
+						}
 					}
-					else {
-						line2 = line2.replace(temp, replaceWith);
-						s.setText(1, line2);
-						s.update();
-					}
-				}
-				if (line3.contains(temp)) {
-					if (destroy) {
-						etc.getServer().setBlockAt(0, s.getX(), s.getY(), s.getZ());
-					}
-					else {
-						line3 = line3.replace(temp, replaceWith);
-						s.setText(2, line3);
-						s.update();
-					}
-				}
-				if (line4.contains(temp)) {
-					if (destroy) {
-						etc.getServer().setBlockAt(0, s.getX(), s.getY(), s.getZ());
-					}
-					else {
-						line4 = line4.replace(temp, replaceWith);
-						s.setText(3, line4);
-						s.update();
+					if (line4.contains(temp)) {
+						if (destroy) {
+							etc.getServer().setBlockAt(0, s.getX(), s.getY(), s.getZ());
+						}
+						else {
+							line4 = line4.replace(temp, replaceWith);
+							s.setText(3, line4);
+							s.update();
+						}
 					}
 				}
 			}

@@ -70,6 +70,7 @@ public class DataManager {
 	private static HashMap<String, Integer>	badWords			= new HashMap<String, Integer>();
 	private static boolean					blockBadWords		= false;
 	private static final File				file_badWords		= new File(LOC + "badWords.txt");
+	private static final boolean			messageOnBadWord	= true;
 	
 	public DataManager() {
 		load();
@@ -144,6 +145,13 @@ public class DataManager {
 		}
 		else {
 			props.setBoolean("blockbadwords", blockBadWords);
+		}
+		
+		if (props.containsKey("messageonbadword")) {
+			useStats = props.getBoolean("messageonbadword");
+		}
+		else {
+			props.setBoolean("messageonbadword", messageOnBadWord);
 		}
 	}
 	
@@ -695,5 +703,9 @@ public class DataManager {
 	
 	public static String getItemRegex() {
 		return ITEM_REGEX;
+	}
+	
+	public static boolean messageOnBadWord() {
+		return messageOnBadWord;
 	}
 }

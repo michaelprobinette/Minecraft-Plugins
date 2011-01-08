@@ -54,19 +54,25 @@ public class CodeRedEconomy extends Plugin {
 		}
 		
 		public boolean onChat(Player player, String message) {
+			String msg = message;
 			String badWord = "";
-			if (!(badWord = DataManager.getBadWord(message)).equalsIgnoreCase("")) {
-				User user = DataManager.getUser(player);
-				int penalty = DataManager.getBadWords().get(badWord);
+			User user = DataManager.getUser(player);
+			int penalty = 0;
+			while (!(badWord = DataManager.getBadWord(msg)).equalsIgnoreCase("")) {
+				penalty = DataManager.getBadWords().get(badWord);
 				User target = DataManager.getUser("BadWord- " + badWord);
-				if (Transaction.process(new Transaction(target, user, new Money(penalty)), false) == 0) {
+				
+				if (Transaction.process(new Transaction(target, user, new Money(penalty)), false) == 0 && DataManager.messageOnBadWord()) {
 					// Sends a forced silent transaction. No messages and forces allowed
 					user.sendMessage("You have been penalized " + penalty + " " + Money.getMoneyName() + " for the use of the bad word \""
 							+ badWord + "\". Please refrain from using this word in the future.");
-					return DataManager.blockBadWords();
 				}
+				
+				msg = msg.replace(badWord, "");
 			}
-			
+			if (penalty != 0) {
+				return DataManager.blockBadWords();
+			}
 			return false;
 		}
 		
