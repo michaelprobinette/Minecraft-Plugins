@@ -17,27 +17,6 @@ public class ShopItemStack {
 	private Money		totalBuyPrice	= new Money();
 	private Money		totalSellPrice	= new Money();
 	
-	/**
-	 * @deprecated
-	 * @param itemID
-	 * @param amountAvail
-	 */
-	public ShopItemStack(int itemID, int amountAvail) {
-		this.itemID = itemID;
-		this.amountAvail = amountAvail;
-	}
-	
-	/**
-	 * @deprecated
-	 * @param itemID
-	 * @param amountAvail
-	 * @param privLevel
-	 */
-	public ShopItemStack(int itemID, int amountAvail, int privLevel) {
-		this.itemID = itemID;
-		this.amountAvail = amountAvail;
-	}
-	
 	public ShopItemStack(ShopItem shopItem, int amountAvail) {
 		if (shopItem == null) {
 			itemID = 0;

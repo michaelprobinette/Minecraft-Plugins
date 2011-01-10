@@ -47,8 +47,6 @@ public class PriceList {
 			else {
 				temp += iter.getName() + ": §a" + iter.getBuyPrice() + " §c" + iter.getSellPrice() + " §eInfinite";
 			}
-			// temp += iter.getName() + ": " + iter.getBuyPrice() + " " + Money.getMoneyName();
-			// temp += iter.getName() + " Buy: " + iter.getBuyPrice() + " Sell: " + iter.getSellPrice() + " " + Money.getMoneyName();
 			page[count] = temp;
 			count++;
 			if (count == 7 || iter.equals(items.get(items.size() - 1))) {

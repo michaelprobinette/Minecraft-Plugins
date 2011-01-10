@@ -166,7 +166,12 @@ public class User extends EconEntity {
 	 */
 	public void showBalance() {
 		autoDesposit(etc.getServer().getTime());
-		sendMessage("Your balance is: " + money.toString());
+		if (money.getAmount() != DataManager.getInfValue()) {
+			sendMessage("Your balance is: " + money.toString());
+		}
+		else {
+			sendMessage("You have Infinite money.");
+		}
 	}
 	
 	/**

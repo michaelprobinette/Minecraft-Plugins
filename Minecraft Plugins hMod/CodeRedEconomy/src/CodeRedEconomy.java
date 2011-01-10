@@ -106,10 +106,6 @@ public class CodeRedEconomy extends Plugin {
 					DataManager.getShop("The Shop").sell(DataManager.getUser(player), split);
 					return true;
 				}
-				// if (split[0].equalsIgnoreCase("/trade") && player.canUseCommand("/trade")) {
-				//					
-				// return true;
-				// }
 				if (split[0].equalsIgnoreCase("/balance")) {
 					DataManager.getUser(player).showBalance();
 					return true;
