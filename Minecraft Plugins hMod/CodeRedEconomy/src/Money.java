@@ -40,11 +40,23 @@ public class Money {
 	}
 	
 	public void addAmount(int amount) {
-		this.amount += amount;
+		// Check to make sure they don't accidently go into inf range
+		if (this.amount + amount == DataManager.getInfValue()) {
+			this.amount += (amount + 1);
+		}
+		else {
+			this.amount += amount;
+		}
 	}
 	
 	public void removeAmount(int amount) {
-		this.amount -= amount;
+		// Check to make sure they don't accidently go into inf range
+		if (this.amount - amount == DataManager.getInfValue()) {
+			this.amount -= (amount + 1);
+		}
+		else {
+			this.amount -= amount;
+		}
 	}
 	
 	public boolean isValid() {

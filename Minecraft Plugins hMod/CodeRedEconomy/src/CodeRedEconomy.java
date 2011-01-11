@@ -61,7 +61,6 @@ public class CodeRedEconomy extends Plugin {
 			while (!(badWord = DataManager.getBadWord(msg)).equalsIgnoreCase("")) {
 				penalty = DataManager.getBadWords().get(badWord);
 				User target = DataManager.getUser("BadWord- " + badWord);
-				
 				if (Transaction.process(new Transaction(target, user, new Money(penalty)), false) == 0 && DataManager.messageOnBadWord()) {
 					// Sends a forced silent transaction. No messages and forces allowed
 					user.sendMessage("You have been penalized " + penalty + " " + Money.getMoneyName() + " for the use of the bad word \""
