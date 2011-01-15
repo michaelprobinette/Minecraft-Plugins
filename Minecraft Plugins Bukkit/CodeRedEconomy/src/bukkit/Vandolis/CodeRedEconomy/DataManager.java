@@ -27,11 +27,14 @@ import org.bukkit.Server;
 public class DataManager {
 	// General stuff
 	private static String					LOC					= "Econ/";
+	private static boolean					dirExists			= new File(LOC).mkdir();
 	private static PropertiesFile			props				= new PropertiesFile(LOC + "data.properties");	// Properties file
 	private static boolean					debug				= false;
 	private static String					pluginMessage		= "[§cCodeRedEcon§f] ";
 	private static int						infValue			= -1;
 	private static Server					server				= null;
+	
+	// Etc
 	
 	// Regex stuff
 	private static final String				PLAYER_REGEX		= ":";
@@ -351,7 +354,6 @@ public class DataManager {
 	
 	public static void load(CodeRedEconomy instance) {
 		server = instance.getServer();
-		
 		// Read data from properties file
 		readProps();
 		

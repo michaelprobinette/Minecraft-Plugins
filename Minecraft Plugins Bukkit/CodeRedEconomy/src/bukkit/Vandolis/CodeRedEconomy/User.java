@@ -9,6 +9,9 @@ package bukkit.Vandolis.CodeRedEconomy;
  * <http://www.gnu.org/licenses/>
  */
 
+import java.util.ArrayList;
+
+import org.bukkit.ItemStack;
 import org.bukkit.Player;
 
 public class User extends EconEntity {
@@ -178,28 +181,25 @@ public class User extends EconEntity {
 	 * Updates the availableItems array to the users current inventory. Used to check amounts easily before selling
 	 */
 	public void updateArray() {
-		
-		// FIXME once bukkit has a getInventory
-		
-		// availableItems = new ArrayList<ShopItemStack>();
-		// for (ItemStack iter : player.getInventory().getContents()) {
-		// if (iter != null) {
-		// if (iter.getTypeID() > 0) {
-		// // Check if it is already in the array
-		// boolean found = false;
-		// for (ShopItemStack siter : availableItems) {
-		// if (siter.getItemID() == iter.getTypeID()) {
-		// // Already in available items, so add to the amount
-		// siter.addAmountAvail(iter.getAmount());
-		// found = true;
-		// }
-		// }
-		// // Add it to the array
-		// if (!found && DataManager.validID(iter.getTypeID())) {
-		// availableItems.add(new ShopItemStack(new ShopItem(iter.getTypeID()), iter.getAmount()));
-		// }
-		// }
-		// }
-		// }
+		availableItems = new ArrayList<ShopItemStack>();
+		for (ItemStack iter : player.getInventory().getContents()) {
+			if (iter != null) {
+				if (iter.getTypeID() > 0) {
+					// Check if it is already in the array
+					boolean found = false;
+					for (ShopItemStack siter : availableItems) {
+						if (siter.getItemID() == iter.getTypeID()) {
+							// Already in available items, so add to the amount
+							siter.addAmountAvail(iter.getAmount());
+							found = true;
+						}
+					}
+					// Add it to the array
+					if (!found && DataManager.validID(iter.getTypeID())) {
+						availableItems.add(new ShopItemStack(new ShopItem(iter.getTypeID()), iter.getAmount()));
+					}
+				}
+			}
+		}
 	}
 }

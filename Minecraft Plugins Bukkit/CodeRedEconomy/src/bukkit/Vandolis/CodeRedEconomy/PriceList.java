@@ -23,7 +23,7 @@ public class PriceList {
 		pages = new ArrayList<String[]>();
 		ArrayList<ShopItem> items = new ArrayList<ShopItem>();
 		
-		// XXX chance once bukkit implements permissions
+		// FIXME chance once bukkit implements permissions
 		for (ShopItem iter : DataManager.getItemList()) {
 			items.add(iter);
 		}

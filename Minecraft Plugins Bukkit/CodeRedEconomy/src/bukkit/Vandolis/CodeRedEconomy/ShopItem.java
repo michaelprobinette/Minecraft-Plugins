@@ -159,19 +159,20 @@ public class ShopItem {
 	}
 	
 	private String getName(int itemID) {
-		// if (itemID < 255) {
-		// return blockNames[itemID];
-		// }
-		// else if (itemID < 500) {
-		// return itemNames[itemID - 256];
-		// }
-		// else if (itemID < 3000) {
-		// return specialItems[itemID - 2256];
-		// }
+		if (itemID < 255) {
+			return blockNames[itemID];
+		}
+		else if (itemID < 500) {
+			return itemNames[itemID - 256];
+		}
+		else if (itemID < 3000) {
+			return specialItems[itemID - 2256];
+		}
 		
-		return item.getType().name();
+		return "Air";
 		
-		// return "Air";
+		// I wish this worked
+		// return item.getType().name();
 	}
 	
 	public int getSellPrice() {

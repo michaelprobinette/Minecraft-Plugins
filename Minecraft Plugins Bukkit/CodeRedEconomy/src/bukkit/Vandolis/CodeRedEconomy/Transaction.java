@@ -1,5 +1,7 @@
 package bukkit.Vandolis.CodeRedEconomy;
 
+import org.bukkit.ItemStack;
+
 /*
  * Economy made for the Redstrype Minecraft Server. Copyright (C) 2010 Michael Robinette This program is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of
@@ -124,11 +126,9 @@ public class Transaction {
 				if (buyer.isPlayer()) {
 					// If it is a player, go ahead and give them the item
 					if (buyer.numberOfItems(stack.getShopItem()) != DataManager.getInfValue()) {
-						
-						// FIXME Fix once bukkit has a player.giveItem type function
-						
 						// Gets the user from the DataManager user list, and returns it to let us use
-						// buyer.getUser().getPlayer().giveItem(trans.getStack().getItemID(), trans.getStack().getAmountAvail());
+						buyer.getUser().getPlayer().getInventory().addItem(
+								new ItemStack(trans.getStack().getItemID(), trans.getStack().getAmountAvail()));
 					}
 				}
 				else {
@@ -142,9 +142,30 @@ public class Transaction {
 				if (seller.isPlayer()) {
 					// If it is a player, go ahead and give them the iter
 					
-					// FIXME Fix once bukkit has a getInventory function
+					// TODO Might be fixed
 					
 					// Gets the user from the DataManager user list, and returns it to let us use
+					int count = 0;
+					for (int iter : seller.getUser().getPlayer().getInventory().all(stack.getItemID()).keySet()) {
+						int temp = seller.getUser().getPlayer().getInventory().all(stack.getItemID()).get(iter).getAmount();
+						if (count + temp >= stack.getAmountAvail()) {
+							// if (temp - (stack.getAmountAvail() - count) == 0) {
+							// seller.getUser().getPlayer().getInventory().setItem(iter, new ItemStack(Material.Air));
+							// }
+							// else {
+							// // Done
+							// seller.getUser().getPlayer().getInventory().setItem(iter,
+							// new ItemStack(stack.getItemID(), temp - (stack.getAmountAvail() - count)));
+							// }
+							seller.getUser().getPlayer().getInventory().setItem(iter, new ItemStack(stack.getItemID()));
+							break;
+						}
+						else {
+							// Not enough in this stack, remove as much as possible
+							count += temp;
+							seller.getUser().getPlayer().getInventory().setItem(iter, new ItemStack(stack.getItemID(), temp));
+						}
+					}
 					// seller.getUser().getPlayer().getInventory().removeItem(trans.getStack().getItemID(),
 					// trans.getStack().getAmountAvail());
 				}

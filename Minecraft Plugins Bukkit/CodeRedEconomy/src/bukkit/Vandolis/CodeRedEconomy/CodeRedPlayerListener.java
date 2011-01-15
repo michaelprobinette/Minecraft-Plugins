@@ -19,9 +19,11 @@ public class CodeRedPlayerListener extends PlayerListener {
 		if (split.length >= 1) {
 			if (split[0].equalsIgnoreCase("/buy")) {
 				DataManager.getShop("The Shop").buy(DataManager.getUser(player), split);
+				event.setCancelled(true);
 			}
 			if (split[0].equalsIgnoreCase("/sell")) {
 				DataManager.getShop("The Shop").sell(DataManager.getUser(player), split);
+				event.setCancelled(true);
 			}
 			// if (split[0].equalsIgnoreCase("/trade") && player.canUseCommand("/trade")) {
 			//					
@@ -29,6 +31,7 @@ public class CodeRedPlayerListener extends PlayerListener {
 			// }
 			if (split[0].equalsIgnoreCase("/balance")) {
 				DataManager.getUser(player).showBalance();
+				event.setCancelled(true);
 			}
 			if (split[0].equalsIgnoreCase("/pay")) {
 				User user = DataManager.getUser(player);
@@ -46,6 +49,7 @@ public class CodeRedPlayerListener extends PlayerListener {
 				else {
 					user.sendMessage("Correct use is \"/pay [player] [amount]\"");
 				}
+				event.setCancelled(true);
 			}
 			if (split[0].equalsIgnoreCase("/add") && DataManager.getDebug()) {
 				if (split.length >= 2) {
@@ -56,20 +60,24 @@ public class CodeRedPlayerListener extends PlayerListener {
 						DataManager.getUser(player).getMoney().addAmount(Integer.valueOf(split[1]));
 					}
 				}
+				event.setCancelled(true);
 			}
 			if (split[0].equalsIgnoreCase("/shop") && DataManager.getDebug()) {
 				System.out.println("There are " + DataManager.getShops().size());
 				for (Shop iter : DataManager.getShops()) {
 					System.out.println(iter.getName());
 				}
+				event.setCancelled(true);
 			}
 			if (split[0].equalsIgnoreCase("/balall") && DataManager.getDebug()) {
 				for (User iter : DataManager.getUsers()) {
 					System.out.println(iter.getName() + iter.getMoney().toString());
 				}
+				event.setCancelled(true);
 			}
 			if (split[0].equalsIgnoreCase("/saveredeco")) {
 				DataManager.save();
+				event.setCancelled(true);
 			}
 			if (split[0].equalsIgnoreCase("/prices")) {
 				if (split.length >= 2) {
@@ -79,9 +87,11 @@ public class CodeRedPlayerListener extends PlayerListener {
 				else {
 					PriceList.priceList(DataManager.getUser(player), 1, DataManager.getShop("The Shop"));
 				}
+				event.setCancelled(true);
 			}
 			if (split[0].equalsIgnoreCase("/undo")) {
 				DataManager.getUser(player).undoLastTrans();
+				event.setCancelled(true);
 			}
 		}
 	}

@@ -2,12 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="C:/Program Files (x86)/Minecraft/SMP Server/bin/minecraft_server.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files (x86)/Minecraft/SMP Server/bukkit/bukkit.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="http://hudson.lukegb.com/job/Bukkit/javadoc/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Mike/Documents/Programming/bukkit-0.0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mike/Documents/Programming/sqlite.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

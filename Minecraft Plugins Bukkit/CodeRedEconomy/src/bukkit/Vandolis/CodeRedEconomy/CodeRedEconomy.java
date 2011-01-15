@@ -33,5 +33,8 @@ public class CodeRedEconomy extends JavaPlugin {
 		
 		// Load the datamanager
 		DataManager.load(this);
+		
+		PluginDescriptionFile pdfFile = getDescription();
+		System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
 	}
 }

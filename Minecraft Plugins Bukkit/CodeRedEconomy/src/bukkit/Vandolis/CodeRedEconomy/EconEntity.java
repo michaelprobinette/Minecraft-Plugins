@@ -78,7 +78,7 @@ public abstract class EconEntity {
 				// money
 				
 				canBuy = (stack.getTotalBuyPrice().getAmount() <= money.getAmount()) || (money.getAmount() == DataManager.getInfValue());
-				// XXX Need to change once bukkit implements a permissions system
+				// FIXME Need to change once bukkit implements a permissions system
 				
 				// canBuy = ((user.getPlayer().isInGroup(DataManager.getReqGroup(stack.getShopItem().getItemID()))) && ((stack
 				// .getTotalBuyPrice().getAmount() <= money.getAmount()) || (money.getAmount() == DataManager.getInfValue())));
