@@ -198,4 +198,18 @@ public class Shop extends EconEntity {
 		}
 		return temp;
 	}
+
+	/**
+	 * @return
+	 */
+	public boolean getInfItems() {
+		return infItems;
+	}
+
+	/**
+	 * @return
+	 */
+	public long getLastRestock() {
+		return lastRestock;
+	}
 }

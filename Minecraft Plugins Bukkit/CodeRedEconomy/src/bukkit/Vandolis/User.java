@@ -201,4 +201,34 @@ public class User extends EconEntity {
 			}
 		}
 	}
+	
+	/**
+	 * @param stack
+	 */
+	public void addItem(ShopItemStack stack) {
+		getPlayer().getInventory().addItem(new ItemStack(stack.getItemID(), stack.getAmountAvail()));
+	}
+	
+	/**
+	 * @param stack
+	 */
+	public void removeItem(ShopItemStack stack) {
+		getPlayer().getInventory().removeItem(new ItemStack(stack.getItemID(), stack.getAmountAvail()));
+	}
+	
+	/**
+	 * @return
+	 */
+	public int getNumTransactionsBuy() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	/**
+	 * @return
+	 */
+	public int getNumTransactionsSell() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

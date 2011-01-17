@@ -8,20 +8,17 @@
  */
 package bukkit.Vandolis;
 
-/*
- * it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
- * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
- * <http://www.gnu.org/licenses/>
- */
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -41,7 +38,9 @@ public class DataManager {
 	private static int						infValue			= -1;
 	private static Server					server				= null;
 	
-	// Etc
+	// SQLite
+	private static boolean					useSQL				= false;
+	private static final String				DB					= "jdbc:sqlite:CodeRedEconomy";
 	
 	// Regex stuff
 	private static final String				PLAYER_REGEX		= ":";
@@ -90,7 +89,13 @@ public class DataManager {
 			System.out.println("Adding shop under the name of: " + shop.getName());
 		}
 		shops.add(shop);
-		write("shops");
+		try {
+			write("shops");
+		}
+		catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static void addUser(User user) {
@@ -108,7 +113,13 @@ public class DataManager {
 		}
 		
 		// Write to file
-		write("player");
+		try {
+			write("player");
+		}
+		catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static boolean allowedBlock(String group, int itemID) {
@@ -332,7 +343,13 @@ public class DataManager {
 		User temp = new User(player); // Not found, make a new user
 		temp.autoDesposit(server.getTime()); // Starting money
 		addUser(temp); // Add user to the users list
-		write("player");
+		try {
+			write("player");
+		}
+		catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return temp;
 	}
 	
@@ -388,27 +405,29 @@ public class DataManager {
 	}
 	
 	private static void readBadWords() {
-		BufferedReader reader;
-		String raw = "";
-		try {
-			reader = new BufferedReader(new FileReader(file_badWords));
-			while ((raw = reader.readLine()) != null) {
-				String split[] = raw.split("=");
-				String word = split[0].trim();
-				int cost = Integer.valueOf(split[1].trim());
-				badWords.put(word, cost);
-			}
-			reader.close();
-		}
-		catch (IOException e) {
+		if (dirExists) {
+			BufferedReader reader;
+			String raw = "";
 			try {
-				// File not found, create empty file
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file_badWords));
-				writer.newLine();
-				writer.close();
+				reader = new BufferedReader(new FileReader(file_badWords));
+				while ((raw = reader.readLine()) != null) {
+					String split[] = raw.split("=");
+					String word = split[0].trim();
+					int cost = Integer.valueOf(split[1].trim());
+					badWords.put(word, cost);
+				}
+				reader.close();
 			}
-			catch (IOException e1) {
-				e1.printStackTrace();
+			catch (IOException e) {
+				try {
+					// File not found, create empty file
+					BufferedWriter writer = new BufferedWriter(new FileWriter(file_badWords));
+					writer.newLine();
+					writer.close();
+				}
+				catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}
@@ -417,238 +436,255 @@ public class DataManager {
 	 * Item file formatting is "itemID:buyPrice:sellPrice:maxAvail"
 	 */
 	private static void readItemFile() {
-		BufferedReader reader;
-		String raw = "";
-		try {
-			reader = new BufferedReader(new FileReader(file_itemlist));
-			
-			while ((raw = reader.readLine()) != null) {
-				ShopItem temp = new ShopItem(raw);
-				itemList.add(temp);
-				if (debug) {
-					System.out.println("Raw item data read: " + raw);
-					System.out.println("Item data: " + temp.toString());
-				}
-			}
-			reader.close();
-		}
-		catch (IOException e) {
+		if (dirExists) {
+			BufferedReader reader;
+			String raw = "";
 			try {
-				// File not found, create empty file
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file_itemlist));
-				writer.newLine();
-				writer.close();
+				reader = new BufferedReader(new FileReader(file_itemlist));
+				
+				while ((raw = reader.readLine()) != null) {
+					ShopItem temp = new ShopItem(raw);
+					itemList.add(temp);
+					if (debug) {
+						System.out.println("Raw item data read: " + raw);
+						System.out.println("Item data: " + temp.toString());
+					}
+				}
+				reader.close();
 			}
-			catch (IOException e1) {
-				e1.printStackTrace();
+			catch (IOException e) {
+				try {
+					// File not found, create empty file
+					BufferedWriter writer = new BufferedWriter(new FileWriter(file_itemlist));
+					writer.newLine();
+					writer.close();
+				}
+				catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}
 	
 	private static void readPrivFile() {
-		BufferedReader reader;
-		String raw = "";
-		try {
-			reader = new BufferedReader(new FileReader(file_privGroups));
-			while ((raw = reader.readLine()) != null) {
-				String split[] = raw.split(":");
-				if (split.length >= 2) {
-					String groupName = split[0];
-					String a[] = split[1].split(",");
-					int blocks[] = new int[a.length];
-					int count = 0;
-					for (String iter : a) {
-						iter = iter.trim();
-						int temp = Integer.valueOf(iter);
-						blocks[count] = temp;
-						count++;
-					}
-					ShopGroup temp = new ShopGroup(groupName, blocks);
-					privGroups.add(temp);
-				}
-			}
-			reader.close();
-		}
-		catch (IOException e) {
+		if (dirExists) {
+			BufferedReader reader;
+			String raw = "";
 			try {
-				// File not found, create empty file
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file_privGroups));
-				writer.newLine();
-				writer.close();
+				reader = new BufferedReader(new FileReader(file_privGroups));
+				while ((raw = reader.readLine()) != null) {
+					String split[] = raw.split(":");
+					if (split.length >= 2) {
+						String groupName = split[0];
+						String a[] = split[1].split(",");
+						int blocks[] = new int[a.length];
+						int count = 0;
+						for (String iter : a) {
+							iter = iter.trim();
+							int temp = Integer.valueOf(iter);
+							blocks[count] = temp;
+							count++;
+						}
+						ShopGroup temp = new ShopGroup(groupName, blocks);
+						privGroups.add(temp);
+					}
+				}
+				reader.close();
 			}
-			catch (IOException e1) {
-				e1.printStackTrace();
+			catch (IOException e) {
+				try {
+					// File not found, create empty file
+					BufferedWriter writer = new BufferedWriter(new FileWriter(file_privGroups));
+					writer.newLine();
+					writer.close();
+				}
+				catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}
 	
 	private static void readProps() {
-		if (props.containsKey("moneyname")) {
-			moneyName = props.getString("moneyname");
-		}
-		else {
-			props.setString("moneyname", moneyName);
-		}
-		
-		if (props.containsKey("debug")) {
-			debug = props.getBoolean("debug");
-		}
-		else {
-			props.setBoolean("debug", debug);
-		}
-		
-		if (props.containsKey("restocktime")) {
-			restockTime = props.getLong("restocktime");
-		}
-		else {
-			props.setLong("restocktime", restockTime);
-		}
-		
-		if (props.containsKey("ingamemessage")) {
-			pluginMessage = props.getString("ingamemessage");
-		}
-		else {
-			props.setString("ingamemessage", pluginMessage);
-		}
-		
-		if (props.containsKey("infvalue")) {
-			infValue = props.getInt("infvalue");
-		}
-		else {
-			props.setInt("infvalue", infValue);
-		}
-		
-		if (props.containsKey("filelocation")) {
-			LOC = props.getString("filelocation");
-		}
-		else {
-			props.setString("filelocation", LOC);
-		}
-		
-		if (props.containsKey("usestats")) {
-			useStats = props.getBoolean("usestats");
-		}
-		else {
-			props.setBoolean("usestats", useStats);
-		}
-		
-		if (props.containsKey("autodeposittime")) {
-			autoDepositTime = props.getLong("autodeposittime");
-		}
-		else {
-			props.setLong("autodeposittime", autoDepositTime);
-		}
-		
-		if (props.containsKey("autodepositamount")) {
-			autoDepositAmount = props.getInt("autodepositamount");
-		}
-		else {
-			props.setInt("autodepositamount", autoDepositAmount);
-		}
-		
-		if (props.containsKey("blockbadwords")) {
-			useStats = props.getBoolean("blockbadwords");
-		}
-		else {
-			props.setBoolean("blockbadwords", blockBadWords);
-		}
-		
-		if (props.containsKey("messageonbadword")) {
-			useStats = props.getBoolean("messageonbadword");
-		}
-		else {
-			props.setBoolean("messageonbadword", messageOnBadWord);
+		if (dirExists) {
+			if (props.containsKey("moneyname")) {
+				moneyName = props.getString("moneyname");
+			}
+			else {
+				props.setString("moneyname", moneyName);
+			}
+			
+			if (props.containsKey("debug")) {
+				debug = props.getBoolean("debug");
+			}
+			else {
+				props.setBoolean("debug", debug);
+			}
+			
+			if (props.containsKey("restocktime")) {
+				restockTime = props.getLong("restocktime");
+			}
+			else {
+				props.setLong("restocktime", restockTime);
+			}
+			
+			if (props.containsKey("ingamemessage")) {
+				pluginMessage = props.getString("ingamemessage");
+			}
+			else {
+				props.setString("ingamemessage", pluginMessage);
+			}
+			
+			if (props.containsKey("infvalue")) {
+				infValue = props.getInt("infvalue");
+			}
+			else {
+				props.setInt("infvalue", infValue);
+			}
+			
+			if (props.containsKey("filelocation")) {
+				LOC = props.getString("filelocation");
+			}
+			else {
+				props.setString("filelocation", LOC);
+			}
+			
+			if (props.containsKey("usestats")) {
+				useStats = props.getBoolean("usestats");
+			}
+			else {
+				props.setBoolean("usestats", useStats);
+			}
+			
+			if (props.containsKey("autodeposittime")) {
+				autoDepositTime = props.getLong("autodeposittime");
+			}
+			else {
+				props.setLong("autodeposittime", autoDepositTime);
+			}
+			
+			if (props.containsKey("autodepositamount")) {
+				autoDepositAmount = props.getInt("autodepositamount");
+			}
+			else {
+				props.setInt("autodepositamount", autoDepositAmount);
+			}
+			
+			if (props.containsKey("blockbadwords")) {
+				useStats = props.getBoolean("blockbadwords");
+			}
+			else {
+				props.setBoolean("blockbadwords", blockBadWords);
+			}
+			
+			if (props.containsKey("messageonbadword")) {
+				useStats = props.getBoolean("messageonbadword");
+			}
+			else {
+				props.setBoolean("messageonbadword", messageOnBadWord);
+			}
 		}
 	}
 	
 	private static void readShopFile() {
-		BufferedReader reader;
-		String raw = "";
-		try {
-			reader = new BufferedReader(new FileReader(file_shop));
-			while ((raw = reader.readLine()) != null) {
-				addShop(new Shop(raw));
-			}
-			reader.close();
-		}
-		catch (IOException e) {
+		if (dirExists) {
+			BufferedReader reader;
+			String raw = "";
 			try {
-				// File not found, create empty file
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file_shop));
-				writer.newLine();
-				writer.close();
+				reader = new BufferedReader(new FileReader(file_shop));
+				while ((raw = reader.readLine()) != null) {
+					addShop(new Shop(raw));
+				}
+				reader.close();
 			}
-			catch (IOException e1) {
-				e1.printStackTrace();
+			catch (IOException e) {
+				try {
+					// File not found, create empty file
+					BufferedWriter writer = new BufferedWriter(new FileWriter(file_shop));
+					writer.newLine();
+					writer.close();
+				}
+				catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}
 	
 	private static void readStatsFile() {
-		BufferedReader reader;
-		String raw = "";
-		try {
-			reader = new BufferedReader(new FileReader(file_stats));
-			ArrayList<String> data = new ArrayList<String>();
-			while ((raw = reader.readLine()) != null) {
-				data.add(raw);
-			}
-			EconStats.loadStats(data);
-			reader.close();
-		}
-		catch (IOException e) {
+		if (dirExists) {
+			BufferedReader reader;
+			String raw = "";
 			try {
-				// File not found, create empty file
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file_privGroups));
-				writer.newLine();
-				writer.close();
+				reader = new BufferedReader(new FileReader(file_stats));
+				ArrayList<String> data = new ArrayList<String>();
+				while ((raw = reader.readLine()) != null) {
+					data.add(raw);
+				}
+				EconStats.loadStats(data);
+				reader.close();
 			}
-			catch (IOException e1) {
-				e1.printStackTrace();
+			catch (IOException e) {
+				try {
+					// File not found, create empty file
+					BufferedWriter writer = new BufferedWriter(new FileWriter(file_privGroups));
+					writer.newLine();
+					writer.close();
+				}
+				catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}
 	
 	private static void readUserFile() {
-		BufferedReader reader;
-		String raw = "";
-		
-		try {
-			reader = new BufferedReader(new FileReader(file_playerData));
+		if (dirExists) {
+			BufferedReader reader;
+			String raw = "";
 			
-			while ((raw = reader.readLine()) != null) {
-				if (debug) {
-					System.out.println("Raw user data read: " + raw);
-				}
-				if (!raw.split(":")[0].equalsIgnoreCase("")) {
-					users.add(new User(raw));
-				}
-			}
-			reader.close();
-		}
-		catch (IOException e) {
-			// File not found, try to make the file
-			BufferedWriter writer;
 			try {
-				writer = new BufferedWriter(new FileWriter(file_playerData));
-				writer.newLine();
-				writer.close();
+				reader = new BufferedReader(new FileReader(file_playerData));
+				
+				while ((raw = reader.readLine()) != null) {
+					if (debug) {
+						System.out.println("Raw user data read: " + raw);
+					}
+					if (!raw.split(":")[0].equalsIgnoreCase("")) {
+						users.add(new User(raw));
+					}
+				}
+				reader.close();
 			}
-			catch (IOException e1) {
-				// FFFFFFFFUUUUUUUUU
-				e1.printStackTrace();
+			catch (IOException e) {
+				// File not found, try to make the file
+				BufferedWriter writer;
+				try {
+					writer = new BufferedWriter(new FileWriter(file_playerData));
+					writer.newLine();
+					writer.close();
+				}
+				catch (IOException e1) {
+					// FFFFFFFFUUUUUUUUU
+					e1.printStackTrace();
+				}
 			}
 		}
-		
 	}
 	
 	public static void save() {
 		System.out.println("Saving player and item data.");
 		// Perform save actions
-		write("player");
-		write("item");
-		write("stats");
-		write("shops");
+		try {
+			write("player");
+			write("item");
+			write("stats");
+			write("shops");
+		}
+		catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static boolean usingStats() {
@@ -664,62 +700,147 @@ public class DataManager {
 		return false;
 	}
 	
-	private static void write(String fileName) {
+	private static void write(String fileName) throws SQLException {
+		Connection conn = DriverManager.getConnection(DB);
+		Statement stat = conn.createStatement();
+		
 		if (fileName.equalsIgnoreCase("player")) {
-			// Write player file
-			try {
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file_playerData));
+			// TODO Player SQL Stuff
+			if (useSQL) {
+				// Drop old table
+				stat.executeUpdate("drop table if exists players;");
+				
+				// Create new table
+				stat.executeUpdate("create table players (Name, Money, NumTransBuy, NumTransSell, Spent, Gained, LastAutoPayment);");
+				
+				PreparedStatement prep = conn.prepareStatement("insert into players values (?, ?, ?, ?, ?, ?, ?);");
 				for (User iter : users) {
-					writer.write(iter.toString());
-					writer.newLine();
+					prep.setString(1, iter.getName());
+					prep.setInt(2, iter.getMoney().getAmount());
+					prep.setInt(3, iter.getNumTransactionsBuy());
+					prep.setInt(4, iter.getNumTransactionsSell());
+					prep.setInt(5, iter.getMoney().getSpent());
+					prep.setInt(6, iter.getMoney().getGained());
+					prep.setLong(7, iter.getLastAutoDeposit());
+					prep.addBatch();
 				}
-				writer.close();
+				
+				conn.setAutoCommit(false);
+				prep.executeBatch();
+				conn.setAutoCommit(true);
 			}
-			catch (IOException e) {
-				e.printStackTrace();
+			else if (dirExists) {
+				// Write player file
+				try {
+					BufferedWriter writer = new BufferedWriter(new FileWriter(file_playerData));
+					for (User iter : users) {
+						writer.write(iter.toString());
+						writer.newLine();
+					}
+					writer.close();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		else if (fileName.equalsIgnoreCase("item")) {
-			// Write item file
-			try {
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file_itemlist));
-				for (ShopItem iter : itemList) {
-					writer.write(iter.toString());
-					writer.newLine();
-				}
-				writer.close();
+			// TODO Item SQL Stuff
+			if (useSQL) {
+				stat.executeUpdate("create table if not exists items (ItemId, BuyPrice, SellPrice, ShopMaxSell, PlayerMaxSell, PlayerMaxBuy, BreakValue);");
 			}
-			catch (IOException e) {
-				e.printStackTrace();
+			else if (dirExists) {
+				// Write item file
+				try {
+					BufferedWriter writer = new BufferedWriter(new FileWriter(file_itemlist));
+					for (ShopItem iter : itemList) {
+						writer.write(iter.toString());
+						writer.newLine();
+					}
+					writer.close();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		else if (fileName.equalsIgnoreCase("stats")) {
-			// Write stats file
-			try {
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file_stats));
-				for (String iter : EconStats.statString()) {
-					writer.write(iter);
-					writer.newLine();
+			// TODO Stats SQL Stuff
+			// if (useSQL) {
+			// stat.executeUpdate("create table if not exists stats ();");
+			// }
+			
+			if (dirExists) {
+				// Write stats file
+				try {
+					BufferedWriter writer = new BufferedWriter(new FileWriter(file_stats));
+					for (String iter : EconStats.statString()) {
+						writer.write(iter);
+						writer.newLine();
+					}
+					writer.close();
 				}
-				writer.close();
-			}
-			catch (IOException e) {
-				e.printStackTrace();
+				catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		else if (fileName.equalsIgnoreCase("shops")) {
-			// Write shops file
-			try {
-				BufferedWriter writer = new BufferedWriter(new FileWriter(file_shop));
+			if (useSQL) {
+				// TODO Shops SQL Stuff
+				
+				// Drop existing tables, this is a total write
+				stat.executeUpdate("drop table if exists shoplist;");
+				
+				// Create the new tables
+				stat.executeUpdate("create table shoplist (Name, Money, InfItems, LastRestock, StockId);");
+				
+				PreparedStatement prep = conn.prepareStatement("insert into shoplist values (?, ?, ?, ?, ?);"); // Shops entry
+				int stockId = 0; // The Id for the shopstocks entry
 				for (Shop iter : shops) {
-					writer.write(iter.toString());
-					writer.newLine();
+					stockId++;
+					prep.setString(1, iter.getName());
+					prep.setInt(2, iter.getMoney().getAmount());
+					prep.setBoolean(3, iter.getInfItems());
+					prep.setLong(4, iter.getLastRestock());
+					prep.setInt(5, stockId);
+					prep.addBatch();
+					
+					stat.executeUpdate("drop table if exists " + iter.getName() + ";");
+					stat.executeUpdate("create table " + iter.getName() + " (ItemId, Amount);");
+					PreparedStatement prep2 = conn.prepareStatement("insert into " + iter.getName() + " values (?, ?);");
+					for (ShopItemStack stack : iter.getAvailItems()) {
+						prep2.setInt(1, stack.getItemID());
+						prep2.setInt(2, stack.getAmountAvail());
+						prep2.addBatch();
+					}
+					
+					conn.setAutoCommit(false);
+					prep2.executeBatch();
+					conn.setAutoCommit(true);
 				}
-				writer.close();
+				
+				// Commit the data
+				conn.setAutoCommit(false);
+				prep.executeBatch();
+				conn.setAutoCommit(true);
 			}
-			catch (IOException e) {
-				e.printStackTrace();
+			else if (dirExists) {
+				// Write shops file
+				try {
+					BufferedWriter writer = new BufferedWriter(new FileWriter(file_shop));
+					for (Shop iter : shops) {
+						
+						writer.write(iter.toString());
+						writer.newLine();
+					}
+					writer.close();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
+		conn.close();
 	}
 }

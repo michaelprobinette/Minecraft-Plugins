@@ -82,22 +82,36 @@ public class Transaction {
 				buyer.setLastTrans(trans);
 				seller.setLastTrans(trans);
 			}
-			if ((seller.getMoney().getAmount() != DataManager.getInfValue()) && !trans.cashOnly()) {
-				// Give the seller the money
-				seller.money.addAmount(trans.getStack().getTotalSellPrice().getAmount());
+			int spent = 0;
+			int earned = 0;
+			if (trans.cashOnly()) {
+				spent = trans.getAmount().getAmount();
+				earned = trans.getAmount().getAmount();
 			}
-			else if ((seller.getMoney().getAmount() != DataManager.getInfValue()) && trans.cashOnly()) {
-				seller.getMoney().addAmount(trans.getAmount().getAmount());
+			else {
+				spent = stack.getTotalBuyPrice().getAmount();
+				earned = stack.getTotalSellPrice().getAmount();
 			}
 			
+			seller.getMoney().addAmount(earned);
+			buyer.getMoney().removeAmount(spent);
+			
+			//			if ((seller.getMoney().getAmount() != DataManager.getInfValue()) && !trans.cashOnly()) {
+			//				// Give the seller the money
+			//				seller.money.addAmount(trans.getStack().getTotalSellPrice().getAmount());
+			//			}
+			//			else if ((seller.getMoney().getAmount() != DataManager.getInfValue()) && trans.cashOnly()) {
+			//				seller.getMoney().addAmount(trans.getAmount().getAmount());
+			//			}
+			
 			// Check if an inf shop
-			if ((buyer.getMoney().getAmount() != DataManager.getInfValue()) && !trans.cashOnly()) {
-				// Subtract the money from the buyer
-				buyer.getMoney().addAmount(-trans.getStack().getTotalBuyPrice().getAmount());
-			}
-			else if ((buyer.getMoney().getAmount() != DataManager.getInfValue()) && trans.cashOnly()) {
-				buyer.getMoney().addAmount(-trans.getAmount().getAmount());
-			}
+			//			if ((buyer.getMoney().getAmount() != DataManager.getInfValue()) && !trans.cashOnly()) {
+			//				// Subtract the money from the buyer
+			//				buyer.getMoney().addAmount(-trans.getStack().getTotalBuyPrice().getAmount());
+			//			}
+			//			else if ((buyer.getMoney().getAmount() != DataManager.getInfValue()) && trans.cashOnly()) {
+			//				buyer.getMoney().addAmount(-trans.getAmount().getAmount());
+			//			}
 			
 			// Stats handling
 			if (buyer.isPlayer()) {
@@ -132,9 +146,7 @@ public class Transaction {
 				if (buyer.isPlayer()) {
 					// If it is a player, go ahead and give them the item
 					if (buyer.numberOfItems(stack.getShopItem()) != DataManager.getInfValue()) {
-						// Gets the user from the DataManager user list, and returns it to let us use
-						buyer.getUser().getPlayer().getInventory().addItem(
-								new ItemStack(trans.getStack().getItemID(), trans.getStack().getAmountAvail()));
+						buyer.getUser().addItem(stack);
 					}
 				}
 				else {
@@ -146,38 +158,9 @@ public class Transaction {
 				
 				// Remove the items from the seller
 				if (seller.isPlayer()) {
-					// If it is a player, go ahead and give them the iter
-					
-					seller.getUser().getPlayer().getInventory().remove(new ItemStack(stack.getItemID(), stack.getAmountAvail()));
-					
-					// // Gets the user from the DataManager user list, and returns it to let us use
-					// for (int iter : seller.getUser().getPlayer().getInventory().all(stack.getItemID()).keySet()) {
-					// int temp = seller.getUser().getPlayer().getInventory().all(stack.getItemID()).get(iter).getAmount();
-					//						
-					//						
-					//						
-					// if (count + temp >= stack.getAmountAvail()) {
-					// if (temp - (stack.getAmountAvail() - count) == 0) {
-					// seller.getUser().getPlayer().getInventory().setItem(iter, new ItemStack(Material.Air));
-					// }
-					// else {
-					// // Done
-					// seller.getUser().getPlayer().getInventory().setItem(iter,
-					// new ItemStack(stack.getItemID(), temp - (stack.getAmountAvail() - count)));
-					// }
-					//
-					// seller.getUser().getPlayer().getInventory().setItem(iter,
-					// new ItemStack(stack.getItemID(), temp - (stack.getAmountAvail() - count)));
-					// break;
-					// }
-					// else {
-					// // Not enough in this stack, remove as much as possible
-					// count += temp;
-					// seller.getUser().getPlayer().getInventory().setItem(iter, new ItemStack(stack.getItemID(), temp));
-					// }
+					// If it is a player, go ahead and give them the item
+					seller.getUser().removeItem(stack);
 				}
-				// seller.getUser().getPlayer().getInventory().removeItem(trans.getStack().getItemID(),
-				// trans.getStack().getAmountAvail());
 			}
 			else if (seller.numberOfItems(stack.getShopItem()) != DataManager.getInfValue()) {
 				// If is is not a player, add it to their availableItems list
@@ -196,16 +179,12 @@ public class Transaction {
 					// Send messages to the seller and buyer telling the success
 					if (buyer.isPlayer()) {
 						// EconStats.bought(stack);
-						buyer.getUser().sendMessage(
-								"You bought " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName()
-										+ " for " + trans.getStack().getTotalBuyPrice().toString());
+						buyer.getUser().sendMessage("You bought " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName() + " for " + trans.getStack().getTotalBuyPrice().toString());
 						buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
 					}
 					if (seller.isPlayer()) {
 						// EconStats.sold(stack);
-						seller.getUser().sendMessage(
-								"You sold " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName() + " for "
-										+ trans.getStack().getTotalSellPrice().toString());
+						seller.getUser().sendMessage("You sold " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName() + " for " + trans.getStack().getTotalSellPrice().toString());
 						seller.getUser().sendMessage("Your new balance is: " + seller.getMoney().toString());
 					}
 				}
@@ -215,18 +194,12 @@ public class Transaction {
 					
 					if (buyer.isPlayer()) {
 						// EconStats.undoSell(stack);
-						buyer.getUser().sendMessage(
-								"The last transaction was undone. " + trans.getStack().getAmountAvail() + " "
-										+ trans.getStack().getShopItem().getName() + " has been refunded and "
-										+ trans.getStack().getTotalSellPrice().toString() + " has been removed.");
+						buyer.getUser().sendMessage("The last transaction was undone. " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName() + " has been refunded and " + trans.getStack().getTotalSellPrice().toString() + " has been removed.");
 						buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
 					}
 					if (seller.isPlayer()) {
 						// EconStats.undoBuy(stack);
-						seller.getUser().sendMessage(
-								"The last transaction was undone. " + trans.getStack().getAmountAvail() + " "
-										+ trans.getStack().getShopItem().getName() + " has been removed and you have been refunded "
-										+ trans.getStack().getTotalBuyPrice().toString());
+						seller.getUser().sendMessage("The last transaction was undone. " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName() + " has been removed and you have been refunded " + trans.getStack().getTotalBuyPrice().toString());
 						seller.getUser().sendMessage("Your new balance is: " + seller.getMoney().toString());
 					}
 				}
@@ -281,9 +254,7 @@ public class Transaction {
 		}
 		else {
 			// Item transaction, check if the buyer has the item, and if the seller has the money
-			if (process(new Transaction(trans.getBuyer(), trans.getSeller(), new ShopItemStack(new ShopItem(trans.getStack().getItemID(),
-					trans.getStack().getShopItem().getSellPrice(), trans.getStack().getShopItem().getBuyPrice()), trans.getStack()
-					.getAmountAvail())), true, true)) {
+			if (process(new Transaction(trans.getBuyer(), trans.getSeller(), new ShopItemStack(new ShopItem(trans.getStack().getItemID(), trans.getStack().getShopItem().getSellPrice(), trans.getStack().getShopItem().getBuyPrice()), trans.getStack().getAmountAvail())), true, true)) {
 				// Succeeded
 				// Remove the transaction from their lists
 				trans.getSeller().undoTransaction(trans);

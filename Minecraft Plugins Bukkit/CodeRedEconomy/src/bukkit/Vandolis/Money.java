@@ -9,14 +9,11 @@
 package bukkit.Vandolis;
 
 public class Money {
-	public static String getMoneyName() {
-		return name;
-	}
-	
 	private int				amount	= 0;
 	private boolean			valid	= true;
-	
 	private static String	name	= "";
+	private int				spent	= 0;
+	private int				gained	= 0;
 	
 	public Money() {
 		name = DataManager.getMoneyName();
@@ -32,12 +29,16 @@ public class Money {
 	
 	public void addAmount(int amount) {
 		// Check to make sure they don't accidently go into inf range
-		if (this.amount + amount == DataManager.getInfValue()) {
+		if (this.amount + amount == DataManager.getInfValue() && this.amount != DataManager.getInfValue()) {
 			this.amount += (amount + 1);
 		}
-		else {
+		else if (this.amount != DataManager.getInfValue()) {
 			this.amount += amount;
 		}
+	}
+	
+	public static String getMoneyName() {
+		return name;
 	}
 	
 	public int getAmount() {
@@ -50,10 +51,10 @@ public class Money {
 	
 	public void removeAmount(int amount) {
 		// Check to make sure they don't accidently go into inf range
-		if (this.amount - amount == DataManager.getInfValue()) {
+		if (this.amount - amount == DataManager.getInfValue() && this.amount != DataManager.getInfValue()) {
 			this.amount -= (amount + 1);
 		}
-		else {
+		else if (this.amount != DataManager.getInfValue()) {
 			this.amount -= amount;
 		}
 	}
@@ -69,5 +70,19 @@ public class Money {
 	@Override
 	public String toString() {
 		return amount + " " + name;
+	}
+	
+	/**
+	 * @return
+	 */
+	public int getSpent() {
+		return spent;
+	}
+	
+	/**
+	 * @return
+	 */
+	public int getGained() {
+		return gained;
 	}
 }
