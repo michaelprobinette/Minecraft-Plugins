@@ -1,7 +1,8 @@
+package bukkit.Vandolis;
 /**
  * 
  */
-package bukkit.Vandolis.CodeRedEconomy;
+
 
 import org.bukkit.event.block.BlockListener;
 

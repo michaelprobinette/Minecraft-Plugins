@@ -1,6 +1,6 @@
-package bukkit.Vandolis.CodeRedEconomy;
+package bukkit.Vandolis;
 
-import org.bukkit.Player;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerListener;
 

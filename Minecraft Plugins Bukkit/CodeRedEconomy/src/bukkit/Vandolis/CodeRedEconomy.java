@@ -1,4 +1,4 @@
-package bukkit.Vandolis.CodeRedEconomy;
+package bukkit.Vandolis;
 
 import java.io.File;
 
@@ -15,8 +15,9 @@ public class CodeRedEconomy extends JavaPlugin {
 	private final CodeRedPlayerListener	playerListener	= new CodeRedPlayerListener(this);
 	private final CodeRedBlockListener	blockListener	= new CodeRedBlockListener(this);
 	
-	public CodeRedEconomy(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File plugin, ClassLoader cLoader) {
-		super(pluginLoader, instance, desc, plugin, cLoader);
+	public CodeRedEconomy(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin,
+			ClassLoader cLoader) {
+		super(pluginLoader, instance, desc, folder, plugin, cLoader);
 	}
 	
 	@Override

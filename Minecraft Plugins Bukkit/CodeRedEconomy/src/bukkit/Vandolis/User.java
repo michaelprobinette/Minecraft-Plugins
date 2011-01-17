@@ -1,4 +1,4 @@
-package bukkit.Vandolis.CodeRedEconomy;
+package bukkit.Vandolis;
 
 /*
  * Economy made for the Redstrype Minecraft Server. Copyright (C) 2010 Michael Robinette This program is free software: you can redistribute
@@ -11,8 +11,8 @@ package bukkit.Vandolis.CodeRedEconomy;
 
 import java.util.ArrayList;
 
-import org.bukkit.ItemStack;
-import org.bukkit.Player;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class User extends EconEntity {
 	private final String	regex		= DataManager.getPlayerRegex();
@@ -184,19 +184,19 @@ public class User extends EconEntity {
 		availableItems = new ArrayList<ShopItemStack>();
 		for (ItemStack iter : player.getInventory().getContents()) {
 			if (iter != null) {
-				if (iter.getTypeID() > 0) {
+				if (iter.getTypeId() > 0) {
 					// Check if it is already in the array
 					boolean found = false;
 					for (ShopItemStack siter : availableItems) {
-						if (siter.getItemID() == iter.getTypeID()) {
+						if (siter.getItemID() == iter.getTypeId()) {
 							// Already in available items, so add to the amount
 							siter.addAmountAvail(iter.getAmount());
 							found = true;
 						}
 					}
 					// Add it to the array
-					if (!found && DataManager.validID(iter.getTypeID())) {
-						availableItems.add(new ShopItemStack(new ShopItem(iter.getTypeID()), iter.getAmount()));
+					if (!found && DataManager.validID(iter.getTypeId())) {
+						availableItems.add(new ShopItemStack(new ShopItem(iter.getTypeId()), iter.getAmount()));
 					}
 				}
 			}

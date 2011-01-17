@@ -1,4 +1,5 @@
-package bukkit.Vandolis.CodeRedEconomy;
+package bukkit.Vandolis;
+
 
 /*
  * Economy made for the Redstrype Minecraft Server. Copyright (C) 2010 Michael Robinette This program is free software: you can redistribute

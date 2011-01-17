@@ -1,6 +1,6 @@
-package bukkit.Vandolis.CodeRedEconomy;
+package bukkit.Vandolis;
 
-import org.bukkit.ItemStack;
+import org.bukkit.inventory.ItemStack;
 
 /*
  * Economy made for the Redstrype Minecraft Server. Copyright (C) 2010 Michael Robinette This program is free software: you can redistribute
@@ -20,16 +20,15 @@ public class ShopItem {
 	private final int				maxAvail;
 	private static final String[]	blockNames		= {
 			"Other", "Stone", "Grass", "Dirt", "Cobblestone", "Wooden Planks", "Sapling", "Bedrock", "Water", "Stationary Water", "Lava",
-			"Stationary Lava", "Sand", "Gravel", "Gold Ore", "Iron Ore", "Coal Ore", "Wood", "Leaves", "Sponge", "Glass", "Red Cloth",
-			"Orange Cloth", "Yellow Cloth", "Lime Cloth", "Green Cloth", "Aquagreen Cloth", "Cyan Cloth", "Blue Cloth", "Purple Cloth",
-			"Indigo Cloth", "Violet Cloth", "Magenta Cloth", "Pink Cloth", "Black Cloth", "Wool", "White Cloth", "Yellow Flower",
-			"Red Rose", "Brown Mushroom", "Red Mushroom", "Gold Block", "Iron Block", "Double Stone Slab", "Stone Slab", "Brick", "TNT",
-			"Bookshelf", "Moss Stone", "Obsidian", "Torch", "Fire", "Monster Spawner", "Wodden Stairs", "Chest", "Redstone Wire",
-			"Diamond Ore", "Diamond Block", "Workbench", "Crops", "Soil", "Furnace", "Burning Furnace", "Sign Post", "Wooden Door",
-			"Ladder", "Minecart Tracks", "Cobblestone Stairs", "Wall Sign", "Lever", "Stone Pressure Plate", "Iron Door",
-			"Wooden Pressure Plate", "Redstone Ore", "GlowingRedstone", "RedstoneTorchOf", "RedstoneTorchOn", "StoneButton", "Snow", "Ice",
-			"SnowBlock", "Cactus", "Clay", "Reed", "Jukebox", "Fence", "Pumpkin", "Netherrack", "Soul Sand", "Glowstone", "Portal",
-			"Jack-O-Lantern"
+			"Stationary Lava", "Sand", "Gravel", "Gold Ore", "Iron Ore", "Coal Ore", "Wood", "Leaves", "Sponge", "Glass",
+			"Lapis Lazuli Ore", "Lapis Lazuli Block", "Dispenser", "Sandstone", "Note Block", "", "", "", "", "", "", "", "", "", "Wool",
+			"", "Yellow Flower", "Red Rose", "Brown Mushroom", "Red Mushroom", "Gold Block", "Iron Block", "Double Stone Slab",
+			"Stone Slab", "Brick", "TNT", "Bookshelf", "Moss Stone", "Obsidian", "Torch", "Fire", "Monster Spawner", "Wodden Stairs",
+			"Chest", "Redstone Wire", "Diamond Ore", "Diamond Block", "Workbench", "Crops", "Soil", "Furnace", "Burning Furnace",
+			"Sign Post", "Wooden Door", "Ladder", "Minecart Tracks", "Cobblestone Stairs", "Wall Sign", "Lever", "Stone Pressure Plate",
+			"Iron Door", "Wooden Pressure Plate", "Redstone Ore", "GlowingRedstone", "RedstoneTorchOf", "RedstoneTorchOn", "StoneButton",
+			"Snow", "Ice", "SnowBlock", "Cactus", "Clay", "Sugar Cane", "Jukebox", "Fence", "Pumpkin", "Netherrack", "Soul Sand",
+			"Glowstone", "Portal", "Jack-O-Lantern", "Cake Block"
 													};
 	private static final String[]	itemNames		= {
 			"Iron Shovel", "Iron Pickaxe", "Iron Axe", "Flint and Steel", "Apple", "Bow", "Arrow", "Coal", "Diamond", "Iron Ingot",
@@ -42,7 +41,8 @@ public class ShopItem {
 			"Diamond Boots", "Gold Helmet", "Gold Chestplate", "Gold Leggings", "Gold Boots", "Flint", "Raw Porkchop", "Cooked Porkchop",
 			"Painting", "Golden Apple", "Sign", "Wooden Door", "Bucket", "Water Bucket", "Lava Bucket", "Minecart", "Saddle", "Iron Door",
 			"Redstone", "Snowball", "Boat", "Leather", "Milk", "Clay Brick", "Clay Balls", "Reed", "Paper", "Book", "Slimeball",
-			"Storage Minecart", "Powered Minecart", "Egg", "Compass", "Fishing Rod", "Clock", "Glowstone Dust", "Raw Fish", "Cooked Fish"
+			"Storage Minecart", "Powered Minecart", "Egg", "Compass", "Fishing Rod", "Clock", "Glowstone Dust", "Raw Fish", "Cooked Fish",
+			"Ink Sack", "Bone", "Sugar", "Cake"
 													};
 	private static final String[]	specialItems	= {
 			"Gold Music Disk", "Green Music Disk"

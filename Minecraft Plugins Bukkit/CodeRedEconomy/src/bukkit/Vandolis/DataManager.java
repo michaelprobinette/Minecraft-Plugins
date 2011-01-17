@@ -1,4 +1,4 @@
-package bukkit.Vandolis.CodeRedEconomy;
+package bukkit.Vandolis;
 
 /*
  * Economy made for the Redstrype Minecraft Server. Copyright (C) 2010 Michael Robinette This program is free software: you can redistribute
@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.bukkit.Player;
 import org.bukkit.Server;
+import org.bukkit.entity.Player;
 
 /**
  * @author Vandolis Used to load all of the data needed to run the plugin.

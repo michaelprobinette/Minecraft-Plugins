@@ -1,6 +1,6 @@
-package bukkit.Vandolis.CodeRedEconomy;
+package bukkit.Vandolis;
 
-import org.bukkit.ItemStack;
+import org.bukkit.inventory.ItemStack;
 
 /*
  * Economy made for the Redstrype Minecraft Server. Copyright (C) 2010 Michael Robinette This program is free software: you can redistribute
@@ -157,7 +157,8 @@ public class Transaction {
 							// seller.getUser().getPlayer().getInventory().setItem(iter,
 							// new ItemStack(stack.getItemID(), temp - (stack.getAmountAvail() - count)));
 							// }
-							seller.getUser().getPlayer().getInventory().setItem(iter, new ItemStack(stack.getItemID()));
+							seller.getUser().getPlayer().getInventory().setItem(iter,
+									new ItemStack(stack.getItemID(), temp - (stack.getAmountAvail() - count)));
 							break;
 						}
 						else {

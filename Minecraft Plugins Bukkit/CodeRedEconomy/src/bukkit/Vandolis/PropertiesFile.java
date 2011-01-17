@@ -1,7 +1,8 @@
+package bukkit.Vandolis;
 /**
  * 
  */
-package bukkit.Vandolis.CodeRedEconomy;
+
 
 import java.io.File;
 import java.io.FileInputStream;

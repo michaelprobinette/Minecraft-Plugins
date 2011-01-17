@@ -1,7 +1,5 @@
-/**
- * 
- */
-package bukkit.Vandolis.CodeRedEconomy;
+package bukkit.Vandolis;
+
 
 /*
  * Economy made for the Redstrype Minecraft Server. Copyright (C) 2010 Michael Robinette This program is free software: you can redistribute
@@ -12,28 +10,24 @@ package bukkit.Vandolis.CodeRedEconomy;
  * <http://www.gnu.org/licenses/>
  */
 
-public class EconException extends Exception {
+public class ShopGroup {
+	private String	groupName		= "";
+	private int[]	allowedBlocks	= new int[1];
 	
-	/**
-	 * 
-	 */
-	private static final long	serialVersionUID	= 1L;
-	private String				buyMsg				= "";
-	private String				sellMsg				= "";
-	
-	public EconException() {
+	public ShopGroup(String group) {
+		groupName = group;
 	}
 	
-	public EconException(String buyMsg, String sellMsg) {
-		this.buyMsg = buyMsg;
-		this.sellMsg = sellMsg;
+	public ShopGroup(String group, int[] allowed) {
+		groupName = group;
+		allowedBlocks = allowed;
 	}
 	
-	public String getBuyMsg() {
-		return buyMsg;
+	public int[] getAllowed() {
+		return allowedBlocks;
 	}
 	
-	public String getSellMsg() {
-		return sellMsg;
+	public String getGroupName() {
+		return groupName;
 	}
 }
