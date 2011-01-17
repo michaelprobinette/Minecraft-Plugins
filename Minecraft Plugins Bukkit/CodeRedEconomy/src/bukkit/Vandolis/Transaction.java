@@ -1,7 +1,3 @@
-package bukkit.Vandolis;
-
-import org.bukkit.inventory.ItemStack;
-
 /*
  * Economy made for the Redstrype Minecraft Server. Copyright (C) 2010 Michael Robinette This program is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of
@@ -10,20 +6,30 @@ import org.bukkit.inventory.ItemStack;
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
+package bukkit.Vandolis;
+
+import org.bukkit.inventory.ItemStack;
 
 public class Transaction {
+	private final EconEntity	seller, buyer;
+	private final ShopItemStack	stack;
+	private final boolean		cashOnly;
+	private final long			time;
+	
+	private Money				amount	= null;
+	
 	/**
 	 * @param trans
 	 * @return represents the status of it. 0 mean all went fine, if negative something went wrong
 	 */
-	public static int process(Transaction trans) {
+	public static void process(Transaction trans) {
 		// call process with messages on
-		return process(trans, false, true);
+		process(trans, false, true);
 	}
 	
-	public static int process(Transaction trans, boolean loud) {
+	public static void process(Transaction trans, boolean loud) {
 		// call process with messages on
-		return process(trans, false, loud);
+		process(trans, false, loud);
 	}
 	
 	/**
@@ -34,7 +40,7 @@ public class Transaction {
 	 *            Undo trans or not. Changes the messages shown to the players
 	 * @return
 	 */
-	public static int process(Transaction trans, boolean undo, boolean loud) {
+	public static boolean process(Transaction trans, boolean undo, boolean loud) {
 		EconEntity buyer = trans.getBuyer();
 		EconEntity seller = trans.getSeller();
 		ShopItemStack stack = trans.getStack();
@@ -142,107 +148,109 @@ public class Transaction {
 				if (seller.isPlayer()) {
 					// If it is a player, go ahead and give them the iter
 					
-					// TODO Might be fixed
+					seller.getUser().getPlayer().getInventory().remove(new ItemStack(stack.getItemID(), stack.getAmountAvail()));
 					
-					// Gets the user from the DataManager user list, and returns it to let us use
-					int count = 0;
-					for (int iter : seller.getUser().getPlayer().getInventory().all(stack.getItemID()).keySet()) {
-						int temp = seller.getUser().getPlayer().getInventory().all(stack.getItemID()).get(iter).getAmount();
-						if (count + temp >= stack.getAmountAvail()) {
-							// if (temp - (stack.getAmountAvail() - count) == 0) {
-							// seller.getUser().getPlayer().getInventory().setItem(iter, new ItemStack(Material.Air));
-							// }
-							// else {
-							// // Done
-							// seller.getUser().getPlayer().getInventory().setItem(iter,
-							// new ItemStack(stack.getItemID(), temp - (stack.getAmountAvail() - count)));
-							// }
-							seller.getUser().getPlayer().getInventory().setItem(iter,
-									new ItemStack(stack.getItemID(), temp - (stack.getAmountAvail() - count)));
-							break;
-						}
-						else {
-							// Not enough in this stack, remove as much as possible
-							count += temp;
-							seller.getUser().getPlayer().getInventory().setItem(iter, new ItemStack(stack.getItemID(), temp));
-						}
-					}
-					// seller.getUser().getPlayer().getInventory().removeItem(trans.getStack().getItemID(),
-					// trans.getStack().getAmountAvail());
+					// // Gets the user from the DataManager user list, and returns it to let us use
+					// for (int iter : seller.getUser().getPlayer().getInventory().all(stack.getItemID()).keySet()) {
+					// int temp = seller.getUser().getPlayer().getInventory().all(stack.getItemID()).get(iter).getAmount();
+					//						
+					//						
+					//						
+					// if (count + temp >= stack.getAmountAvail()) {
+					// if (temp - (stack.getAmountAvail() - count) == 0) {
+					// seller.getUser().getPlayer().getInventory().setItem(iter, new ItemStack(Material.Air));
+					// }
+					// else {
+					// // Done
+					// seller.getUser().getPlayer().getInventory().setItem(iter,
+					// new ItemStack(stack.getItemID(), temp - (stack.getAmountAvail() - count)));
+					// }
+					//
+					// seller.getUser().getPlayer().getInventory().setItem(iter,
+					// new ItemStack(stack.getItemID(), temp - (stack.getAmountAvail() - count)));
+					// break;
+					// }
+					// else {
+					// // Not enough in this stack, remove as much as possible
+					// count += temp;
+					// seller.getUser().getPlayer().getInventory().setItem(iter, new ItemStack(stack.getItemID(), temp));
+					// }
 				}
-				else if (seller.numberOfItems(stack.getShopItem()) != DataManager.getInfValue()) {
-					// If is is not a player, add it to their availableItems list
-					seller.removeShopItems(trans.getStack());
-				}
-				
-				// ///////////////////////////////////////////
-				// /////////////// Messages///////////////////
-				// ///////////////////////////////////////////
-				if (loud) {
-					if (!undo) {
-						// Add it to their transaction list
-						buyer.addTransaction(trans);
-						seller.addTransaction(trans);
-						
-						// Send messages to the seller and buyer telling the success
-						if (buyer.isPlayer()) {
-							// EconStats.bought(stack);
-							buyer.getUser().sendMessage(
-									"You bought " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName()
-											+ " for " + trans.getStack().getTotalBuyPrice().toString());
-							buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
-						}
-						if (seller.isPlayer()) {
-							// EconStats.sold(stack);
-							seller.getUser().sendMessage(
-									"You sold " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName()
-											+ " for " + trans.getStack().getTotalSellPrice().toString());
-							seller.getUser().sendMessage("Your new balance is: " + seller.getMoney().toString());
-						}
+				// seller.getUser().getPlayer().getInventory().removeItem(trans.getStack().getItemID(),
+				// trans.getStack().getAmountAvail());
+			}
+			else if (seller.numberOfItems(stack.getShopItem()) != DataManager.getInfValue()) {
+				// If is is not a player, add it to their availableItems list
+				seller.removeShopItems(trans.getStack());
+			}
+			
+			// ///////////////////////////////////////////
+			// /////////////// Messages///////////////////
+			// ///////////////////////////////////////////
+			if (loud) {
+				if (!undo) {
+					// Add it to their transaction list
+					buyer.addTransaction(trans);
+					seller.addTransaction(trans);
+					
+					// Send messages to the seller and buyer telling the success
+					if (buyer.isPlayer()) {
+						// EconStats.bought(stack);
+						buyer.getUser().sendMessage(
+								"You bought " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName()
+										+ " for " + trans.getStack().getTotalBuyPrice().toString());
+						buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
 					}
-					else {
-						// Undo, the buyer is the person who sold the item in the transaction
-						// The seller is the person who bought the item in the last transaction
-						
-						if (buyer.isPlayer()) {
-							// EconStats.undoSell(stack);
-							buyer.getUser().sendMessage(
-									"The last transaction was undone. " + trans.getStack().getAmountAvail() + " "
-											+ trans.getStack().getShopItem().getName() + " has been refunded and "
-											+ trans.getStack().getTotalSellPrice().toString() + " has been removed.");
-							buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
-						}
-						if (seller.isPlayer()) {
-							// EconStats.undoBuy(stack);
-							seller.getUser().sendMessage(
-									"The last transaction was undone. " + trans.getStack().getAmountAvail() + " "
-											+ trans.getStack().getShopItem().getName() + " has been removed and you have been refunded "
-											+ trans.getStack().getTotalBuyPrice().toString());
-							seller.getUser().sendMessage("Your new balance is: " + seller.getMoney().toString());
-						}
+					if (seller.isPlayer()) {
+						// EconStats.sold(stack);
+						seller.getUser().sendMessage(
+								"You sold " + trans.getStack().getAmountAvail() + " " + trans.getStack().getShopItem().getName() + " for "
+										+ trans.getStack().getTotalSellPrice().toString());
+						seller.getUser().sendMessage("Your new balance is: " + seller.getMoney().toString());
 					}
 				}
 				else {
-					if (!undo) {
-						
-						// Send messages to the seller and buyer telling the success
-						if (buyer.isPlayer()) {
-							// EconStats.paid(trans);
-							buyer.getUser().sendMessage("You have paid " + seller.getName() + " " + trans.getAmount().toString());
-							buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
-						}
-						if (seller.isPlayer()) {
-							// Nothing
-							seller.getUser().sendMessage(buyer.getName() + " has paid you " + trans.getAmount().toString());
-							seller.getUser().sendMessage("Your new balance is: " + seller.getMoney().toString());
-						}
+					// Undo, the buyer is the person who sold the item in the transaction
+					// The seller is the person who bought the item in the last transaction
+					
+					if (buyer.isPlayer()) {
+						// EconStats.undoSell(stack);
+						buyer.getUser().sendMessage(
+								"The last transaction was undone. " + trans.getStack().getAmountAvail() + " "
+										+ trans.getStack().getShopItem().getName() + " has been refunded and "
+										+ trans.getStack().getTotalSellPrice().toString() + " has been removed.");
+						buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
+					}
+					if (seller.isPlayer()) {
+						// EconStats.undoBuy(stack);
+						seller.getUser().sendMessage(
+								"The last transaction was undone. " + trans.getStack().getAmountAvail() + " "
+										+ trans.getStack().getShopItem().getName() + " has been removed and you have been refunded "
+										+ trans.getStack().getTotalBuyPrice().toString());
+						seller.getUser().sendMessage("Your new balance is: " + seller.getMoney().toString());
+					}
+				}
+			}
+			else {
+				if (!undo) {
+					
+					// Send messages to the seller and buyer telling the success
+					if (buyer.isPlayer()) {
+						// EconStats.paid(trans);
+						buyer.getUser().sendMessage("You have paid " + seller.getName() + " " + trans.getAmount().toString());
+						buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney().toString());
+					}
+					if (seller.isPlayer()) {
+						// Nothing
+						seller.getUser().sendMessage(buyer.getName() + " has paid you " + trans.getAmount().toString());
+						seller.getUser().sendMessage("Your new balance is: " + seller.getMoney().toString());
 					}
 				}
 			}
 			DataManager.save(); // Save on each transaction
-			return 0; // Return 0 as it succeeded
+			return true;
 		}
-		return 1;
+		return false;
 	}
 	
 	/**
@@ -263,7 +271,7 @@ public class Transaction {
 		
 		if (trans.cashOnly()) {
 			// Cash transaction only, check if the buyer
-			if (process(new Transaction(trans.getBuyer(), trans.getSeller(), trans.getAmount()), true, true) == 0) {
+			if (process(new Transaction(trans.getBuyer(), trans.getSeller(), trans.getAmount()), true, true)) {
 				// Succeeded
 				// Remove the transaction from their lists
 				trans.getSeller().undoTransaction(trans);
@@ -275,7 +283,7 @@ public class Transaction {
 			// Item transaction, check if the buyer has the item, and if the seller has the money
 			if (process(new Transaction(trans.getBuyer(), trans.getSeller(), new ShopItemStack(new ShopItem(trans.getStack().getItemID(),
 					trans.getStack().getShopItem().getSellPrice(), trans.getStack().getShopItem().getBuyPrice()), trans.getStack()
-					.getAmountAvail())), true, true) == 0) {
+					.getAmountAvail())), true, true)) {
 				// Succeeded
 				// Remove the transaction from their lists
 				trans.getSeller().undoTransaction(trans);
@@ -285,16 +293,6 @@ public class Transaction {
 		}
 		return false;
 	}
-	
-	private final EconEntity	seller, buyer;
-	
-	private final ShopItemStack	stack;
-	
-	private final boolean		cashOnly;
-	
-	private Money				amount	= null;
-	
-	private final long			time;
 	
 	public Transaction(EconEntity seller, EconEntity buyer, Money amount) {
 		this.seller = seller;

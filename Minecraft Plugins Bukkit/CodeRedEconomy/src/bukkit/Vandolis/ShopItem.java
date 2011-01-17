@@ -1,7 +1,3 @@
-package bukkit.Vandolis;
-
-import org.bukkit.inventory.ItemStack;
-
 /*
  * Economy made for the Redstrype Minecraft Server. Copyright (C) 2010 Michael Robinette This program is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of
@@ -10,6 +6,9 @@ import org.bukkit.inventory.ItemStack;
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
+package bukkit.Vandolis;
+
+import org.bukkit.inventory.ItemStack;
 
 public class ShopItem {
 	private final int				itemID;

@@ -1,8 +1,7 @@
-package bukkit.Vandolis;
-/**
- * 
+/*
+ * Borrowed from the now dead hMod. Still a handy way to save settings
  */
-
+package bukkit.Vandolis;
 
 import java.io.File;
 import java.io.FileInputStream;
