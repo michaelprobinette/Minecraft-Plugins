@@ -1,8 +1,8 @@
 package bukkit.Vandolis;
+
 /**
  * 
  */
-
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -41,12 +41,17 @@ public class DataManager {
 	public static Chest getChest(Location loc) throws SQLException {
 		Connection conn = DriverManager.getConnection("jdbc:sqlite:BloodBucket");
 		Statement stat = conn.createStatement();
-		ResultSet rs = stat.executeQuery("select * from chestprotect where LocationX = " + loc.getBlockX() + " and LocationY = "
-				+ loc.getBlockY() + " and LocationZ = " + loc.getBlockZ() + ";");
+		ResultSet rs = stat.executeQuery("select * from chestprotect where LocationX = " + loc.getBlockX() + " and LocationY = " + loc.getBlockY() + " and LocationZ = " + loc.getBlockZ() + ";");
 		Chest returnChest = new Chest(rs.getString(4), loc, rs.getBoolean(5), rs.getString(6));
 		rs.close();
 		conn.close();
 		return returnChest;
+	}
+	
+	public static void updateChest(Chest chest) throws SQLException {
+		Connection conn = DriverManager.getConnection("jdbc:sqlite:BloodBucket");
+		Statement stat = conn.createStatement();
+		stat.executeQuery("insert into chestprotect where;");
 	}
 	
 	public static void init() throws ClassNotFoundException, SQLException {
@@ -95,8 +100,7 @@ public class DataManager {
 		Statement stat = conn.createStatement();
 		ResultSet rs = stat.executeQuery("select * from chestprotect;");
 		while (rs.next()) {
-			System.out.println("Chest X: " + rs.getInt(1) + "\tY: " + rs.getInt(2) + "\tZ: " + rs.getInt(3) + "\tCreator: "
-					+ rs.getString(4) + "\tPrivate: " + rs.getBoolean(5) + "\tAllowed Users: " + rs.getString(6));
+			System.out.println("Chest X: " + rs.getInt(1) + "\tY: " + rs.getInt(2) + "\tZ: " + rs.getInt(3) + "\tCreator: " + rs.getString(4) + "\tPrivate: " + rs.getBoolean(5) + "\tAllowed Users: " + rs.getString(6));
 		}
 		rs.close();
 		conn.close();
@@ -105,8 +109,7 @@ public class DataManager {
 	public static void removeChest(Location loc) throws SQLException {
 		Connection conn = DriverManager.getConnection("jdbc:sqlite:BloodBucket");
 		Statement stat = conn.createStatement();
-		stat.executeUpdate("delete from chestprotect where LocationX = " + loc.getBlockX() + " and LocationY = " + loc.getBlockY()
-				+ " and LocationZ = " + loc.getBlockZ() + ";");
+		stat.executeUpdate("delete from chestprotect where LocationX = " + loc.getBlockX() + " and LocationY = " + loc.getBlockY() + " and LocationZ = " + loc.getBlockZ() + ";");
 	}
 	
 	public static void test() throws SQLException {

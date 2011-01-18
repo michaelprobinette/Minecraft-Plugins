@@ -32,7 +32,7 @@ public abstract class EconEntity {
 	}
 	
 	/**
-	 * Makes a default entity with the given money.
+	 * Makes a default entity with the given {@link Money}.
 	 * 
 	 * @param money
 	 */
@@ -90,47 +90,63 @@ public abstract class EconEntity {
 	 */
 	public boolean canBuy(ShopItemStack stack) throws EconException {
 		// TODO clean up the canBuy code
-		
 		if (DataManager.getDebug()) {
 			if (stack != null) {
 				System.out.println("Checking to see if " + name + " can buy " + stack.getAmountAvail() + " " + stack.getShopItem().getName());
 			}
 		}
-		boolean canBuy = false;
-		boolean boughtLessThanMax = true;
 		if (stack != null) {
-			// Check if the entity is a player
-			if (isPlayer) {
-				// Get the player from the user and check if they are in the correct group to buy the item, as well as if they have enough
-				// money
+			// Item transaction
+			if (user != null) {
+				// Player
 				
-				canBuy = (stack.getTotalBuyPrice().getAmount() <= money.getAmount()) || (money.getAmount() == DataManager.getInfValue());
-				// FIXME Need to change once bukkit implements a permissions system
-				
-				// canBuy = ((user.getPlayer().isInGroup(DataManager.getReqGroup(stack.getShopItem().getItemID()))) && ((stack
-				// .getTotalBuyPrice().getAmount() <= money.getAmount()) || (money.getAmount() == DataManager.getInfValue())));
-				// if (!(user.getPlayer().isInGroup(DataManager.getReqGroup(stack.getShopItem().getItemID())))) {
-				// throw new EconException("You are not allowed to purchase this item.", name + " is not allowed to purchase this item.");
-				// }
 			}
 			else {
-				// Not a player, check if it has enough money
-				canBuy = ((stack.getTotalBuyPrice().getAmount() <= money.getAmount()) || (money.getAmount() == DataManager.getInfValue()));
-			}
-			if (((stack.getTotalBuyPrice().getAmount() > money.getAmount()) && (money.getAmount() != DataManager.getInfValue()))) {
-				throw new EconException("You do not have enough " + Money.getMoneyName() + " (" + getMoney().getAmount() + "/" + stack.getTotalBuyPrice().getAmount() + ")", getName() + " does not have enough " + Money.getMoneyName());
+				// Shop
 			}
 		}
-		else {
-			canBuy = true;
-		}
 		
-		if ((user != null) && (stack != null)) {
-			// Will only check if it is a user buying, throws a EconException if they can't buy any more.
-			boughtLessThanMax = checkMaxBuy(stack);
-		}
-		
-		return (canBuy && boughtLessThanMax);
+		return true;
+		//		if (DataManager.getDebug()) {
+		//			if (stack != null) {
+		//				System.out.println("Checking to see if " + name + " can buy " + stack.getAmountAvail() + " " + stack.getShopItem().getName());
+		//			}
+		//		}
+		//		boolean canBuy = false;
+		//		boolean boughtLessThanMax = true;
+		//		if (stack != null) {
+		//			// Check if the entity is a player
+		//			if (isPlayer) {
+		//				// Get the player from the user and check if they are in the correct group to buy the item, as well as if they have enough
+		//				// money
+		//				
+		//				canBuy = (stack.getTotalBuyPrice().getAmount() <= money.getAmount()) || (money.getAmount() == DataManager.getInfValue());
+		//				// FIXME Need to change once bukkit implements a permissions system
+		//				
+		//				// canBuy = ((user.getPlayer().isInGroup(DataManager.getReqGroup(stack.getShopItem().getItemID()))) && ((stack
+		//				// .getTotalBuyPrice().getAmount() <= money.getAmount()) || (money.getAmount() == DataManager.getInfValue())));
+		//				// if (!(user.getPlayer().isInGroup(DataManager.getReqGroup(stack.getShopItem().getItemID())))) {
+		//				// throw new EconException("You are not allowed to purchase this item.", name + " is not allowed to purchase this item.");
+		//				// }
+		//			}
+		//			else {
+		//				// Not a player, check if it has enough money
+		//				canBuy = ((stack.getTotalBuyPrice().getAmount() <= money.getAmount()) || (money.getAmount() == DataManager.getInfValue()));
+		//			}
+		//			if (((stack.getTotalBuyPrice().getAmount() > money.getAmount()) && (money.getAmount() != DataManager.getInfValue()))) {
+		//				throw new EconException("You do not have enough " + Money.getMoneyName() + " (" + getMoney().getAmount() + "/" + stack.getTotalBuyPrice().getAmount() + ")", getName() + " does not have enough " + Money.getMoneyName());
+		//			}
+		//		}
+		//		else {
+		//			canBuy = true;
+		//		}
+		//		
+		//		if ((user != null) && (stack != null)) {
+		//			// Will only check if it is a user buying, throws a EconException if they can't buy any more.
+		//			boughtLessThanMax = checkMaxBuy(stack);
+		//		}
+		//		
+		//		return (canBuy && boughtLessThanMax);
 	}
 	
 	/**
