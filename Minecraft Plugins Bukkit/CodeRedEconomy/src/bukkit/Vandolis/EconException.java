@@ -9,20 +9,27 @@
 package bukkit.Vandolis;
 
 public class EconException extends Exception {
-	
-	/**
-	 * 
-	 */
 	private static final long	serialVersionUID	= 1L;
 	private String				buyMsg				= "";
 	private String				sellMsg				= "";
-	
+	private ShopItemStack		stack				= null; // Holds the new, allowed transaction
+															
 	public EconException() {
 	}
 	
 	public EconException(String buyMsg, String sellMsg) {
 		this.buyMsg = buyMsg;
 		this.sellMsg = sellMsg;
+	}
+	
+	public EconException(String buyMsg, String sellMsg, ShopItemStack stack) {
+		this.buyMsg = buyMsg;
+		this.sellMsg = sellMsg;
+		this.stack = stack;
+	}
+	
+	public ShopItemStack getStack() {
+		return stack;
 	}
 	
 	public String getBuyMsg() {

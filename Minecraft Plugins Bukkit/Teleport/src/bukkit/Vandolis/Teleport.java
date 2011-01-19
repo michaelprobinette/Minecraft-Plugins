@@ -8,6 +8,7 @@ import java.io.File;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
@@ -50,6 +51,98 @@ public class Teleport extends JavaPlugin {
 		System.out.println("Teleport Disabled");
 	}
 	
+	public int findSafeY(World w, int x, int z, int y) {
+		int safe = 0; // The safe Y pos returned
+		
+		d: for (int distance = 0; distance < 64; distance++) {
+			if (safe == 0) {
+				if ((safe = checkUp(w, distance, x, z, y)) != 0) {
+					break d;
+				}
+			}
+			if (safe == 0) {
+				if ((safe = checkDown(w, distance, x, z, y)) != 0) {
+					break d;
+				}
+			}
+		}
+		return safe;
+	}
+	
+	public void caveElevator(Player p, boolean up) {
+		int y = 0;
+		for (int distance = 0; distance <= 64; distance++) {
+			if (up) {
+				// Add 1 to the Y pos so that it doesn't return their current spot
+				y = checkUp(p.getWorld(), distance, (int) p.getLocation().getBlockX(), (int) p.getLocation().getBlockZ(), (int) p.getLocation().getBlockY() + 1);
+				if (y != 0) {
+					break;
+				}
+			}
+			else {
+				// Subtract 1 from the Y pos so that it doesn't return their current spot
+				y = checkDown(p.getWorld(), distance, (int) p.getLocation().getBlockX(), (int) p.getLocation().getBlockZ(), (int) p.getLocation().getBlockY() - 1);
+				if (y != 0) {
+					break;
+				}
+			}
+		}
+		if (y != 0) {
+			// Found a spot, teleport the player
+			p.teleportTo(new Location(p.getWorld(), p.getLocation().getX(), y, p.getLocation().getZ()));
+		}
+	}
+	
+	public int checkDown(World w, int distance, int x, int z, int y) {
+		int safe = 0;
+		int count = 0;
+		// Check down
+		for (int i = y; i > y - distance && y - distance > 5; i--) {
+			// Check if the block is air and the count of air is less than 2
+			// If the count is equal to 2 try and find solid ground
+			if (w.getBlockAt(x, i, z).getType() == Material.AIR && count < 2) {
+				count++;
+				if (count >= 2) {
+					// Two blocks of air found, break out
+					safe = i;
+				}
+			}
+			else if (count >= 2) {
+				// Solid ground found
+				safe = i + 1;
+				break;
+			}
+			else {
+				// Not air, reset the count to 0
+				count = 0;
+			}
+		}
+		return safe;
+	}
+	
+	public int checkUp(World w, int distance, int x, int z, int y) {
+		int safe = 0;
+		int count = 0;
+		// Check up
+		for (int i = y; i < y + distance; i++) {
+			// Check if the block is air
+			if (w.getBlockAt(x, i, z).getType() == Material.AIR) {
+				count++;
+				if (count == 2) {
+					// Two blocks of air found, break out
+					// Don't need to check for floor as the count starts when it passes from a block of material into a block of air
+					safe = i - 1;
+					break;
+				}
+			}
+			else {
+				// Not air, reset the count to 0
+				count = 0;
+			}
+		}
+		return safe;
+	}
+	
 	public void telePlayer(Player player, String... split) {
 		// Convert the split to an int array
 		int pos[] = new int[split.length - 1];
@@ -61,105 +154,20 @@ public class Teleport extends JavaPlugin {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		double y = 0;
-		int count = 0;
 		switch (pos.length) {
 			case 0:
 				break;
 			case 1:
 				player.sendMessage("Teleporting you...");
-				// Check up
-				d: for (int distance = 0; distance < 64; distance++) {
-					if (y == 0) {
-						// for (int i = (int) player.getY(); i < etc.getServer().getHighestBlockY(pos[0], (int) player.getZ()); i++) {
-						for (int i = (int) player.getLocation().getY(); i < player.getLocation().getY() + distance; i++) {
-							if (player.getWorld().getBlockAt(pos[0], i, (int) player.getLocation().getZ()).getType() == Material.AIR) {
-								count++;
-								if (count == 2) {
-									y = i - 1;
-									break d;
-								}
-							}
-							else {
-								count = 0;
-							}
-						}
-					}
-					if (y == 0) {
-						// Check down
-						// for (int i = (int) player.getY(); i > 0; i--) {
-						for (int i = (int) player.getLocation().getY(); i > player.getLocation().getY() - distance && player.getLocation().getY() - distance > 0; i--) {
-							
-							if (player.getWorld().getBlockAt(pos[0], i, (int) player.getLocation().getZ()).getType() == Material.AIR) {
-								count++;
-								if (count == 2) {
-									y = i;
-									break d;
-								}
-							}
-							else {
-								count = 0;
-							}
-						}
-					}
-				}
-				player.teleportTo(new Location(player.getWorld(), pos[0], y, player.getLocation().getZ()));
-				//				player.teleportTo(pos[0], y, player.getLocation().getZ(), player.getLocation().getYaw(), player.getLocation().getPitch());
+				player.teleportTo(new Location(player.getWorld(), pos[0], findSafeY(player.getWorld(), pos[0], (int) player.getLocation().getZ(), (int) player.getLocation().getY()), player.getLocation().getZ()));
 				break;
 			case 2:
-				// Check up
-				d: for (int distance = 0; distance < 64; distance++) {
-					if (y == 0) {
-						// for (int i = (int) player.getY(); i < etc.getServer().getHighestBlockY(pos[0], (int) player.getZ()); i++) {
-						for (int i = (int) player.getLocation().getY(); i < player.getLocation().getY() + distance; i++) {
-							if (player.getWorld().getBlockAt(pos[0], i, pos[1]).getType() == Material.AIR) {
-								count++;
-								if (count == 2) {
-									y = i - 1;
-									break d;
-								}
-							}
-							else {
-								count = 0;
-							}
-						}
-					}
-					if (y == 0) {
-						// Check down
-						// for (int i = (int) player.getY(); i > 0; i--) {
-						for (int i = (int) player.getLocation().getY(); i > player.getLocation().getY() - distance && player.getLocation().getY() - distance > 0; i--) {
-							
-							if (player.getWorld().getBlockAt(pos[0], i, pos[1]).getType() == Material.AIR) {
-								count++;
-								if (count == 2) {
-									y = i;
-									break d;
-								}
-							}
-							else {
-								count = 0;
-							}
-						}
-					}
-				}
 				player.sendMessage("Teleporting you...");
-				player.teleportTo(new Location(player.getWorld(), pos[0], y, pos[1]));
-				//				player.teleportTo(pos[0], y, pos[1], player.getLocation().getYaw(), player.getLocation().getPitch());
+				player.teleportTo(new Location(player.getWorld(), pos[0], findSafeY(player.getWorld(), pos[0], pos[1], (int) player.getLocation().getBlockY()), pos[1]));
 				break;
 			case 3:
 				player.sendMessage("Teleporting you...");
-				player.teleportTo(new Location(player.getWorld(), pos[0], pos[2], pos[1]));
-				//				player.teleportTo(pos[0], pos[2], pos[1], player.getLocation().getYaw(), player.getLocation().getPitch());
-				break;
-			case 4:
-				player.sendMessage("Teleporting you...");
-				player.teleportTo(new Location(player.getWorld(), pos[0], pos[2], pos[1]));
-				//				player.teleportTo(pos[0], pos[2], pos[1], pos[3], player.getLocation().getPitch());
-				break;
-			case 5:
-				player.sendMessage("Teleporting you...");
-				player.teleportTo(new Location(player.getWorld(), pos[0], pos[2], pos[1]));
-				//				player.teleportTo(pos[0], pos[2], pos[1], pos[3], pos[4]);
+				player.teleportTo(new Location(player.getWorld(), pos[0], findSafeY(player.getWorld(), pos[0], pos[1], pos[2]), pos[1]));
 				break;
 			default:
 				player.sendMessage("Did not teleport anywhere.");

@@ -8,8 +8,6 @@
  */
 package bukkit.Vandolis;
 
-import java.util.ArrayList;
-
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -19,7 +17,7 @@ public class User extends EconEntity {
 	private final String	groupName	= "";
 	
 	/**
-	 * 
+	 * Default constructor
 	 */
 	public User() {
 		super();
@@ -27,7 +25,7 @@ public class User extends EconEntity {
 	}
 	
 	/**
-	 * New player
+	 * New {@link User} constructor based on the given {@link Player}.
 	 * 
 	 * @param player
 	 */
@@ -45,17 +43,25 @@ public class User extends EconEntity {
 		// groupName = "nogroup";
 		// }
 		
-		isPlayer = true;
+		/*
+		 * Sets the EconEntities user to this object, easy way to get the correct user when dealing with entities.
+		 * Then registers the user with the DataManager.
+		 */
 		setUser(this);
 		DataManager.addUser(this);
 	}
 	
 	/**
+	 * Creates a {@link User} object based off of a save string from a file. Save string contains the users name, amount of money, as well
+	 * as the last time they got an auto-deposit.
+	 * 
 	 * @param saveString
 	 */
 	public User(String saveString) {
 		super();
-		// Split it and grab the data
+		/*
+		 * Split it and grab the data
+		 */
 		String split[] = saveString.split(regex);
 		if (split.length >= 2) {
 			name = split[0];
@@ -67,10 +73,13 @@ public class User extends EconEntity {
 			setPlayer(DataManager.getServer().getPlayer(name));
 		}
 		else if (split.length == 1) {
+			/*
+			 * Came from a new user, only the name
+			 */
 			if (DataManager.getDebug()) {
 				System.out.println("Creating a new user with the name of " + name);
 			}
-			// Came from a new user, only the name
+			
 			name = saveString;
 			setPlayer(DataManager.getServer().getPlayer(name));
 		}
@@ -90,22 +99,17 @@ public class User extends EconEntity {
 	}
 	
 	/**
+	 * Returns the group the user belongs to.
+	 * 
 	 * @return
 	 */
 	public String getGroupName() {
 		return groupName;
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * @see EconEntity#getMoney()
-	 */
-	@Override
-	public Money getMoney() {
-		return money;
-	}
-	
 	/**
+	 * Returns the {@link Player} attached to the {@link User} object. Null if no player has been tied yet.
+	 * 
 	 * @return
 	 */
 	public Player getPlayer() {
@@ -113,13 +117,19 @@ public class User extends EconEntity {
 	}
 	
 	/**
+	 * Sends a message to the user using the default message format.
+	 * 
 	 * @param message
 	 */
 	public void sendMessage(String message) {
-		player.sendMessage(DataManager.getPluginMessage() + message);
+		if (player != null) {
+			player.sendMessage(DataManager.getPluginMessage() + message);
+		}
 	}
 	
 	/**
+	 * Ties the given {@link Player} to the {@link User}.
+	 * 
 	 * @param player
 	 */
 	public void setPlayer(Player player) {
@@ -134,13 +144,11 @@ public class User extends EconEntity {
 			// else {
 			// groupName = "nogroup";
 			// }
-			
-			isPlayer = true;
 		}
 	}
 	
 	/**
-	 * 
+	 * Prints the {@link User} balance.
 	 */
 	public void showBalance() {
 		autoDesposit(DataManager.getServer().getTime());
@@ -152,18 +160,17 @@ public class User extends EconEntity {
 		}
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * @see java.lang.Object#toString()
+	/**
+	 * Returns the save string to be written to file. Format is name:money:autoDeposit
+	 * 
+	 * @return
 	 */
-	@Override
-	public String toString() {
-		// name:money:lastdeposit
+	public String getSaveString() {
 		return name + regex + money.getAmount() + regex + lastAutoDeposit;
 	}
 	
 	/**
-	 * 
+	 * Tries to undo the users last {@link Transaction}.
 	 */
 	public void undoLastTrans() {
 		if (lastTrans != null) {
@@ -180,22 +187,35 @@ public class User extends EconEntity {
 	 * Updates the availableItems array to the users current inventory. Used to check amounts easily before selling
 	 */
 	public void updateArray() {
-		availableItems = new ArrayList<ShopItemStack>();
+		/*
+		 * Clear the availableItems to prevent errors.
+		 */
+		availableItems.clear();
+		
+		/*
+		 * Iterate through the players inventory and add the items to the availableItems array.
+		 */
 		for (ItemStack iter : player.getInventory().getContents()) {
 			if (iter != null) {
 				if (iter.getTypeId() > 0) {
-					// Check if it is already in the array
+					/*
+					 * Check if it is already in the array
+					 */
 					boolean found = false;
 					for (ShopItemStack siter : availableItems) {
-						if (siter.getItemID() == iter.getTypeId()) {
-							// Already in available items, so add to the amount
+						if (siter.getItemId() == iter.getTypeId()) {
+							/*
+							 * Already in available items, so add to the amount
+							 */
 							siter.addAmountAvail(iter.getAmount());
 							found = true;
 						}
 					}
-					// Add it to the array
+					/*
+					 * Add it to the array if it was not found already
+					 */
 					if (!found && DataManager.validID(iter.getTypeId())) {
-						availableItems.add(new ShopItemStack(new ShopItem(iter.getTypeId()), iter.getAmount()));
+						availableItems.add(new ShopItemStack(iter.getTypeId(), iter.getAmount()));
 					}
 				}
 			}
@@ -203,32 +223,20 @@ public class User extends EconEntity {
 	}
 	
 	/**
+	 * Adds the item to the players inventory.
+	 * 
 	 * @param stack
 	 */
 	public void addItem(ShopItemStack stack) {
-		getPlayer().getInventory().addItem(new ItemStack(stack.getItemID(), stack.getAmountAvail()));
+		getPlayer().getInventory().addItem(stack.getItem());
 	}
 	
 	/**
+	 * Removes the item from the players inventory.
+	 * 
 	 * @param stack
 	 */
 	public void removeItem(ShopItemStack stack) {
-		getPlayer().getInventory().removeItem(new ItemStack(stack.getItemID(), stack.getAmountAvail()));
-	}
-	
-	/**
-	 * @return
-	 */
-	public int getNumTransactionsBuy() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	
-	/**
-	 * @return
-	 */
-	public int getNumTransactionsSell() {
-		// TODO Auto-generated method stub
-		return 0;
+		getPlayer().getInventory().removeItem(stack.getItem());
 	}
 }

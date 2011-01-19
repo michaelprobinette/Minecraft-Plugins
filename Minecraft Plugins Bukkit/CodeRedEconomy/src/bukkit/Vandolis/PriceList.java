@@ -43,7 +43,7 @@ public class PriceList {
 			String temp = "";
 			int amount = 0;
 			for (ShopItemStack iters : shop.getAvailItems()) {
-				if (iters.getItemID() == iter.getItemID()) {
+				if (iters.getItemId() == iter.getItemId()) {
 					amount = iters.getAmountAvail();
 				}
 			}

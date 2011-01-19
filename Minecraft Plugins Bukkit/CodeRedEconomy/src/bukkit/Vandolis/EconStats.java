@@ -29,7 +29,7 @@ public class EconStats {
 		boolean found = false;
 		for (ShopItemStack iter : itemsBought) {
 			if (stack != null) {
-				if (iter.getItemID() == stack.getItemID()) {
+				if (iter.getItemId() == stack.getItemId()) {
 					found = true;
 					iter.addAmountAvail(stack.getAmountAvail());
 					break;
@@ -98,16 +98,16 @@ public class EconStats {
 					
 					// Safety check
 					if (ssplit.length == 3) {
-						int ID = Integer.valueOf(ssplit[0]);
+						int id = Integer.valueOf(ssplit[0]);
 						int buyAmount = Integer.valueOf(ssplit[1]);
 						int sellAmount = Integer.valueOf(ssplit[2]);
 						if (buyAmount != 0) {
 							// Add it to the bought
-							itemsBought.add(new ShopItemStack(new ShopItem(ID), buyAmount));
+							itemsBought.add(new ShopItemStack(id, buyAmount));
 						}
 						if (sellAmount != 0) {
 							// Add it to the bought
-							itemsSold.add(new ShopItemStack(new ShopItem(ID), sellAmount));
+							itemsSold.add(new ShopItemStack(id, sellAmount));
 						}
 					}
 				}
@@ -140,7 +140,7 @@ public class EconStats {
 		numTrans++;
 		boolean found = false;
 		for (ShopItemStack iter : itemsSold) {
-			if (iter.getItemID() == stack.getItemID()) {
+			if (iter.getItemId() == stack.getItemId()) {
 				found = true;
 				iter.addAmountAvail(stack.getAmountAvail());
 				break;
@@ -163,12 +163,12 @@ public class EconStats {
 		// Count totals
 		for (ShopItem iter : DataManager.getItemList()) {
 			for (ShopItemStack iter2 : itemsBought) {
-				if (iter2.getItemID() == iter.getItemID()) {
+				if (iter2.getItemId() == iter.getItemId()) {
 					totSpent += iter2.getTotalBuyPrice().getAmount();
 				}
 			}
 			for (ShopItemStack iter3 : itemsSold) {
-				if (iter3.getItemID() == iter.getItemID()) {
+				if (iter3.getItemId() == iter.getItemId()) {
 					totGained += iter3.getTotalSellPrice().getAmount();
 				}
 			}
@@ -181,13 +181,13 @@ public class EconStats {
 			double sellPrice = 0;
 			double buyPrice = 0;
 			for (ShopItemStack iter2 : itemsBought) {
-				if (iter2.getItemID() == iter.getItemID()) {
+				if (iter2.getItemId() == iter.getItemId()) {
 					amountBought = iter2.getAmountAvail();
 					buyPrice = iter2.getTotalBuyPrice().getAmount();
 				}
 			}
 			for (ShopItemStack iter3 : itemsSold) {
-				if (iter3.getItemID() == iter.getItemID()) {
+				if (iter3.getItemId() == iter.getItemId()) {
 					amountSold = iter3.getAmountAvail();
 					sellPrice = iter3.getTotalSellPrice().getAmount();
 				}
@@ -295,16 +295,16 @@ public class EconStats {
 		
 		results.add("%" + numTrans);
 		for (ShopItem iter : DataManager.getItemList()) {
-			int itemID = iter.getItemID();
+			int itemID = iter.getItemId();
 			int amountSold = 0;
 			int amountBought = 0;
 			for (ShopItemStack iter2 : itemsBought) {
-				if (iter2.getItemID() == iter.getItemID()) {
+				if (iter2.getItemId() == iter.getItemId()) {
 					amountBought = iter2.getAmountAvail();
 				}
 			}
 			for (ShopItemStack iter3 : itemsSold) {
-				if (iter3.getItemID() == iter.getItemID()) {
+				if (iter3.getItemId() == iter.getItemId()) {
 					amountSold = iter3.getAmountAvail();
 				}
 			}
@@ -343,7 +343,7 @@ public class EconStats {
 	public static void undoBuy(ShopItemStack stack) {
 		numTrans--;
 		for (ShopItemStack iter : itemsBought) {
-			if (iter.getItemID() == stack.getItemID()) {
+			if (iter.getItemId() == stack.getItemId()) {
 				iter.addAmountAvail(-stack.getAmountAvail());
 				break;
 			}
@@ -353,7 +353,7 @@ public class EconStats {
 	public static void undoSell(ShopItemStack stack) {
 		numTrans--;
 		for (ShopItemStack iter : itemsSold) {
-			if (iter.getItemID() == stack.getItemID()) {
+			if (iter.getItemId() == stack.getItemId()) {
 				iter.addAmountAvail(-stack.getAmountAvail());
 				break;
 			}

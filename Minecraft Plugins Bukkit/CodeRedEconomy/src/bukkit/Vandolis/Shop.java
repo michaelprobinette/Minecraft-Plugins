@@ -8,17 +8,24 @@
  */
 package bukkit.Vandolis;
 
+import org.bukkit.Server;
+
 public class Shop extends EconEntity {
 	private final String	regex		= DataManager.getShopRegex();
 	private final String	regex2		= DataManager.getShop2Regex();
 	private boolean			infItems	= false;
 	private long			lastRestock	= 0;
 	
+	/**
+	 * Default Constructor. Loads the stock without infinite values. Starts with 0 {@link Money}.
+	 */
 	public Shop() {
 		initialize();
 	}
 	
 	/**
+	 * Makes a shop with the given setting of infinite items. Starts with 0 {@link Money}.
+	 * 
 	 * @param infItems
 	 * @param infMoney
 	 */
@@ -39,11 +46,23 @@ public class Shop extends EconEntity {
 		initialize();
 	}
 	
+	/**
+	 * Loads a shop from a save string.
+	 * 
+	 * @param saveData
+	 */
 	public Shop(String saveData) {
 		load(saveData);
 		setShop(this);
 	}
 	
+	/**
+	 * Makes a shop with the given name, given infItems value, and given {@link Money} amount. Preferred constructor.
+	 * 
+	 * @param name
+	 * @param infItems
+	 * @param amountMoney
+	 */
 	public Shop(String name, boolean infItems, int amountMoney) {
 		this.infItems = infItems;
 		this.name = name;
@@ -51,39 +70,64 @@ public class Shop extends EconEntity {
 		initialize();
 	}
 	
+	/**
+	 * Function ran when a player tries to buy an item. Parses the command used to get the item name as well as the amount. If no amount is
+	 * given the default value is 1.
+	 * 
+	 * @param user
+	 * @param split
+	 */
 	public void buy(User user, String[] split) {
-		// Check players balance, find what they want to buy, check priv level, buy
 		String itemName = "";
-		int amount = 0;
+		int amount = 1;
+		
+		/*
+		 * Check the command length to make sure it is at least 2. [0] = /buy [1] = itemName
+		 */
 		if (split.length >= 2) {
 			try {
+				/*
+				 * Loop through the split and grab the itemName as well as the amount.
+				 */
 				for (String iter : split) {
+					/*
+					 * Skip the first value as it is the /buy
+					 */
 					if (!iter.equalsIgnoreCase(split[0])) {
-						// It is not the /sell part
-						// Try and convert to a number
-						
+						/*
+						 * Try and convert into the amount, if that fails it must be part of the name.
+						 */
 						try {
 							amount = Integer.valueOf(iter);
 						}
 						catch (NumberFormatException e) {
-							// Not a number, add to name
-							itemName += iter + regex2;
+							/*
+							 * Not a number, add to name.
+							 */
+							itemName += iter + " ";
 						}
 					}
 				}
-				if (amount == 0) {
-					amount = 1;
-				}
+				
+				/*
+				 * Trim the name for use and show debug info.
+				 */
 				itemName = itemName.trim();
 				if (DataManager.getDebug()) {
 					System.out.println("Item name is: " + itemName);
 				}
 				
-				if (amount > 0) {
-					Transaction.process(new Transaction(this, user, new ShopItemStack(DataManager.getItem(itemName), amount)));
+				/*
+				 * Check to make sure the amount is nonnegative as well as the itemName has a value.
+				 */
+				if ((amount > 0) && !itemName.equalsIgnoreCase("")) {
+					/*
+					 * Process a new transaction with the parsed info.
+					 */
+					Transaction.process(new Transaction(this, user, new ShopItemStack(DataManager.getItemId(itemName), amount)));
 				}
 				else {
-					user.sendMessage("Please enter a valid amount.");
+					user.sendMessage("Please enter a valid amount and/or item name.");
 				}
 			}
 			catch (NumberFormatException e1) {
@@ -95,20 +139,30 @@ public class Shop extends EconEntity {
 		}
 	}
 	
+	/**
+	 * Stocks the shop with items.
+	 */
 	private void initialize() {
-		// Load all of the implemented items from the DataManager
+		/*
+		 * Load all of the implemented items from the DataManager
+		 */
 		for (ShopItem iter : DataManager.getItemList()) {
 			if (infItems) {
-				availableItems.add(new ShopItemStack(iter, DataManager.getInfValue())); // Inf items value
+				availableItems.add(new ShopItemStack(iter.getItemId(), DataManager.getInfValue())); // Inf items value
 			}
 			else {
-				availableItems.add(new ShopItemStack(iter, iter.getMaxAvail()));
+				availableItems.add(new ShopItemStack(iter.getItemId(), iter.getMaxAvail()));
 			}
 		}
 		lastRestock = DataManager.getServer().getTime();
 		setShop(this);
 	}
 	
+	/**
+	 * Loads a shop from a save string.
+	 * 
+	 * @param loadData
+	 */
 	public void load(String loadData) {
 		String sc[] = loadData.split(DataManager.getShopRegex()); // Split colon
 		
@@ -116,7 +170,9 @@ public class Shop extends EconEntity {
 			System.out.println("Loading a shop named " + sc[0]);
 		}
 		
-		// Safety check
+		/*
+		 * Safety check of length then load the data.
+		 */
 		if (sc.length >= 4) {
 			name = sc[0];
 			money.setAmount(Integer.valueOf(sc[1]));
@@ -126,57 +182,95 @@ public class Shop extends EconEntity {
 				if (!iter.equalsIgnoreCase(sc[0]) && !iter.equalsIgnoreCase(sc[1]) && !iter.equalsIgnoreCase(sc[2])
 						&& !iter.equalsIgnoreCase(sc[3])) {
 					String[] ss = iter.split(regex2);
-					availableItems.add(new ShopItemStack(new ShopItem(Integer.valueOf(ss[0].trim())), Integer.valueOf(ss[1].trim())));
+					availableItems.add(new ShopItemStack(Integer.valueOf(ss[0].trim()), Integer.valueOf(ss[1].trim())));
 				}
 			}
 		}
+		else {
+			initialize();
+		}
 	}
 	
+	/**
+	 * Tries to restock the {@link Shop}. Checks the last restock time against the current {@link Server} time.
+	 */
 	public void restock() {
+		/*
+		 * Check the current time against the last restock time
+		 */
 		if (DataManager.getServer().getTime() - lastRestock >= DataManager.getRestockTime()) {
 			System.out.println("Restocking " + name);
 			lastRestock = DataManager.getServer().getTime();
 			for (ShopItemStack iter : availableItems) {
-				// Check against the DataManager value
-				if (iter.getAmountAvail() < DataManager.getItem(iter.getShopItem().getName()).getMaxAvail()) {
-					iter.setAmountAvail(DataManager.getItem(iter.getShopItem().getName()).getMaxAvail());
+				/*
+				 * Checks the current value against the max value for the item. 
+				 * Only restocks the item if the current amount is less than the max.
+				 */
+				if (iter.getAmountAvail() < iter.getMaxAvail()) {
+					iter.setAmountAvail(iter.getMaxAvail());
 				}
 			}
 		}
 	}
 	
+	/**
+	 * Function ran when a player tries to sell an item. Parses the command used to get the item name as well as the amount. If no amount is
+	 * given the default value is 1.
+	 * 
+	 * @param user
+	 * @param split
+	 */
 	public void sell(User user, String[] split) {
 		String itemName = "";
-		int amount = -1;
+		int amount = 1;
+		
+		/*
+		 * Check the command length to make sure it is at least 2. [0] = /sell [1] = itemName
+		 */
 		if (split.length >= 2) {
 			try {
+				/*
+				 * Loop through the split and grab the itemName as well as the amount.
+				 */
 				for (String iter : split) {
+					/*
+					 * Skip the first one as it is /sell
+					 */
 					if (!iter.equalsIgnoreCase(split[0])) {
-						// It is not the /sell part
-						// Try and convert to a number
-						
+						/*
+						 * Try and convert it into the amount, if that fails it must be part of the name
+						 */
 						try {
 							amount = Integer.valueOf(iter);
 						}
 						catch (NumberFormatException e) {
-							// Not a number, add to name
-							itemName += iter + regex2;
+							/*
+							 * Not a number, add to the name.
+							 */
+							itemName += iter + " ";
 						}
 					}
 				}
-				if (amount == -1) {
-					amount = 1;
-				}
+				
+				/*
+				 * Trim the name for use and print debug info
+				 */
 				itemName = itemName.trim();
 				if (DataManager.getDebug()) {
 					System.out.println("Item name is: " + itemName);
 				}
 				
-				if (amount > 0) {
-					Transaction.process(new Transaction(user, this, new ShopItemStack(DataManager.getItem(itemName), amount)));
+				/*
+				 * Check to make sure the amount is nonnegative and the itemName is not empty.
+				 */
+				if ((amount > 0) && !itemName.equalsIgnoreCase("")) {
+					/*
+					 * Process a new transaction with the parsed data
+					 */
+					Transaction.process(new Transaction(user, this, new ShopItemStack(DataManager.getItemId(itemName), amount)));
 				}
 				else {
-					user.sendMessage("Please enter a valid amount.");
+					user.sendMessage("Please enter a valid amount and/or item name.");
 				}
 			}
 			catch (NumberFormatException e1) {
@@ -188,25 +282,33 @@ public class Shop extends EconEntity {
 		}
 	}
 	
-	@Override
-	public String toString() {
+	/**
+	 * Returns the save string to write to file. Format is ShopName:Shop Money:infAmount:lastRestock:idamount:id amount:id amount
+	 * 
+	 * @return
+	 */
+	public String getSaveString() {
 		// Used for saving the shop, data needed is:
-		// Shop Name : Shop Money : infAmount : lastRestock : id amount : id amount : id amount
+		// 
 		String temp = name + regex + money.getAmount() + regex + infItems + regex + lastRestock;
 		for (ShopItemStack iter : availableItems) {
-			temp += regex + iter.getItemID() + regex2 + iter.getAmountAvail();
+			temp += regex + iter.getItemId() + regex2 + iter.getAmountAvail();
 		}
 		return temp;
 	}
-
+	
 	/**
+	 * Returns if the {@link Shop} has all infinite items
+	 * 
 	 * @return
 	 */
 	public boolean getInfItems() {
 		return infItems;
 	}
-
+	
 	/**
+	 * Returns the last time the {@link Shop} was restocked.
+	 * 
 	 * @return
 	 */
 	public long getLastRestock() {

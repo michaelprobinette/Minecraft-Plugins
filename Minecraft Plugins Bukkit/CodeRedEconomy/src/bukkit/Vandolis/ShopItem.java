@@ -11,13 +11,19 @@ package bukkit.Vandolis;
 import org.bukkit.inventory.ItemStack;
 
 public class ShopItem {
-	private final int				itemID;
+	private final String			REGEX			= DataManager.getItemRegex();
+	private final int				itemId;
 	private final String			itemName;
-	// private final int privLevel;
 	private final int				buyPrice;
 	private final int				sellPrice;
 	private final int				maxAvail;
-	private static final String[]	blockNames		= {
+	private ItemStack				item;
+	private final int				maxSell;
+	private final Money				breakValue;
+	private final int				maxBuy;
+	
+	private static final String[]	blockNames		=
+															{
 			"Other", "Stone", "Grass", "Dirt", "Cobblestone", "Wooden Planks", "Sapling", "Bedrock", "Water", "Stationary Water", "Lava",
 			"Stationary Lava", "Sand", "Gravel", "Gold Ore", "Iron Ore", "Coal Ore", "Wood", "Leaves", "Sponge", "Glass",
 			"Lapis Lazuli Ore", "Lapis Lazuli Block", "Dispenser", "Sandstone", "Note Block", "", "", "", "", "", "", "", "", "", "Wool",
@@ -28,8 +34,9 @@ public class ShopItem {
 			"Iron Door", "Wooden Pressure Plate", "Redstone Ore", "GlowingRedstone", "RedstoneTorchOf", "RedstoneTorchOn", "StoneButton",
 			"Snow", "Ice", "SnowBlock", "Cactus", "Clay", "Sugar Cane", "Jukebox", "Fence", "Pumpkin", "Netherrack", "Soul Sand",
 			"Glowstone", "Portal", "Jack-O-Lantern", "Cake Block"
-													};
-	private static final String[]	itemNames		= {
+															};
+	private static final String[]	itemNames		=
+															{
 			"Iron Shovel", "Iron Pickaxe", "Iron Axe", "Flint and Steel", "Apple", "Bow", "Arrow", "Coal", "Diamond", "Iron Ingot",
 			"Gold Ingot", "Iron Sword", "Wooden Sword", "Woodern Shovel", "Wooden Pickaxe", "Wooden Axe", "Stone Sword", "Stone Shovel",
 			"Stone Pickaxe", "Stone Axe", "Diamond Sword", "Diamond Shovel", "Diamond Pickaxe", "Diamond Axe", "Stick", "Bowl",
@@ -42,32 +49,35 @@ public class ShopItem {
 			"Redstone", "Snowball", "Boat", "Leather", "Milk", "Clay Brick", "Clay Balls", "Reed", "Paper", "Book", "Slimeball",
 			"Storage Minecart", "Powered Minecart", "Egg", "Compass", "Fishing Rod", "Clock", "Glowstone Dust", "Raw Fish", "Cooked Fish",
 			"Ink Sack", "Bone", "Sugar", "Cake"
-													};
+															};
 	private static final String[]	specialItems	= {
 			"Gold Music Disk", "Green Music Disk"
 													};
-	private final ItemStack			item;
-	private final int				maxSell;
-	private final int				breakValue;
-	private final int				maxBuy;
 	
 	public ShopItem() {
-		itemID = 0;
+		itemId = 0;
 		itemName = "Air";
-		// privLevel = 0;
 		buyPrice = 0;
 		sellPrice = 0;
 		maxAvail = 0;
 		item = new ItemStack(0);
 		maxSell = -1;
-		breakValue = 0;
+		breakValue = new Money();
 		maxBuy = -1;
 	}
 	
+	/**
+	 * Creates a {@link ShopItem} based on the itemId given. Loads the rest of the data from the {@link DataManager}.
+	 * 
+	 * @param itemID
+	 */
 	public ShopItem(int itemID) {
-		this.itemID = itemID;
+		itemId = itemID;
 		itemName = getName(itemID);
-		// privLevel = 0;
+		
+		/*
+		 * Load the data from the DataManager
+		 */
 		ShopItem temp = DataManager.getItem(itemID);
 		buyPrice = temp.getBuyPrice();
 		sellPrice = temp.getSellPrice();
@@ -78,85 +88,136 @@ public class ShopItem {
 		maxBuy = temp.getMaxBuy();
 	}
 	
-	public ShopItem(int itemID, int buyPrice, int sellPrice) {
-		this.itemID = itemID;
-		itemName = getName(itemID);
-		this.buyPrice = buyPrice;
-		this.sellPrice = sellPrice;
-		ShopItem temp = DataManager.getItem(itemID);
-		maxAvail = temp.getMaxAvail();
-		maxSell = temp.getMaxSell();
-		breakValue = temp.getBreakValue();
-		item = new ItemStack(itemID, 1);
-		maxBuy = temp.getMaxBuy();
-	}
-	
-	public ShopItem(int itemID, int buyPrice, int sellPrice, int maxAvail, int maxSell, int maxBuy, int breakValue) {
-		this.itemID = itemID;
-		itemName = getName(itemID);
-		this.buyPrice = buyPrice;
-		this.sellPrice = sellPrice;
-		this.maxAvail = maxAvail;
-		this.maxSell = maxSell;
-		this.breakValue = breakValue;
-		item = new ItemStack(itemID, 1);
-		this.maxBuy = maxBuy;
-	}
-	
+	/**
+	 * Constructor for loading from a save string. Format is itemId:buyPrice:sellPrice:maxAvail:maxSell:maxBuy:breakValue
+	 * 
+	 * @param loadData
+	 */
 	public ShopItem(String loadData) {
-		String split[] = loadData.split(":");
+		String split[] = loadData.split(REGEX);
 		
-		itemID = Integer.valueOf(split[0]);
+		itemId = Integer.valueOf(split[0]);
 		buyPrice = Integer.valueOf(split[1]);
 		sellPrice = Integer.valueOf(split[2]);
 		maxAvail = Integer.valueOf(split[3]);
 		maxSell = Integer.valueOf(split[4]);
 		maxBuy = Integer.valueOf(split[5]);
-		breakValue = Integer.valueOf(split[6]);
-		item = new ItemStack(itemID, 1);
-		itemName = getName(itemID);
+		breakValue = new Money(Integer.valueOf(split[6]));
+		item = new ItemStack(itemId, 1);
+		itemName = getName(itemId);
 	}
 	
-	public int getBreakValue() {
+	/**
+	 * Used by the undo transaction to make a inverted item.
+	 * 
+	 * @param itemId2
+	 * @param sellPrice2
+	 * @param buyPrice2
+	 */
+	public ShopItem(int itemId, int sellPrice, int buyPrice) {
+		this.itemId = itemId;
+		itemName = getName(itemId);
+		this.buyPrice = buyPrice;
+		this.sellPrice = sellPrice;
+		
+		/*
+		 * Load the data from the DataManager
+		 */
+		ShopItem temp = DataManager.getItem(itemId);
+		maxAvail = temp.getMaxAvail();
+		item = new ItemStack(itemId, 1);
+		maxSell = temp.getMaxSell();
+		breakValue = temp.getBreakValue();
+		maxBuy = temp.getMaxBuy();
+	}
+	
+	/**
+	 * Returns the amount of money a entity gets for destroying this item.
+	 * 
+	 * @return
+	 */
+	public Money getBreakValue() {
 		return breakValue;
 	}
 	
+	/**
+	 * Returns the maximum amount a player can buy.
+	 * 
+	 * @return
+	 */
 	public int getBuyMax() {
 		return maxBuy;
 	}
 	
+	/**
+	 * Returns the buy price of the item.
+	 * 
+	 * @return
+	 */
 	public int getBuyPrice() {
 		return buyPrice;
 	}
 	
+	/**
+	 * Returns the actual {@link ItemStack} object.
+	 * 
+	 * @return
+	 */
 	public ItemStack getItem() {
 		return item;
 	}
 	
-	public int getItemID() {
-		return itemID;
+	/**
+	 * Returns the itemId.
+	 * 
+	 * @return
+	 */
+	public int getItemId() {
+		return itemId;
 	}
 	
+	/**
+	 * Returns the maximum amount a {@link Shop} can restock to. Check {@link DataManager} for the infinite value.
+	 * 
+	 * @return
+	 */
 	public int getMaxAvail() {
 		return maxAvail;
 	}
 	
+	/**
+	 * Returns the maximum amount a player can buy.
+	 * 
+	 * @return
+	 */
 	public int getMaxBuy() {
 		return maxBuy;
 	}
 	
-	// public int getPrivLevel() {
-	// return privLevel;
-	// }
-	
+	/**
+	 * Returns the maximum amount a player can sell.
+	 * 
+	 * @return
+	 */
 	public int getMaxSell() {
 		return maxSell;
 	}
 	
+	/**
+	 * Returns the items name.
+	 * 
+	 * @return
+	 */
 	public String getName() {
 		return itemName;
 	}
 	
+	/**
+	 * Used to get the item name from the arrays based on its itemId.
+	 * 
+	 * @param itemID
+	 * @return
+	 */
 	private String getName(int itemID) {
 		if (itemID < 255) {
 			return blockNames[itemID];
@@ -174,12 +235,38 @@ public class ShopItem {
 		// return item.getType().name();
 	}
 	
+	/**
+	 * Returns the sell price of the item.
+	 * 
+	 * @return
+	 */
 	public int getSellPrice() {
 		return sellPrice;
 	}
 	
+	/**
+	 * Sets the item to the given itemStack.
+	 * 
+	 * @param itemStack
+	 */
+	protected void setItem(ItemStack itemStack) {
+		item = itemStack;
+	}
+	
+	/**
+	 * Returns the save string for writing to a file. Format is itemId:buyPrice:sellPrice:maxAvail:maxSell:maxBuy:breakValue
+	 * 
+	 * @return
+	 */
+	public String getSaveString() {
+		return itemId + REGEX + buyPrice + REGEX + sellPrice + REGEX + maxAvail + REGEX + maxSell + REGEX + maxBuy + REGEX + breakValue;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
-		return itemID + ":" + buyPrice + ":" + sellPrice + ":" + maxAvail + ":" + maxSell + ":" + maxBuy + ":" + breakValue;
+		return itemName;
 	}
 }

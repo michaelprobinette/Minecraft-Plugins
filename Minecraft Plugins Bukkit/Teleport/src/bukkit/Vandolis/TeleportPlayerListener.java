@@ -24,14 +24,22 @@ public class TeleportPlayerListener extends PlayerListener {
 		Player player = event.getPlayer();
 		String[] split = event.getMessage().split(" ");
 		if (split.length >= 1) {
-			if (split[0].equalsIgnoreCase("/tele")) {
+			if (split[0].equalsIgnoreCase("/ppt")) {
 				if (split.length >= 2) {
 					plugin.telePlayer(player, split);
 				}
 				else {
-					player.sendMessage("Usage is /tele [x] [z] [y] [rotation] [pitch]. Leave blank if unknown.");
+					player.sendMessage("Usage is /tele [x] [z] [y]. Leave blank to try and use current.");
 				}
 				event.setCancelled(true);
+			}
+			else if (split[0].equalsIgnoreCase("/up")) {
+				// Try to move the player up
+				plugin.caveElevator(player, true);
+			}
+			else if (split[0].equalsIgnoreCase("/down")) {
+				// Try to move the player down
+				plugin.caveElevator(player, false);
 			}
 		}
 	}

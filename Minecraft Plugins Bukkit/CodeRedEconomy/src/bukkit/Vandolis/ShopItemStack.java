@@ -8,59 +8,113 @@
  */
 package bukkit.Vandolis;
 
-public class ShopItemStack {
-	private int			itemID			= 0;
+import org.bukkit.inventory.ItemStack;
+
+public class ShopItemStack extends ShopItem {
 	private int			amountAvail		= 0;
-	private ShopItem	shopItem		= null;
 	private final Money	totalBuyPrice	= new Money();
 	private final Money	totalSellPrice	= new Money();
 	
-	public ShopItemStack(ShopItem shopItem, int amountAvail) {
-		if (shopItem == null) {
-			itemID = 0;
-			this.shopItem = new ShopItem();
-			this.amountAvail = 0;
-			totalBuyPrice.setAmount(0);
-			totalSellPrice.setAmount(0);
-		}
-		else {
-			itemID = shopItem.getItemID();
-			this.shopItem = shopItem;
-			this.amountAvail = amountAvail;
-			totalBuyPrice.setAmount(shopItem.getBuyPrice() * amountAvail);
-			totalSellPrice.setAmount(shopItem.getSellPrice() * amountAvail);
-		}
+	/**
+	 * Creates a ShopItemStack from the given {@link ShopItem} and the amount given.
+	 * 
+	 * @param shopItem
+	 * @param amountAvail
+	 */
+	public ShopItemStack(int itemId, int amountAvail) {
+		super(itemId);
+		
+		/*
+		 * Set the total buy and sell price.
+		 */
+		this.amountAvail = amountAvail;
+		totalBuyPrice.setAmount(getBuyPrice() * amountAvail);
+		totalSellPrice.setAmount(getSellPrice() * amountAvail);
+		setItem(new ItemStack(itemId, amountAvail));
 	}
 	
+	/**
+	 * Used by the undo transaction to make an inverted item.
+	 * 
+	 * @param itemId
+	 * @param sellPrice
+	 * @param buyPrice
+	 * @param amountAvail2
+	 */
+	public ShopItemStack(int itemId, int sellPrice, int buyPrice, int amountAvail) {
+		super(itemId, sellPrice, buyPrice);
+		
+		/*
+		 * Set the total buy and sell price.
+		 */
+		this.amountAvail = amountAvail;
+		totalBuyPrice.setAmount(getBuyPrice() * amountAvail);
+		totalSellPrice.setAmount(getSellPrice() * amountAvail);
+		setItem(new ItemStack(getItemId(), amountAvail));
+	}
+	
+	/**
+	 * Used to add to the amount available or subtract with a negative. Updates the totalBuy/SellPrice as well.
+	 * 
+	 * @param amount
+	 */
 	public void addAmountAvail(int amount) {
+		/*
+		 * Add or subtract from the current amount and update the buy and sell price with the new amount.
+		 */
 		amountAvail += amount;
-		totalBuyPrice.setAmount(shopItem.getBuyPrice() * amountAvail);
-		totalSellPrice.setAmount(shopItem.getSellPrice() * amountAvail);
+		totalBuyPrice.setAmount(getBuyPrice() * amountAvail);
+		totalSellPrice.setAmount(getSellPrice() * amountAvail);
+		setItem(new ItemStack(getItemId(), amountAvail));
 	}
 	
+	/**
+	 * Returns the amount in the stack.
+	 * 
+	 * @return
+	 */
 	public int getAmountAvail() {
 		return amountAvail;
 	}
 	
-	public int getItemID() {
-		return itemID;
-	}
-	
-	public ShopItem getShopItem() {
-		return shopItem;
-	}
-	
+	/**
+	 * Returns the amount of {@link Money} required to buy.
+	 * 
+	 * @return
+	 */
 	public Money getTotalBuyPrice() {
 		return totalBuyPrice;
 	}
 	
+	/**
+	 * Returns the amount of {@link Money} required to sell.
+	 * 
+	 * @return
+	 */
 	public Money getTotalSellPrice() {
 		return totalSellPrice;
 	}
 	
+	/**
+	 * Used to set the amount of the stack to the given amount. Updates the totalBuy/SellPrice as well.
+	 * 
+	 * @param amount
+	 */
 	public void setAmountAvail(int amount) {
+		/*
+		 * Change the amount, and update the buy and sell price with the new amount.
+		 */
 		amountAvail = amount;
-		totalBuyPrice.setAmount(shopItem.getBuyPrice() * amountAvail);
-		totalSellPrice.setAmount(shopItem.getSellPrice() * amountAvail);
+		totalBuyPrice.setAmount(getBuyPrice() * amountAvail);
+		totalSellPrice.setAmount(getSellPrice() * amountAvail);
+		setItem(new ItemStack(getItemId(), amountAvail));
+	}
+	
+	/* (non-Javadoc)
+	 * @see bukkit.Vandolis.ShopItem#toString()
+	 */
+	@Override
+	public String toString() {
+		return amountAvail + " " + getName();
 	}
 }

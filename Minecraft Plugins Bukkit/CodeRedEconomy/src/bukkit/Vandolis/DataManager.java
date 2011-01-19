@@ -163,7 +163,7 @@ public class DataManager {
 	
 	public static int getBuyPrice(int itemID) {
 		for (ShopItem iter : itemList) {
-			if (iter.getItemID() == itemID) {
+			if (iter.getItemId() == itemID) {
 				return iter.getBuyPrice();
 			}
 		}
@@ -193,20 +193,20 @@ public class DataManager {
 	
 	public static ShopItem getItem(int itemID) {
 		for (ShopItem iter : itemList) {
-			if (iter.getItemID() == itemID) {
+			if (iter.getItemId() == itemID) {
 				return iter;
 			}
 		}
 		return null;
 	}
 	
-	public static ShopItem getItem(String itemName) {
+	public static int getItemId(String itemName) {
 		for (ShopItem iter : itemList) {
 			if (iter.getName().equalsIgnoreCase(itemName)) {
-				return iter;
+				return iter.getItemId();
 			}
 		}
-		return null;
+		return 0;
 	}
 	
 	public static ArrayList<ShopItem> getItemList() {
@@ -219,7 +219,7 @@ public class DataManager {
 	
 	public static int getMaxAvail(int itemID) {
 		for (ShopItem iter : itemList) {
-			if (iter.getItemID() == itemID) {
+			if (iter.getItemId() == itemID) {
 				return iter.getMaxAvail();
 			}
 		}
@@ -259,7 +259,7 @@ public class DataManager {
 	
 	public static int getSellPrice(int itemID) {
 		for (ShopItem iter : itemList) {
-			if (iter.getItemID() == itemID) {
+			if (iter.getItemId() == itemID) {
 				return iter.getSellPrice();
 			}
 		}
@@ -693,7 +693,7 @@ public class DataManager {
 	
 	public static boolean validID(int itemID) {
 		for (ShopItem iter : itemList) {
-			if (iter.getItemID() == itemID) {
+			if (iter.getItemId() == itemID) {
 				return true;
 			}
 		}
@@ -734,7 +734,7 @@ public class DataManager {
 				try {
 					BufferedWriter writer = new BufferedWriter(new FileWriter(file_playerData));
 					for (User iter : users) {
-						writer.write(iter.toString());
+						writer.write(iter.getSaveString());
 						writer.newLine();
 					}
 					writer.close();
@@ -747,14 +747,15 @@ public class DataManager {
 		else if (fileName.equalsIgnoreCase("item")) {
 			// TODO Item SQL Stuff
 			if (useSQL) {
-				stat.executeUpdate("create table if not exists items (ItemId, BuyPrice, SellPrice, ShopMaxSell, PlayerMaxSell, PlayerMaxBuy, BreakValue);");
+				stat
+						.executeUpdate("create table if not exists items (ItemId, BuyPrice, SellPrice, ShopMaxSell, PlayerMaxSell, PlayerMaxBuy, BreakValue);");
 			}
 			else if (dirExists) {
 				// Write item file
 				try {
 					BufferedWriter writer = new BufferedWriter(new FileWriter(file_itemlist));
 					for (ShopItem iter : itemList) {
-						writer.write(iter.toString());
+						writer.write(iter.getSaveString());
 						writer.newLine();
 					}
 					writer.close();
@@ -810,7 +811,7 @@ public class DataManager {
 					stat.executeUpdate("create table " + iter.getName() + " (ItemId, Amount);");
 					PreparedStatement prep2 = conn.prepareStatement("insert into " + iter.getName() + " values (?, ?);");
 					for (ShopItemStack stack : iter.getAvailItems()) {
-						prep2.setInt(1, stack.getItemID());
+						prep2.setInt(1, stack.getItemId());
 						prep2.setInt(2, stack.getAmountAvail());
 						prep2.addBatch();
 					}
@@ -831,7 +832,7 @@ public class DataManager {
 					BufferedWriter writer = new BufferedWriter(new FileWriter(file_shop));
 					for (Shop iter : shops) {
 						
-						writer.write(iter.toString());
+						writer.write(iter.getSaveString());
 						writer.newLine();
 					}
 					writer.close();
