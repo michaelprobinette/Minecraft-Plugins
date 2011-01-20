@@ -11,12 +11,12 @@ import org.bukkit.event.player.PlayerListener;
  * @author Vandolis
  */
 public class TeleportPlayerListener extends PlayerListener {
-	private final Teleport	plugin;
+	private final PinPointTeleport	plugin;
 	
 	/**
 	 * @param teleport
 	 */
-	public TeleportPlayerListener(Teleport teleport) {
+	public TeleportPlayerListener(PinPointTeleport teleport) {
 		plugin = teleport;
 	}
 	

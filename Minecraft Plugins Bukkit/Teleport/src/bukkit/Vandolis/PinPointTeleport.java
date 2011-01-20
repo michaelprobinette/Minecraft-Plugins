@@ -21,12 +21,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 /**
  * @author Vandolis
  */
-public class Teleport extends JavaPlugin {
+public class PinPointTeleport extends JavaPlugin {
 	private final TeleportPlayerListener	playerListener	= new TeleportPlayerListener(this);
 	private static ArrayList<Material>		airBlocks		= new ArrayList<Material>();
 	private static ArrayList<Material>		notFloorBlocks	= new ArrayList<Material>();
 	
-	public Teleport(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
+	public PinPointTeleport(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
 		super(pluginLoader, instance, desc, folder, plugin, cLoader);
 		// NOTE: Event registration should be done in onEnable not here as all events are unregistered when a plugin is disabled
 		airBlocks.add(Material.AIR);

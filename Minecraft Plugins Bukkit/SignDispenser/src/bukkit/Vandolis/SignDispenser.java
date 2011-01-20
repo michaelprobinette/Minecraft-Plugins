@@ -91,7 +91,7 @@ public class SignDispenser extends JavaPlugin {
 		
 		pm.registerEvent(Type.BLOCK_RIGHTCLICKED, blockListener, Priority.Normal, this);
 		pm.registerEvent(Type.BLOCK_PLACED, blockListener, Priority.Normal, this);
-		pm.registerEvent(Type.BLOCK_DAMAGED, blockListener, Priority.Normal, this);
+		//		pm.registerEvent(Type.BLOCK_DAMAGED, blockListener, Priority.Normal, this);
 		
 		// EXAMPLE: Custom code, here we just output some info so we can check all is well
 		PluginDescriptionFile pdfFile = getDescription();
