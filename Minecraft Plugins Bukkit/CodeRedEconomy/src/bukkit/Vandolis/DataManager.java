@@ -26,23 +26,31 @@ import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
 /**
- * @author Vandolis Used to load all of the data needed to run the plugin.
+ * Used to load all of the data needed to run the plugin.
+ * 
+ * @author Vandolis
  */
 public class DataManager {
-	// General stuff
+	/*
+	 * General stuff
+	 */
 	private static String					LOC					= "Econ/";
-	private static boolean					dirExists			= new File(LOC).mkdir();
+	private static boolean					dirExists			= false;
 	private static PropertiesFile			props				= new PropertiesFile(LOC + "data.properties");	// Properties file
 	private static boolean					debug				= false;
 	private static String					pluginMessage		= "[§cCodeRedEcon§f] ";
 	private static int						infValue			= -1;
 	private static Server					server				= null;
 	
-	// SQLite
+	/*
+	 * SQLite
+	 */
 	private static boolean					useSQL				= false;
 	private static final String				DB					= "jdbc:sqlite:CodeRedEconomy";
 	
-	// Regex stuff
+	/*
+	 * Regex stuff
+	 */
 	private static final String				PLAYER_REGEX		= ":";
 	private static final String				PLAYER2_REGEX		= " ";
 	private static final String				SHOP_REGEX			= ":";
@@ -51,44 +59,68 @@ public class DataManager {
 	private static final String				STATS2_REGEX		= " ";
 	private static final String				ITEM_REGEX			= ":";
 	
-	// Money stuff
+	/*
+	 * Money stuff
+	 */
 	private static String					moneyName			= "Strypes";
 	
-	// Shop stuff
-	// Holds all of the shops, might use to make different shops based on location or something, might use in the future. Or right now.
+	/*
+	 * Shop stuff
+	 * Shops Holds all of the shops, might use to make different shops based on location or something, might use in the future. Or right now.
+	*/
 	static ArrayList<Shop>					shops				= new ArrayList<Shop>();
 	private static long						restockTime			= 60000;
 	private static final File				file_shop			= new File(LOC + "shops.txt");
 	
-	// Privilege stuff
+	/*
+	 * Privilege stuff
+	 */
 	private static final File				file_privGroups		= new File(LOC + "privGroups.txt");
 	private static ArrayList<ShopGroup>		privGroups			= new ArrayList<ShopGroup>();
 	
-	// Items stuff
+	/*
+	 * Items stuff
+	 */
 	private static final File				file_itemlist		= new File(LOC + "items.txt");
 	private static ArrayList<ShopItem>		itemList			= new ArrayList<ShopItem>();
 	
-	// Player data... stuff
+	/*
+	 * Player data... stuff
+	 */
 	private static final File				file_playerData		= new File(LOC + "playerData.txt");
 	private static ArrayList<User>			users				= new ArrayList<User>();
 	private static long						autoDepositTime		= 60000;
 	private static int						autoDepositAmount	= 50;
+	private static long						maxBuySellTime		= 20000;
 	
-	// Stats stuff
+	/*
+	 * Stats stuff
+	 */
 	private static boolean					useStats			= true;
 	private static final File				file_stats			= new File(LOC + "stats.txt");
 	
-	// Bad word
+	/*
+	 * Bad word stuff
+	 */
 	private static HashMap<String, Integer>	badWords			= new HashMap<String, Integer>();
 	private static boolean					blockBadWords		= false;
 	private static final File				file_badWords		= new File(LOC + "badWords.txt");
 	private static final boolean			messageOnBadWord	= true;
 	
+	/**
+	 * Adds a {@link Shop} to the list of shops. Writes the array to file.
+	 * 
+	 * @param shop
+	 */
 	public static void addShop(Shop shop) {
 		if (debug) {
 			System.out.println("Adding shop under the name of: " + shop.getName());
 		}
 		shops.add(shop);
+		
+		/*
+		 * Write the new array to file.
+		 */
 		try {
 			write("shops");
 		}
@@ -98,6 +130,11 @@ public class DataManager {
 		}
 	}
 	
+	/**
+	 * Adds a {@link User} to the list of users if they aren't found. AutoDeposists money, then writes to file.
+	 * 
+	 * @param user
+	 */
 	public static void addUser(User user) {
 		user.autoDesposit(server.getTime());
 		// Check if user is already in there
@@ -122,12 +159,19 @@ public class DataManager {
 		}
 	}
 	
-	public static boolean allowedBlock(String group, int itemID) {
+	/**
+	 * Checks the given group and itemId against the list of {@link ShopGroup} to see what blocks they are allowed.
+	 * 
+	 * @param group
+	 * @param itemId
+	 * @return True if allowed to buy, false if not
+	 */
+	public static boolean allowedBlock(String group, int itemId) {
 		for (ShopGroup iter : privGroups) {
 			System.out.println("Checking " + iter.getGroupName() + " against " + group);
 			if (iter.getGroupName().equalsIgnoreCase(group)) {
 				for (int biter : iter.getAllowed()) {
-					if (biter == itemID) {
+					if (biter == itemId) {
 						return true;
 					}
 				}
@@ -136,18 +180,34 @@ public class DataManager {
 		return false;
 	}
 	
+	/**
+	 * @return A boolean of whether to check for bad words or not.
+	 */
 	public static boolean blockBadWords() {
 		return blockBadWords;
 	}
 	
+	/**
+	 * @return The amount of {@link Money} to add for an autoDeposit
+	 */
 	public static int getAutoDepositAmount() {
 		return autoDepositAmount;
 	}
 	
+	/**
+	 * @return The amount of time needed to pass before autoDepositing.
+	 */
 	public static long getAutoDepositTime() {
 		return autoDepositTime;
 	}
 	
+	/**
+	 * Checks the given message for a bad word. If found returns the bad word.
+	 * 
+	 * @param message
+	 *            to check
+	 * @return The bad word the message contains.
+	 */
 	public static String getBadWord(String message) {
 		for (String iter : badWords.keySet()) {
 			if (message.contains(iter)) {
@@ -157,23 +217,39 @@ public class DataManager {
 		return "";
 	}
 	
+	/**
+	 * @return The HashMap of badWords and their penalty
+	 */
 	public static HashMap<String, Integer> getBadWords() {
 		return badWords;
 	}
 	
-	public static int getBuyPrice(int itemID) {
+	/**
+	 * @param itemId
+	 * @return the buy price for the given itemId
+	 */
+	public static int getBuyPrice(int itemId) {
 		for (ShopItem iter : itemList) {
-			if (iter.getItemId() == itemID) {
+			if (iter.getItemId() == itemId) {
 				return iter.getBuyPrice();
 			}
 		}
 		return 0;
 	}
 	
+	/**
+	 * @return The debug setting. True if enabled.
+	 */
 	public static boolean getDebug() {
 		return debug;
 	}
 	
+	/**
+	 * Searches the list of {@link ShopGroup} to find the one associated with the given groupName.
+	 * 
+	 * @param groupName
+	 * @return associated {@link ShopGroup}
+	 */
 	public static ShopGroup getGroup(String groupName) {
 		for (ShopGroup iter : privGroups) {
 			if (iter.getGroupName().equalsIgnoreCase(groupName)) {
@@ -183,23 +259,41 @@ public class DataManager {
 		return null;
 	}
 	
+	/**
+	 * @return ArrayList of the {@link ShopGroup}
+	 */
 	public static ArrayList<ShopGroup> getGroups() {
 		return privGroups;
 	}
 	
+	/**
+	 * @return the value used for infinite in {@link Money} and {@link ShopItemStack} amounts.
+	 */
 	public static int getInfValue() {
 		return infValue;
 	}
 	
-	public static ShopItem getItem(int itemID) {
+	/**
+	 * Searches the list of {@link ShopItem} for the given itemId. Returns null if not found.
+	 * 
+	 * @param itemId
+	 * @return the {@link ShopItem} with the same itemId
+	 */
+	public static ShopItem getItem(int itemId) {
 		for (ShopItem iter : itemList) {
-			if (iter.getItemId() == itemID) {
+			if (iter.getItemId() == itemId) {
 				return iter;
 			}
 		}
 		return null;
 	}
 	
+	/**
+	 * Searches the list of {@link ShopItem} for the given itemName. Returns 0 if not found.
+	 * 
+	 * @param itemName
+	 * @return itemId of the item.
+	 */
 	public static int getItemId(String itemName) {
 		for (ShopItem iter : itemList) {
 			if (iter.getName().equalsIgnoreCase(itemName)) {
@@ -209,14 +303,26 @@ public class DataManager {
 		return 0;
 	}
 	
+	/**
+	 * @return The list of loaded {@link ShopItem}
+	 */
 	public static ArrayList<ShopItem> getItemList() {
 		return itemList;
 	}
 	
+	/**
+	 * @return Regex used for items
+	 */
 	public static String getItemRegex() {
 		return ITEM_REGEX;
 	}
 	
+	/**
+	 * Searches the list of {@link ShopItem} and returns the maxAvailable for shops. Returns 0 if not found.
+	 * 
+	 * @param itemID
+	 * @return
+	 */
 	public static int getMaxAvail(int itemID) {
 		for (ShopItem iter : itemList) {
 			if (iter.getItemId() == itemID) {
@@ -226,63 +332,79 @@ public class DataManager {
 		return 0;
 	}
 	
+	/**
+	 * @return Official name of {@link Money}
+	 */
 	public static String getMoneyName() {
 		return moneyName;
 	}
 	
+	/**
+	 * @return second regex used for players
+	 */
 	public static String getPlayer2Regex() {
 		return PLAYER2_REGEX;
 	}
 	
+	/**
+	 * @return regex used for players
+	 */
 	public static String getPlayerRegex() {
 		return PLAYER_REGEX;
 	}
 	
+	/**
+	 * @return The string to put in front of messages from the plugin.
+	 */
 	public static String getPluginMessage() {
 		return pluginMessage;
 	}
 	
-	public static String getReqGroup(int itemID) {
-		for (ShopGroup iter : privGroups) {
-			for (int biter : iter.getAllowed()) {
-				if (biter == itemID) {
-					return iter.getGroupName();
-				}
-			}
-		}
-		return "default";
-	}
-	
+	/**
+	 * @return The amount of time needed to pass before restocking a shop
+	 */
 	public static long getRestockTime() {
 		return restockTime;
 	}
 	
-	public static int getSellPrice(int itemID) {
+	/**
+	 * Searches the list of {@link ShopItem} for the given itemId. Returns 0 if not found.
+	 * 
+	 * @param itemId
+	 * @return the items sell price.
+	 */
+	public static int getSellPrice(int itemId) {
 		for (ShopItem iter : itemList) {
-			if (iter.getItemId() == itemID) {
+			if (iter.getItemId() == itemId) {
 				return iter.getSellPrice();
 			}
 		}
 		return 0;
 	}
 	
+	/**
+	 * @return the current server
+	 */
 	public static Server getServer() {
 		return server;
 	}
 	
+	/**
+	 * Searches the list of shops for the given {@link EconEntity}. If not found, adds a new {@link Shop} to the list and returns it.
+	 * 
+	 * @param ent
+	 * @return
+	 */
 	public static Shop getShop(EconEntity ent) {
-		for (Shop iter : shops) {
-			if (iter.getName().equalsIgnoreCase(ent.getName())) {
-				return iter;
-			}
-		}
-		
-		// No shop found, make a new one with default values
-		Shop temp = new Shop(ent.getName(), false, -1);
-		addShop(temp);
-		return temp;
+		return getShop(ent.getName());
 	}
 	
+	/**
+	 * Searches the list of shops for the given name. If nout found, adds a new {@link Shop} to the list and returns it.
+	 * 
+	 * @param name
+	 * @return
+	 */
 	public static Shop getShop(String name) {
 		for (Shop iter : shops) {
 			if (iter.getName().equalsIgnoreCase(name)) {
@@ -293,45 +415,56 @@ public class DataManager {
 			}
 		}
 		
-		// No shop found, make a new one with default values
+		/*
+		 * No shop found, make a new one with default values
+		 */
 		Shop temp = new Shop(name, false, -1);
 		addShop(temp);
 		return temp;
 	}
 	
+	/**
+	 * @return second regex used for {@link Shop}
+	 */
 	public static String getShop2Regex() {
 		return SHOP2_REGEX;
 	}
 	
+	/**
+	 * @return regex used for {@link Shop}
+	 */
 	public static String getShopRegex() {
 		return SHOP_REGEX;
 	}
 	
+	/**
+	 * @return List of {@link Shop}
+	 */
 	public static ArrayList<Shop> getShops() {
 		return shops;
 	}
 	
+	/**
+	 * @return second regex used for stats
+	 */
 	public static String getStats2Regex() {
 		return STATS2_REGEX;
 	}
 	
+	/**
+	 * @return regex used for stats
+	 */
 	public static String getStatsRegex() {
 		return STATS_REGEX;
 	}
 	
-	public static User getUser(EconEntity ent) {
-		for (User iter : users) {
-			if (iter.getName().equalsIgnoreCase(ent.getName())) {
-				iter.autoDesposit(server.getTime());
-				return iter;
-			}
-		}
-		User temp = new User(ent.getName()); // Not found, make a new user
-		temp.autoDesposit(server.getTime()); // Starting money
-		addUser(temp); // Add user to the users list
-		return temp;
-	}
-	
+	/**
+	 * Searches the list of {@link User} for the given {@link Player}. If not found adds a new user with the given player tied to the list
+	 * and returns it.
+	 * 
+	 * @param player
+	 * @return
+	 */
 	public static User getUser(Player player) {
 		for (User iter : users) {
 			if (iter.getName().equalsIgnoreCase(player.getName())) {
@@ -340,9 +473,14 @@ public class DataManager {
 				return iter;
 			}
 		}
-		User temp = new User(player); // Not found, make a new user
-		temp.autoDesposit(server.getTime()); // Starting money
-		addUser(temp); // Add user to the users list
+		
+		/*
+		 * User not found, make a new user and tie the player to it.
+		 * Add the new user to the user list and write to file
+		 */
+		User temp = new User(player);
+		temp.autoDesposit(server.getTime());
+		addUser(temp);
 		try {
 			write("player");
 		}
@@ -350,9 +488,18 @@ public class DataManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		return temp;
 	}
 	
+	/**
+	 * Searches the list of {@link User} for the given name. If a user is not found makes adds a new user with the given name to the list
+	 * and
+	 * returns it.
+	 * 
+	 * @param name
+	 * @return
+	 */
 	public static User getUser(String name) {
 		if (name.contains(":")) {
 			name = name.replace(":", "");
@@ -366,46 +513,89 @@ public class DataManager {
 				return iter;
 			}
 		}
-		User temp = new User(name); // Not found, make a new user
-		temp.autoDesposit(server.getTime()); // Starting money
-		addUser(temp); // Add user to the users list
+		
+		/*
+		 * User not found, make a new one and add it to the list.
+		 * Write to file.
+		 */
+		User temp = new User(name);
+		temp.autoDesposit(server.getTime());
+		addUser(temp);
+		try {
+			write("player");
+		}
+		catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return temp;
 	}
 	
+	/**
+	 * @return the list of users
+	 */
 	public static ArrayList<User> getUsers() {
 		return users;
 	}
 	
+	/**
+	 * Used to load a static {@link DataManager}. Sets the server to the given one, and reads all the files.
+	 * 
+	 * @param instance
+	 */
 	public static void load(CodeRedEconomy instance) {
+		System.out.println("Loading CodeRedEconomy...");
+		
 		server = instance.getServer();
-		// Read data from properties file
+		
+		/*
+		 * Check to see if the dir exists
+		 */
+		dirExists = new File(LOC).exists();
+		if (!dirExists) {
+			dirExists = new File(LOC).mkdir();
+		}
+		
+		/*Change the folder location to the given one*/
+		//		LOC = instance.getDataFolder().getPath();
+		
+		/*Read data from properties file*/
 		readProps();
 		
-		// Read from the items file
+		/*Read from the items file*/
 		readItemFile();
 		
-		// Read from the users file
+		/*Read from the users file*/
 		readUserFile();
 		
-		// Read from the group priv file
+		/*Read from the group priv file*/
 		readPrivFile();
 		
-		// Read from the stats file
+		/*Read from the stats file*/
 		readStatsFile();
 		
-		// Read from the shop file
+		/*Read from the shop file*/
 		readShopFile();
 		
-		// Read bad words file
+		/*Read bad words file*/
 		readBadWords();
 	}
 	
+	/**
+	 * @return True if a message should be sent to the offending user.
+	 */
 	public static boolean messageOnBadWord() {
 		return messageOnBadWord;
 	}
 	
+	/**
+	 * Loads the bad words from file
+	 */
 	private static void readBadWords() {
 		if (dirExists) {
+			System.out.println("Reading Bad Words File...");
+			
 			BufferedReader reader;
 			String raw = "";
 			try {
@@ -420,7 +610,9 @@ public class DataManager {
 			}
 			catch (IOException e) {
 				try {
-					// File not found, create empty file
+					/*
+					 * File not found, create empty file
+					 */
 					BufferedWriter writer = new BufferedWriter(new FileWriter(file_badWords));
 					writer.newLine();
 					writer.close();
@@ -433,12 +625,15 @@ public class DataManager {
 	}
 	
 	/**
+	 * Loads the item data from file.
 	 * Item file formatting is "itemID:buyPrice:sellPrice:maxAvail"
 	 */
 	private static void readItemFile() {
 		if (dirExists) {
 			BufferedReader reader;
 			String raw = "";
+			itemList = new ArrayList<ShopItem>();
+			
 			try {
 				reader = new BufferedReader(new FileReader(file_itemlist));
 				
@@ -454,7 +649,9 @@ public class DataManager {
 			}
 			catch (IOException e) {
 				try {
-					// File not found, create empty file
+					/*
+					 * File not found, create empty file
+					 */
 					BufferedWriter writer = new BufferedWriter(new FileWriter(file_itemlist));
 					writer.newLine();
 					writer.close();
@@ -466,8 +663,13 @@ public class DataManager {
 		}
 	}
 	
+	/**
+	 * Loads the {@link ShopGroup} data from file.
+	 */
 	private static void readPrivFile() {
 		if (dirExists) {
+			System.out.println("Reading Groups File...");
+			
 			BufferedReader reader;
 			String raw = "";
 			try {
@@ -493,7 +695,9 @@ public class DataManager {
 			}
 			catch (IOException e) {
 				try {
-					// File not found, create empty file
+					/*
+					 * File not found, create empty file
+					 */
 					BufferedWriter writer = new BufferedWriter(new FileWriter(file_privGroups));
 					writer.newLine();
 					writer.close();
@@ -505,8 +709,13 @@ public class DataManager {
 		}
 	}
 	
+	/**
+	 * Reads the {@link PropertiesFile}
+	 */
 	private static void readProps() {
 		if (dirExists) {
+			System.out.println("Reading properties file...");
+			
 			if (props.containsKey("moneyname")) {
 				moneyName = props.getString("moneyname");
 			}
@@ -583,11 +792,23 @@ public class DataManager {
 			else {
 				props.setBoolean("messageonbadword", messageOnBadWord);
 			}
+			
+			if (props.containsKey("maxbuyselltimeout")) {
+				maxBuySellTime = props.getLong("maxbuyselltimeout");
+			}
+			else {
+				props.setLong("maxbuyselltimeout", maxBuySellTime);
+			}
 		}
 	}
 	
+	/**
+	 * Loads the {@link Shop} data from file
+	 */
 	private static void readShopFile() {
 		if (dirExists) {
+			System.out.println("Reading Shops File...");
+			
 			BufferedReader reader;
 			String raw = "";
 			try {
@@ -599,7 +820,9 @@ public class DataManager {
 			}
 			catch (IOException e) {
 				try {
-					// File not found, create empty file
+					/*
+					 * File not found, create empty file
+					 */
 					BufferedWriter writer = new BufferedWriter(new FileWriter(file_shop));
 					writer.newLine();
 					writer.close();
@@ -611,8 +834,13 @@ public class DataManager {
 		}
 	}
 	
+	/**
+	 * Loads the {@link EconStats} from file
+	 */
 	private static void readStatsFile() {
 		if (dirExists) {
+			System.out.println("Reading Stats File...");
+			
 			BufferedReader reader;
 			String raw = "";
 			try {
@@ -626,7 +854,9 @@ public class DataManager {
 			}
 			catch (IOException e) {
 				try {
-					// File not found, create empty file
+					/*
+					 * File not found, create empty file
+					 */
 					BufferedWriter writer = new BufferedWriter(new FileWriter(file_privGroups));
 					writer.newLine();
 					writer.close();
@@ -638,8 +868,13 @@ public class DataManager {
 		}
 	}
 	
+	/**
+	 * Loads the {@link User} data from file.
+	 */
 	private static void readUserFile() {
 		if (dirExists) {
+			System.out.println("Reading Users File...");
+			
 			BufferedReader reader;
 			String raw = "";
 			
@@ -657,7 +892,9 @@ public class DataManager {
 				reader.close();
 			}
 			catch (IOException e) {
-				// File not found, try to make the file
+				/*
+				 * File not found, try to make the file
+				 */
 				BufferedWriter writer;
 				try {
 					writer = new BufferedWriter(new FileWriter(file_playerData));
@@ -665,16 +902,24 @@ public class DataManager {
 					writer.close();
 				}
 				catch (IOException e1) {
-					// FFFFFFFFUUUUUUUUU
+					/*
+					 * FFFFFFFFUUUUUUUUU
+					 */
 					e1.printStackTrace();
 				}
 			}
 		}
 	}
 	
+	/**
+	 * Performs a full save of the economy. Writes all data to file
+	 */
 	public static void save() {
 		System.out.println("Saving player and item data.");
-		// Perform save actions
+		
+		/*
+		  * Perform save actions
+		  */
 		try {
 			write("player");
 			write("item");
@@ -687,26 +932,40 @@ public class DataManager {
 		}
 	}
 	
+	/**
+	 * @return True to use stats, false to not
+	 */
 	public static boolean usingStats() {
 		return useStats;
 	}
 	
-	public static boolean validID(int itemID) {
+	/**
+	 * Searches the list of {@link ShopItem} for the given itemId. True if found.
+	 * 
+	 * @param itemId
+	 * @return
+	 */
+	public static boolean validId(int itemId) {
 		for (ShopItem iter : itemList) {
-			if (iter.getItemId() == itemID) {
+			if (iter.getItemId() == itemId) {
 				return true;
 			}
 		}
 		return false;
 	}
 	
+	/**
+	 * Parent function for writing data to file. Supply the name of the data you want to write.
+	 * 
+	 * @param fileName
+	 * @throws SQLException
+	 */
 	private static void write(String fileName) throws SQLException {
-		Connection conn = DriverManager.getConnection(DB);
-		Statement stat = conn.createStatement();
-		
 		if (fileName.equalsIgnoreCase("player")) {
 			// TODO Player SQL Stuff
 			if (useSQL) {
+				Connection conn = DriverManager.getConnection(DB);
+				Statement stat = conn.createStatement();
 				// Drop old table
 				stat.executeUpdate("drop table if exists players;");
 				
@@ -728,6 +987,7 @@ public class DataManager {
 				conn.setAutoCommit(false);
 				prep.executeBatch();
 				conn.setAutoCommit(true);
+				conn.close();
 			}
 			else if (dirExists) {
 				// Write player file
@@ -747,8 +1007,11 @@ public class DataManager {
 		else if (fileName.equalsIgnoreCase("item")) {
 			// TODO Item SQL Stuff
 			if (useSQL) {
+				Connection conn = DriverManager.getConnection(DB);
+				Statement stat = conn.createStatement();
 				stat
 						.executeUpdate("create table if not exists items (ItemId, BuyPrice, SellPrice, ShopMaxSell, PlayerMaxSell, PlayerMaxBuy, BreakValue);");
+				conn.close();
 			}
 			else if (dirExists) {
 				// Write item file
@@ -775,7 +1038,7 @@ public class DataManager {
 				// Write stats file
 				try {
 					BufferedWriter writer = new BufferedWriter(new FileWriter(file_stats));
-					for (String iter : EconStats.statString()) {
+					for (String iter : EconStats.getSaveString()) {
 						writer.write(iter);
 						writer.newLine();
 					}
@@ -788,6 +1051,8 @@ public class DataManager {
 		}
 		else if (fileName.equalsIgnoreCase("shops")) {
 			if (useSQL) {
+				Connection conn = DriverManager.getConnection(DB);
+				Statement stat = conn.createStatement();
 				// TODO Shops SQL Stuff
 				
 				// Drop existing tables, this is a total write
@@ -825,6 +1090,7 @@ public class DataManager {
 				conn.setAutoCommit(false);
 				prep.executeBatch();
 				conn.setAutoCommit(true);
+				conn.close();
 			}
 			else if (dirExists) {
 				// Write shops file
@@ -842,6 +1108,13 @@ public class DataManager {
 				}
 			}
 		}
-		conn.close();
+		
+	}
+	
+	/**
+	 * @return amount of time for a transaction to timeout. Used in checkMaxBuy/Sell
+	 */
+	public static long getMaxBuySellTime() {
+		return maxBuySellTime;
 	}
 }

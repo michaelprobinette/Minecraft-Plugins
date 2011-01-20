@@ -14,6 +14,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Base entity for the economy. Shops and {@link User} extend this.
+ * 
+ * @author Vandolis
+ */
 public abstract class EconEntity {
 	protected Money						money			= new Money();
 	protected ArrayList<ShopItemStack>	availableItems	= new ArrayList<ShopItemStack>();
@@ -127,14 +132,40 @@ public abstract class EconEntity {
 				checkEnoughSlots(stack);
 				
 				/* Return if the player has the money*/
-				return (money.getAmount() >= stack.getTotalBuyPrice().getAmount());
+				if ((stack.getTotalBuyPrice().getAmount() > money.getAmount()) && (money.getAmount() != DataManager.getInfValue())) {
+					/*
+					 * Find the largest stack size they can afford
+					 */
+					int count = money.getAmount() / stack.getTotalBuyPrice().getAmount();
+					
+					ShopItemStack newStack = new ShopItemStack(stack.getItemId(), count);
+					
+					if (count > 0) {
+						throw new EconException("You can only afford " + newStack, name + " could only afford " + newStack, newStack);
+					}
+				}
 			}
 			else {
 				/*Shop*/
 
 				/*Check the money*/
-				return (money.getAmount() >= stack.getTotalBuyPrice().getAmount());
+				if ((stack.getTotalBuyPrice().getAmount() > money.getAmount()) && (money.getAmount() != DataManager.getInfValue())) {
+					/*
+					 * Find the largest stack size they can afford
+					 */
+					int count = money.getAmount() / stack.getTotalBuyPrice().getAmount();
+					
+					ShopItemStack newStack = new ShopItemStack(stack.getItemId(), count);
+					
+					if (count > 0) {
+						throw new EconException("You can only afford " + newStack, name + " could only afford " + newStack, newStack);
+					}
+				}
 			}
+		}
+		
+		if (DataManager.getDebug()) {
+			System.out.println(name + " can buy " + stack);
 		}
 		
 		return true;
@@ -154,6 +185,10 @@ public abstract class EconEntity {
 		// if (!(user.getPlayer().isInGroup(DataManager.getReqGroup(stack.getItemID())))) {
 		// throw new EconException("You are not allowed to purchase this item.", name + " is not allowed to purchase this item.");
 		// }
+		
+		if (DataManager.getDebug()) {
+			System.out.println(name + " is allowed to buy " + stack);
+		}
 	}
 	
 	/**
@@ -184,6 +219,10 @@ public abstract class EconEntity {
 						+ " does not have enough space for " + stack.getAmountAvail() + " " + stack.getName() + ".");
 			}
 		}
+		
+		if (DataManager.getDebug()) {
+			System.out.println(name + " has enough slots for " + stack);
+		}
 	}
 	
 	/**
@@ -205,8 +244,17 @@ public abstract class EconEntity {
 			if (user != null) {
 				/*Player*/
 
+				/*Make sure that this is not a cash only*/
+				if (stack != null) {
+					/* 
+					 * Check to see if they have the required items.
+					 * Will throw an exception if it fails
+					 */
+					checkHasItems(stack);
+				}
+				
 				/*
-				 * Check to see if they are allowed to buy the item
+				 * Check to see if they are allowed to sell the item
 				 * Will throw an exception if it fails
 				 */
 				checkAllowed(stack);
@@ -217,14 +265,6 @@ public abstract class EconEntity {
 				 */
 				checkMaxSell(stack);
 				
-				/*Make sure that this is not a cash only*/
-				if (stack != null) {
-					/* 
-					 * Check to see if they have the required items.
-					 * Will throw an exception if it fails
-					 */
-					checkHasItems(stack);
-				}
 			}
 			else {
 				/*Shop*/
@@ -239,50 +279,13 @@ public abstract class EconEntity {
 				}
 			}
 		}
+		
+		if (DataManager.getDebug()) {
+			System.out.println(name + " can sell " + stack);
+		}
+		
 		/*Reached this far, no exception thrown so return true*/
 		return true;
-		
-		//		if (DataManager.getDebug()) {
-		//			if (stack != null) {
-		//				System.out.println("Checking to see if " + name + " can sell " + stack.getAmountAvail() + " "
-		//						+ stack.getName());
-		//			}
-		//		}
-		//		boolean hasItems = false;
-		//		boolean soldLessThanMax = true;
-		//		if (stack != null) {
-		//			// Check if the entity is a player
-		//			if (user != null) {
-		//				user.updateArray();
-		//			}
-		//			ShopItemStack sis = getStack(availableItems, stack);
-		//			if (sis != null) {
-		//				hasItems = (stack.getAmountAvail() <= sis.getAmountAvail());
-		//				if (sis.getAmountAvail() == -1) {
-		//					hasItems = true;
-		//				}
-		//			}
-		//		}
-		//		else {
-		//			hasItems = true;
-		//		}
-		//		
-		//		if (!hasItems) {
-		//			if (stack.getItemID() != 0) {
-		//				throw new EconException(name + " does not have enough " + stack.getName(), "You do not have enough "
-		//						+ stack.getName() + " (" + numberOfItems(stack.getShopItem()) + "/" + stack.getAmountAvail() + ")");
-		//			}
-		//			else {
-		//				throw new EconException(name + " does not sell that item.", "You can't sell that item.");
-		//			}
-		//		}
-		//		
-		//		if ((user != null) && (stack != null)) {
-		//			// Only checks if it is a user selling
-		//			soldLessThanMax = checkMaxSell(stack);
-		//		}
-		//		
-		//		return (hasItems && soldLessThanMax);
 	}
 	
 	/**
@@ -292,29 +295,51 @@ public abstract class EconEntity {
 	 * @throws EconException
 	 */
 	private void checkHasItems(ShopItemStack stack) throws EconException {
+		if (DataManager.getDebug()) {
+			System.out.println("Checking to see if " + name + " has " + stack);
+		}
+		
 		/*If a user, update the array*/
 		if (user != null) {
 			user.updateArray();
 		}
+		
 		/*Amount the player currently has*/
-		int current = getStack(availableItems, stack).getAmountAvail();
-		if (current < stack.getAmountAvail()) {
-			/*
-			 * Check to make sure it is not air, as that would mean it is not an item that can be sold or bought
-			 */
-			if (stack.getItemId() != 0) {
+		ShopItemStack s = getStack(availableItems, stack);
+		int current = 0;
+		
+		if (s != null) {
+			current = s.getAmountAvail();
+		}
+		
+		/*
+		 * Check to make sure it is not air, as that would mean it is not an item that can be sold or bought
+		 */
+		if (stack.getItemId() != 0) {
+			if ((current < stack.getAmountAvail()) && (current != DataManager.getInfValue())) {
 				/*
 				 * Not enough of the item, throw an exception with the correct messages and with a new stack size of the max the entity has
 				 */
-				throw new EconException(name + " does not have enough " + stack.getName(), "You do not have enough " + stack.getName()
-						+ " (" + numberOfItems(stack) + "/" + stack.getAmountAvail() + ")", new ShopItemStack(stack.getItemId(), current));
+				if (current != 0) {
+					throw new EconException(name + " does not have enough " + stack.getName(), "You do not have enough " + stack.getName()
+							+ " (" + numberOfItems(stack) + "/" + stack.getAmountAvail() + ")", new ShopItemStack(stack.getItemId(),
+							current));
+				}
+				else {
+					throw new EconException(name + " does not have enough " + stack.getName(), "You do not have enough " + stack.getName()
+							+ " (" + numberOfItems(stack) + "/" + stack.getAmountAvail() + ")");
+				}
 			}
-			else {
-				/*
-				 * Can't sell that item, not on the list.
-				 */
-				throw new EconException(name + " does not sell that item.", "You can't sell that item.");
+			
+			if (DataManager.getDebug()) {
+				System.out.println(name + " has " + stack);
 			}
+		}
+		else {
+			/*
+			 * Can't sell that item, not on the list.
+			 */
+			throw new EconException(name + " does not sell that item.", "You can't sell that item.");
 		}
 	}
 	
@@ -329,7 +354,14 @@ public abstract class EconEntity {
 		if (DataManager.getDebug()) {
 			System.out.println("Checking " + name + " for the max buy for " + stack.getName());
 		}
+		
+		/*
+		 * Remove timeouts
+		 */
+		removeTimeouts();
+		
 		int totBought = 0;
+		
 		for (Transaction iter : transactions) {
 			// If the buyer is this entity and it is an item transaction, check the item id
 			if (iter.getBuyer().getName().equalsIgnoreCase(name) && (iter.getStack() != null)) {
@@ -339,6 +371,7 @@ public abstract class EconEntity {
 				}
 			}
 		}
+		
 		if ((totBought + stack.getAmountAvail() > stack.getMaxBuy()) && (stack.getMaxBuy() != DataManager.getInfValue())) {
 			// Print debug info to console
 			if (DataManager.getDebug()) {
@@ -348,11 +381,15 @@ public abstract class EconEntity {
 			// Exception handling
 			if (totBought != stack.getMaxBuy()) {
 				throw new EconException("You can only buy " + (stack.getMaxBuy() - totBought) + " more " + stack.getName(), name
-						+ " has can't buy that many " + stack.getName());
+						+ " can't buy that many " + stack.getName());
 			}
 			else {
 				throw new EconException("You can't buy anymore " + stack.getName(), name + " can't buy anymore " + stack.getName());
 			}
+		}
+		
+		if (DataManager.getDebug()) {
+			System.out.println(name + " will not reach the buy max with " + stack);
 		}
 	}
 	
@@ -368,6 +405,11 @@ public abstract class EconEntity {
 		if (DataManager.getDebug()) {
 			System.out.println("Checking " + name + " for the max sell for " + stack.getName());
 		}
+		
+		/*
+		 * Remove timeouts
+		 */
+		removeTimeouts();
 		
 		int totSold = 0; // A count of how many of the item the entity has already sold
 		
@@ -392,6 +434,23 @@ public abstract class EconEntity {
 			}
 			else {
 				throw new EconException(name + " can't sell anymore " + stack.getName(), "You can't sell anymore " + stack.getName());
+			}
+		}
+		
+		if (DataManager.getDebug()) {
+			System.out.println(name + " will not reach the sell max with " + stack);
+		}
+	}
+	
+	/**
+	 * Goes through the list of {@link Transaction} and removes any that have timed out.
+	 */
+	private void removeTimeouts() {
+		long time = DataManager.getServer().getTime();
+		
+		for (Transaction iter : transactions) {
+			if (time - iter.getTime() >= DataManager.getMaxBuySellTime()) {
+				
 			}
 		}
 	}
@@ -550,6 +609,7 @@ public abstract class EconEntity {
 	 */
 	public void removeShopItems(ShopItemStack stack) {
 		ShopItemStack sis = getStack(availableItems, stack);
+		
 		if (sis != null) {
 			if (sis.getAmountAvail() != DataManager.getInfValue()) {
 				sis.addAmountAvail(-stack.getAmountAvail());

@@ -10,6 +10,11 @@ package bukkit.Vandolis;
 
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Class that is the base item used by the economy. Eventually gets added directly to the players inventory.
+ * 
+ * @author Vandolis
+ */
 public class ShopItem {
 	private final String			REGEX			= DataManager.getItemRegex();
 	private final int				itemId;
@@ -21,6 +26,7 @@ public class ShopItem {
 	private final int				maxSell;
 	private final Money				breakValue;
 	private final int				maxBuy;
+	private boolean					valid			= true;
 	
 	private static final String[]	blockNames		=
 															{
@@ -53,18 +59,6 @@ public class ShopItem {
 	private static final String[]	specialItems	= {
 			"Gold Music Disk", "Green Music Disk"
 													};
-	
-	public ShopItem() {
-		itemId = 0;
-		itemName = "Air";
-		buyPrice = 0;
-		sellPrice = 0;
-		maxAvail = 0;
-		item = new ItemStack(0);
-		maxSell = -1;
-		breakValue = new Money();
-		maxBuy = -1;
-	}
 	
 	/**
 	 * Creates a {@link ShopItem} based on the itemId given. Loads the rest of the data from the {@link DataManager}.
@@ -129,6 +123,8 @@ public class ShopItem {
 		maxSell = temp.getMaxSell();
 		breakValue = temp.getBreakValue();
 		maxBuy = temp.getMaxBuy();
+		
+		valid = (itemId != 0);
 	}
 	
 	/**
@@ -174,6 +170,13 @@ public class ShopItem {
 	 */
 	public int getItemId() {
 		return itemId;
+	}
+	
+	/**
+	 * @return Whether or not the item is valid.
+	 */
+	public boolean isValid() {
+		return valid;
 	}
 	
 	/**
@@ -259,7 +262,8 @@ public class ShopItem {
 	 * @return
 	 */
 	public String getSaveString() {
-		return itemId + REGEX + buyPrice + REGEX + sellPrice + REGEX + maxAvail + REGEX + maxSell + REGEX + maxBuy + REGEX + breakValue;
+		return itemId + REGEX + buyPrice + REGEX + sellPrice + REGEX + maxAvail + REGEX + maxSell + REGEX + maxBuy + REGEX
+				+ breakValue.getAmount();
 	}
 	
 	/* (non-Javadoc)

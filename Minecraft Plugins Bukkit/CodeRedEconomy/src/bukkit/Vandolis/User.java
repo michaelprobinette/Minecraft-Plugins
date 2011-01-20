@@ -11,6 +11,11 @@ package bukkit.Vandolis;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Main player class for the economy. Eventually holds the player that is being interacted with.
+ * 
+ * @author Vandolis
+ */
 public class User extends EconEntity {
 	private final String	regex		= DataManager.getPlayerRegex();
 	private Player			player		= null;
@@ -188,6 +193,13 @@ public class User extends EconEntity {
 	 */
 	public void updateArray() {
 		/*
+		 * Checks to make sure the player is not null, if it is grab the player from the server
+		 */
+		if (player == null) {
+			player = DataManager.getServer().getPlayer(name);
+		}
+		
+		/*
 		 * Clear the availableItems to prevent errors.
 		 */
 		availableItems.clear();
@@ -214,7 +226,7 @@ public class User extends EconEntity {
 					/*
 					 * Add it to the array if it was not found already
 					 */
-					if (!found && DataManager.validID(iter.getTypeId())) {
+					if (!found && DataManager.validId(iter.getTypeId())) {
 						availableItems.add(new ShopItemStack(iter.getTypeId(), iter.getAmount()));
 					}
 				}
@@ -228,6 +240,13 @@ public class User extends EconEntity {
 	 * @param stack
 	 */
 	public void addItem(ShopItemStack stack) {
+		/*
+		 * Checks to make sure the player is not null, if it is grab the player from the server
+		 */
+		if (player == null) {
+			player = DataManager.getServer().getPlayer(name);
+		}
+		
 		getPlayer().getInventory().addItem(stack.getItem());
 	}
 	
@@ -237,6 +256,13 @@ public class User extends EconEntity {
 	 * @param stack
 	 */
 	public void removeItem(ShopItemStack stack) {
+		/*
+		 * Checks to make sure the player is not null, if it is grab the player from the server
+		 */
+		if (player == null) {
+			player = DataManager.getServer().getPlayer(name);
+		}
+		
 		getPlayer().getInventory().removeItem(stack.getItem());
 	}
 }

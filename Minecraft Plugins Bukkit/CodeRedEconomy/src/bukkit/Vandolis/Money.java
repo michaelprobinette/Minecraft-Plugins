@@ -8,6 +8,11 @@
  */
 package bukkit.Vandolis;
 
+/**
+ * Main class for anything money related. Includes name and amount
+ * 
+ * @author Vandolis
+ */
 public class Money {
 	private int				amount	= 0;
 	private boolean			valid	= true;
@@ -15,10 +20,18 @@ public class Money {
 	private int				spent	= 0;
 	private int				gained	= 0;
 	
+	/**
+	 * Makes a new {@link Money} with all 0.
+	 */
 	public Money() {
 		name = DataManager.getMoneyName();
 	}
 	
+	/**
+	 * Makes a new {@link Money} with the given amount.
+	 * 
+	 * @param amount
+	 */
 	public Money(int amount) {
 		name = DataManager.getMoneyName();
 		this.amount = amount;
@@ -27,60 +40,104 @@ public class Money {
 		}
 	}
 	
+	/**
+	 * @param amount
+	 *            to add
+	 */
 	public void addAmount(int amount) {
-		// Check to make sure they don't accidently go into inf range
-		if (this.amount + amount == DataManager.getInfValue() && this.amount != DataManager.getInfValue()) {
+		/*
+		 * Check to make sure they don't accidently go into inf range
+		 */
+		if ((this.amount + amount == DataManager.getInfValue()) && (this.amount != DataManager.getInfValue())) {
 			this.amount += (amount + 1);
 		}
 		else if (this.amount != DataManager.getInfValue()) {
 			this.amount += amount;
 		}
+		
+		if (amount > 0) {
+			gained += amount;
+		}
+		else {
+			spent += amount;
+		}
 	}
 	
+	/**
+	 * @return Name of the {@link Money}
+	 */
 	public static String getMoneyName() {
 		return name;
 	}
 	
+	/**
+	 * @return Amount of {@link Money}
+	 */
 	public int getAmount() {
 		return amount;
 	}
 	
+	/**
+	 * @return Valid money, false if negative
+	 */
 	public boolean isValid() {
 		return valid;
 	}
 	
+	/**
+	 * @param amount
+	 *            to remove
+	 */
 	public void removeAmount(int amount) {
-		// Check to make sure they don't accidently go into inf range
-		if (this.amount - amount == DataManager.getInfValue() && this.amount != DataManager.getInfValue()) {
+		/*
+		 * Check to make sure they don't accidently go into inf range
+		 */
+		if ((this.amount - amount == DataManager.getInfValue()) && (this.amount != DataManager.getInfValue())) {
 			this.amount -= (amount + 1);
 		}
 		else if (this.amount != DataManager.getInfValue()) {
 			this.amount -= amount;
 		}
+		
+		if (amount > 0) {
+			gained += amount;
+		}
+		else {
+			spent += amount;
+		}
 	}
 	
+	/**
+	 * Sets the amount of money to the given amount
+	 * 
+	 * @param amount
+	 * @return
+	 */
 	public boolean setAmount(int amount) {
 		this.amount = amount;
-		if (amount < 0) {
+		if ((amount < 0) && (amount != DataManager.getInfValue())) {
 			valid = false;
 		}
 		return valid;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		return amount + " " + name;
 	}
 	
 	/**
-	 * @return
+	 * @return the amount of {@link Money} that has been spent
 	 */
 	public int getSpent() {
 		return spent;
 	}
 	
 	/**
-	 * @return
+	 * @return the amount of {@link Money} that has been gained
 	 */
 	public int getGained() {
 		return gained;

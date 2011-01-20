@@ -8,23 +8,36 @@
  */
 package bukkit.Vandolis;
 
+/**
+ * A class that contains group names as well as a list of the items that group is allowed to buy
+ * 
+ * @author Vandolis
+ */
 public class ShopGroup {
 	private String	groupName		= "";
 	private int[]	allowedBlocks	= new int[1];
 	
-	public ShopGroup(String group) {
-		groupName = group;
-	}
-	
+	/**
+	 * Makes a {@link ShopGroup} for the given group name and fills it with the given allowed items
+	 * 
+	 * @param group
+	 * @param allowed
+	 */
 	public ShopGroup(String group, int[] allowed) {
 		groupName = group;
 		allowedBlocks = allowed;
 	}
 	
+	/**
+	 * @return the list of allowed items for the group
+	 */
 	public int[] getAllowed() {
 		return allowedBlocks;
 	}
 	
+	/**
+	 * @return the group name
+	 */
 	public String getGroupName() {
 		return groupName;
 	}

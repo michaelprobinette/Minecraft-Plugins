@@ -19,6 +19,11 @@ import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * Main plugin file, registers {@link Event} and loads {@link DataManager}.
+ * 
+ * @author Vandolis
+ */
 public class CodeRedEconomy extends JavaPlugin {
 	private final CodeRedPlayerListener	playerListener	= new CodeRedPlayerListener(this);
 	private final CodeRedBlockListener	blockListener	= new CodeRedBlockListener(this);

@@ -29,17 +29,19 @@ public class TeleportPlayerListener extends PlayerListener {
 					plugin.telePlayer(player, split);
 				}
 				else {
-					player.sendMessage("Usage is /tele [x] [z] [y]. Leave blank to try and use current.");
+					player.sendMessage("Usage is /ppt [x] [z] [y]. Leave blank to try and use current.");
 				}
 				event.setCancelled(true);
 			}
 			else if (split[0].equalsIgnoreCase("/up")) {
 				// Try to move the player up
 				plugin.caveElevator(player, true);
+				event.setCancelled(true);
 			}
 			else if (split[0].equalsIgnoreCase("/down")) {
 				// Try to move the player down
 				plugin.caveElevator(player, false);
+				event.setCancelled(true);
 			}
 		}
 	}

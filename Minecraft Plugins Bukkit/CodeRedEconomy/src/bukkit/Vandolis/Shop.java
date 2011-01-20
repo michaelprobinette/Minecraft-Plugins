@@ -10,6 +10,11 @@ package bukkit.Vandolis;
 
 import org.bukkit.Server;
 
+/**
+ * Class that handles buy/sell of items.
+ * 
+ * @author Vandolis
+ */
 public class Shop extends EconEntity {
 	private final String	regex		= DataManager.getShopRegex();
 	private final String	regex2		= DataManager.getShop2Regex();
@@ -64,9 +69,10 @@ public class Shop extends EconEntity {
 	 * @param amountMoney
 	 */
 	public Shop(String name, boolean infItems, int amountMoney) {
+		super(new Money(amountMoney));
 		this.infItems = infItems;
 		this.name = name;
-		money.setAmount(amountMoney);
+		setShop(this);
 		initialize();
 	}
 	
@@ -113,6 +119,7 @@ public class Shop extends EconEntity {
 				 * Trim the name for use and show debug info.
 				 */
 				itemName = itemName.trim();
+				
 				if (DataManager.getDebug()) {
 					System.out.println("Item name is: " + itemName);
 				}
@@ -121,16 +128,19 @@ public class Shop extends EconEntity {
 				 * Check to make sure the amount is nonnegative as well as the itemName has a value.
 				 */
 				if ((amount > 0) && !itemName.equalsIgnoreCase("")) {
-					/*
-					 * Process a new transaction with the parsed info.
-					 */
-					Transaction.process(new Transaction(this, user, new ShopItemStack(DataManager.getItemId(itemName), amount)));
+					if (DataManager.getDebug()) {
+						System.out.println("Valid, processing.");
+					}
+					
+					ShopItemStack stack = new ShopItemStack(DataManager.getItemId(itemName), amount);
+					
+					Transaction.process(new Transaction(this, user, stack));
 				}
 				else {
 					user.sendMessage("Please enter a valid amount and/or item name.");
 				}
 			}
-			catch (NumberFormatException e1) {
+			catch (Exception e2) {
 				user.sendMessage("The correct use is /buy [item name] [amount]");
 			}
 		}
@@ -192,13 +202,15 @@ public class Shop extends EconEntity {
 	}
 	
 	/**
-	 * Tries to restock the {@link Shop}. Checks the last restock time against the current {@link Server} time.
+	 * Tries to restock the {@link Shop}. If not forced, checks the last restock time against the current {@link Server} time.
+	 * 
+	 * @param force
 	 */
-	public void restock() {
+	public void restock(boolean force) {
 		/*
 		 * Check the current time against the last restock time
 		 */
-		if (DataManager.getServer().getTime() - lastRestock >= DataManager.getRestockTime()) {
+		if ((DataManager.getServer().getTime() - lastRestock >= DataManager.getRestockTime()) || force) {
 			System.out.println("Restocking " + name);
 			lastRestock = DataManager.getServer().getTime();
 			for (ShopItemStack iter : availableItems) {
@@ -211,6 +223,13 @@ public class Shop extends EconEntity {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Normal restock call, not forced.
+	 */
+	public void restock() {
+		restock(false);
 	}
 	
 	/**
@@ -291,9 +310,11 @@ public class Shop extends EconEntity {
 		// Used for saving the shop, data needed is:
 		// 
 		String temp = name + regex + money.getAmount() + regex + infItems + regex + lastRestock;
+		
 		for (ShopItemStack iter : availableItems) {
 			temp += regex + iter.getItemId() + regex2 + iter.getAmountAvail();
 		}
+		
 		return temp;
 	}
 	

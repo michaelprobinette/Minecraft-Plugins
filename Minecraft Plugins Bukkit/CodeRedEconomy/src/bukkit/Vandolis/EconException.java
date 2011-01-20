@@ -8,34 +8,58 @@
  */
 package bukkit.Vandolis;
 
+/**
+ * Custom exception class for the economy. Contains messages for the buyer and seller, as well as an allowed stack size if needed
+ * 
+ * @author Vandolis
+ */
 public class EconException extends Exception {
 	private static final long	serialVersionUID	= 1L;
 	private String				buyMsg				= "";
 	private String				sellMsg				= "";
-	private ShopItemStack		stack				= null; // Holds the new, allowed transaction
-															
-	public EconException() {
-	}
+	private ShopItemStack		stack				= null;
 	
+	/**
+	 * Creates a {@link EconException} with the given messages.
+	 * 
+	 * @param buyMsg
+	 * @param sellMsg
+	 */
 	public EconException(String buyMsg, String sellMsg) {
 		this.buyMsg = buyMsg;
 		this.sellMsg = sellMsg;
 	}
 	
+	/**
+	 * Creates a {@link EconException} with the given messages and the allowed stack to buy/sell.
+	 * 
+	 * @param buyMsg
+	 * @param sellMsg
+	 * @param stack
+	 */
 	public EconException(String buyMsg, String sellMsg, ShopItemStack stack) {
 		this.buyMsg = buyMsg;
 		this.sellMsg = sellMsg;
 		this.stack = stack;
 	}
 	
+	/**
+	 * @return The stack of item an {@link EconEntity} can buy/sell without the offending problem
+	 */
 	public ShopItemStack getStack() {
 		return stack;
 	}
 	
+	/**
+	 * @return Message to send to the buyer
+	 */
 	public String getBuyMsg() {
 		return buyMsg;
 	}
 	
+	/**
+	 * @return Message to send to the seller
+	 */
 	public String getSellMsg() {
 		return sellMsg;
 	}

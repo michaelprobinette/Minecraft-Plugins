@@ -9,13 +9,15 @@
 
 package bukkit.Vandolis;
 
-/**
- * 
- */
-
+import org.bukkit.block.BlockDamageLevel;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockListener;
 
 /**
+ * Block Listener class for any {@link BlockEvent}
+ * 
  * @author Vandolis
  */
 public class CodeRedBlockListener extends BlockListener {
@@ -26,5 +28,28 @@ public class CodeRedBlockListener extends BlockListener {
 	 */
 	public CodeRedBlockListener(CodeRedEconomy codeRedEconomy) {
 		plugin = codeRedEconomy;
+	}
+	
+	public void onBlockDamage(BlockDamageEvent event) {
+		Player player = event.getPlayer();
+		
+		/*
+		 * Check to see if the block is broken
+		 */
+		if (event.getDamageLevel().equals(BlockDamageLevel.BROKEN)) {
+			/*
+			 * Broken block, check to see if there is a value attached to it.
+			 * If there is go ahead and pay the user
+			 */
+			ShopItem broken = DataManager.getItem(event.getBlock().getTypeId());
+			
+			if (broken != null) {
+				Money breakValue = broken.getBreakValue();
+				
+				if (breakValue.getAmount() != 0) {
+					DataManager.getUser(player).getMoney().addAmount(breakValue.getAmount());
+				}
+			}
+		}
 	}
 }

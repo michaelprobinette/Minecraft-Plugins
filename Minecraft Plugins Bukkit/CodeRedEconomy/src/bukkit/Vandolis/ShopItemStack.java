@@ -10,6 +10,11 @@ package bukkit.Vandolis;
 
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * Class that extends a {@link ShopItem} and adds a amount as well as total buy/sell prices
+ * 
+ * @author Vandolis
+ */
 public class ShopItemStack extends ShopItem {
 	private int			amountAvail		= 0;
 	private final Money	totalBuyPrice	= new Money();

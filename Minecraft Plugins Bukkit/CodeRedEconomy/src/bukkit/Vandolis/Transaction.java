@@ -8,6 +8,11 @@
  */
 package bukkit.Vandolis;
 
+/**
+ * Class that handles any sort of economy action. Processes {@link Transaction} by adding/removing money/items
+ * 
+ * @author Vandolis
+ */
 public class Transaction {
 	private final EconEntity	seller;
 	private final EconEntity	buyer;
@@ -111,10 +116,14 @@ public class Transaction {
 			/*
 			 * Check the buyer and seller, store the results in the check boolean
 			 */
-			canBuy = buyer.canBuy(trans.getStack());
 			canSell = seller.canSell(trans.getStack());
+			canBuy = buyer.canBuy(trans.getStack());
 		}
 		catch (EconException e) {
+			if (DataManager.getDebug()) {
+				System.out.println("EconException caught.");
+			}
+			
 			/*
 			 * Message the entities if it is a loud transaction
 			 */
@@ -132,6 +141,10 @@ public class Transaction {
 			 * then we need to re-process the transaction with the new stack
 			 */
 			if (e.getStack() != null) {
+				if (DataManager.getDebug()) {
+					System.out.println("Stack is not null, reprocessing.");
+				}
+				
 				/*
 				 * Set the transactions stack to the one supplied by the exception, then re-process it
 				 */
@@ -145,6 +158,10 @@ public class Transaction {
 		 * If the transaction is forced, skip the check altogether
 		 */
 		if ((canBuy && canSell) || !loud) {
+			if (DataManager.getDebug()) {
+				System.out.println("Can buy and can sell. Processing...");
+			}
+			
 			/*
 			 * Variables that hold the amount of money each entity must be modified by. 
 			 * Spent is for the buyer. 
@@ -283,6 +300,7 @@ public class Transaction {
 							buyer.getUser().sendMessage("You bought " + trans.getStack() + " for " + trans.getStack().getTotalBuyPrice());
 							buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney());
 						}
+						
 						if (seller.getUser() != null) {
 							// EconStats.sold(stack);
 							seller.getUser().sendMessage("You sold " + trans.getStack() + " for " + trans.getStack().getTotalSellPrice());
@@ -294,19 +312,19 @@ public class Transaction {
 						 * Last, undone transaction messages
 						 * The buyer is paying the seller
 						 */
-
 						if (buyer.getUser() != null) {
 							// EconStats.undoSell(stack);
 							buyer.getUser().sendMessage(
 									"The last transaction was undone. " + trans.getStack() + " has been refunded and "
-											+ trans.getStack().getTotalSellPrice() + " has been removed.");
+											+ trans.getStack().getTotalBuyPrice() + " has been removed.");
 							buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney());
 						}
+						
 						if (seller.getUser() != null) {
 							// EconStats.undoBuy(stack);
 							seller.getUser().sendMessage(
-									"The last transaction was undone. " + trans.getStack().getName()
-											+ " has been removed and you have been refunded " + trans.getStack().getTotalBuyPrice());
+									"The last transaction was undone. " + trans.getStack()
+											+ " has been removed and you have been refunded " + trans.getStack().getTotalSellPrice());
 							seller.getUser().sendMessage("Your new balance is: " + seller.getMoney());
 						}
 					}
@@ -360,14 +378,18 @@ public class Transaction {
 	 *            the transaction to be reversed
 	 */
 	public static boolean undoTransaction(Transaction trans) {
+		if (DataManager.getDebug()) {
+			System.out.println("Undoing a transaction...");
+		}
+		
 		/*
 		 * Update the arrays if they are players
 		 */
 		if (trans.getBuyer().getUser() != null) {
-			DataManager.getUser(trans.getBuyer()).updateArray();
+			DataManager.getUser(trans.getBuyer().getName()).updateArray();
 		}
 		if (trans.getSeller().getUser() != null) {
-			DataManager.getUser(trans.getSeller()).updateArray();
+			DataManager.getUser(trans.getSeller().getName()).updateArray();
 		}
 		
 		/*
@@ -388,7 +410,7 @@ public class Transaction {
 			 * Item transaction. Invert all of the values and send it to be processed.
 			 */
 			if (process(new Transaction(trans.getBuyer(), trans.getSeller(), new ShopItemStack(trans.getStack().getItemId(), trans
-					.getStack().getSellPrice(), trans.getStack().getBuyPrice(), trans.getStack().getAmountAvail())), true, true)) {
+					.getStack().getBuyPrice(), trans.getStack().getSellPrice(), trans.getStack().getAmountAvail())), true, true)) {
 				/*
 				 * Succeeded
 				 * Remove the transaction from their lists for keeping tally of maxBuy and maxSell
