@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockRightClickEvent;
@@ -25,13 +26,22 @@ public class SignDispenserBlockListener extends BlockListener {
 	}
 	
 	public void onBlockPlace(BlockPlaceEvent event) {
+	}
+	
+	public void onBlockDamage(BlockDamageEvent event) {
 		Player p = event.getPlayer();
-		for (Player iter : players) {
-			if (iter.equals(p)) {
-				//				System.out.println("Removing " + iter.getName());
-				event.setBuild(false);
-				players.remove(iter);
-				break;
+		
+		if (event.getBlock().getType().equals(Material.SIGN) || event.getBlock().getType().equals(Material.SIGN_POST)) {
+			// Sign
+			Sign si = (Sign) event.getBlock().getState();
+			String lines[] = si.getLines();
+			
+			if (lines[0].equalsIgnoreCase("Right Click:") || lines[0].equalsIgnoreCase("Item ID")) {
+				// My sign
+				if (!plugin.isOp(p.getName())) {
+					event.setCancelled(true);
+					si.update();
+				}
 			}
 		}
 	}
@@ -69,6 +79,7 @@ public class SignDispenserBlockListener extends BlockListener {
 						lines = si.getLines();
 					}
 					
+					si.update();
 					if (lines[0].equalsIgnoreCase("Right Click:")) {
 						int itemId = -1;
 						int amount = 1;
