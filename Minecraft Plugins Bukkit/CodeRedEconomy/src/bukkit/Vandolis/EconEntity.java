@@ -105,9 +105,10 @@ public abstract class EconEntity {
 	public boolean canBuy(ShopItemStack stack) throws EconException {
 		if (DataManager.getDebug()) {
 			if (stack != null) {
-				System.out.println("Checking to see if " + name + " can buy " + stack.getAmountAvail() + " " + stack.getName());
+				System.out.println("Checking to see if " + name + " can buy " + stack + " for " + stack.getTotalBuyPrice());
 			}
 		}
+		
 		if (stack != null) {
 			/*Item transaction*/
 			if (user != null) {
@@ -136,12 +137,15 @@ public abstract class EconEntity {
 					/*
 					 * Find the largest stack size they can afford
 					 */
-					int count = money.getAmount() / stack.getTotalBuyPrice().getAmount();
+					int count = money.getAmount() / stack.getBuyPrice();
 					
 					ShopItemStack newStack = new ShopItemStack(stack.getItemId(), count);
 					
 					if (count > 0) {
 						throw new EconException("You can only afford " + newStack, name + " could only afford " + newStack, newStack);
+					}
+					else {
+						throw new EconException("You can't afford any " + stack.getName(), name + " can't afford any " + stack.getName());
 					}
 				}
 			}
@@ -153,12 +157,15 @@ public abstract class EconEntity {
 					/*
 					 * Find the largest stack size they can afford
 					 */
-					int count = money.getAmount() / stack.getTotalBuyPrice().getAmount();
+					int count = money.getAmount() / stack.getBuyPrice();
 					
 					ShopItemStack newStack = new ShopItemStack(stack.getItemId(), count);
 					
 					if (count > 0) {
 						throw new EconException("You can only afford " + newStack, name + " could only afford " + newStack, newStack);
+					}
+					else {
+						throw new EconException("You can't afford any " + stack.getName(), name + " can't afford any " + stack.getName());
 					}
 				}
 			}

@@ -4,6 +4,7 @@
 package bukkit.Vandolis;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,10 +23,45 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Teleport extends JavaPlugin {
 	private final TeleportPlayerListener	playerListener	= new TeleportPlayerListener(this);
+	private static ArrayList<Material>		airBlocks		= new ArrayList<Material>();
+	private static ArrayList<Material>		notFloorBlocks	= new ArrayList<Material>();
 	
 	public Teleport(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
 		super(pluginLoader, instance, desc, folder, plugin, cLoader);
 		// NOTE: Event registration should be done in onEnable not here as all events are unregistered when a plugin is disabled
+		airBlocks.add(Material.AIR);
+		airBlocks.add(Material.TORCH);
+		airBlocks.add(Material.SIGN);
+		airBlocks.add(Material.SIGN_POST);
+		airBlocks.add(Material.WATER);
+		airBlocks.add(Material.WALL_SIGN);
+		airBlocks.add(Material.BROWN_MUSHROOM);
+		airBlocks.add(Material.CAKE_BLOCK);
+		airBlocks.add(Material.CROPS);
+		airBlocks.add(Material.LADDER);
+		airBlocks.add(Material.PAINTING);
+		airBlocks.add(Material.PORTAL);
+		airBlocks.add(Material.RED_MUSHROOM);
+		airBlocks.add(Material.REDSTONE_TORCH_OFF);
+		airBlocks.add(Material.REDSTONE_TORCH_ON);
+		airBlocks.add(Material.REDSTONE_WIRE);
+		airBlocks.add(Material.SAPLING);
+		airBlocks.add(Material.SUGAR_CANE_BLOCK);
+		airBlocks.add(Material.WOOD_DOOR);
+		airBlocks.add(Material.WOODEN_DOOR);
+		airBlocks.add(Material.MINECART);
+		airBlocks.add(Material.BOAT);
+		airBlocks.add(Material.IRON_DOOR_BLOCK);
+		airBlocks.add(Material.LEVER);
+		airBlocks.add(Material.STONE_BUTTON);
+		airBlocks.add(Material.STONE_PLATE);
+		airBlocks.add(Material.WOOD_PLATE);
+		
+		notFloorBlocks.add(Material.LAVA);
+		notFloorBlocks.add(Material.AIR);
+		notFloorBlocks.add(Material.FIRE);
+		notFloorBlocks.add(Material.FENCE);
+		notFloorBlocks.add(Material.SUGAR_CANE_BLOCK);
 	}
 	
 	public void onEnable() {
@@ -96,38 +132,44 @@ public class Teleport extends JavaPlugin {
 		}
 	}
 	
+	private boolean isAir(Material mat) {
+		for (Material iter : airBlocks) {
+			if (iter.equals(mat)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isFloor(Material mat) {
+		for (Material iter : notFloorBlocks) {
+			if (iter.equals(mat)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	public int checkDown(World w, int distance, int x, int z, int y) {
 		int safe = 0;
-		int count = 0;
 		
 		// Check down
-		for (int i = y; (i > y - distance) && (y - distance > 10); i--) {
+		for (int i = y; (i > y - distance) && (i - distance > 10); i--) {
 			// Check if the block is air and the count of air is less than 2
 			// If the count is equal to 2 try and find solid ground
 			Material material1 = w.getBlockAt(x, i, z).getType();
 			Material material2 = w.getBlockAt(x, i - 1, z).getType();
 			Material floor = w.getBlockAt(x, i - 2, z).getType();
 			
-			if (((material1.equals(Material.AIR)) || (material1.equals(Material.WATER)))
-					&& (material2.equals(Material.AIR) || material2.equals(Material.WATER))
-					&& (!floor.equals(Material.LAVA) && !floor.equals(Material.AIR))) {
+			if (isAir(material1) && isAir(material2) && isFloor(floor)) {
 				safe = i - 1;
 				
-				break;
+				if (floor.equals(Material.LAVA)) {
+					w.getBlockAt(x, i - 2, z).setType(Material.COBBLESTONE);
+				}
 				
-				//				count++;
-				//				System.out.println("Found " + material1);
-				//				
-				//				if (count >= 2) {
-				//					// Two blocks of air found, check floor
-				//					safe = i;
-				//					
-				//					break;
-				//				}
-			}
-			else {
-				// Not air, reset the count to 0
-				count = 0;
+				break;
 			}
 		}
 		
@@ -136,30 +178,22 @@ public class Teleport extends JavaPlugin {
 	
 	public int checkUp(World w, int distance, int x, int z, int y) {
 		int safe = 0;
-		int count = 0;
 		// Check up
 		for (int i = y; i < y + distance; i++) {
 			// Check if it has passed through solid ground
 			// Check if the block is air
-			Material material = w.getBlockAt(x, i, z).getType();
+			Material material1 = w.getBlockAt(x, i, z).getType();
+			Material material2 = w.getBlockAt(x, i - 1, z).getType();
 			Material floor = w.getBlockAt(x, i - 2, z).getType();
 			
-			if ((material.equals(Material.AIR) || (material.equals(Material.WATER)))
-					&& (!(floor.equals(Material.AIR)) && !floor.equals(Material.WATER))) {
-				count++;
-				System.out.println("Found " + material);
+			if (isAir(material1) && isAir(material2) && isFloor(floor)) {
 				
-				if (count == 2) {
-					// Two blocks of air found, break out
-					// Don't need to check for floor as the count starts when it passes from a block of material into a block of air
-					safe = i - 1;
-					
-					break;
+				if (floor.equals(Material.LAVA)) {
+					w.getBlockAt(x, i - 2, z).setType(Material.COBBLESTONE);
 				}
-			}
-			else {
-				// Not air, reset the count to 0
-				count = 0;
+				safe = i - 1;
+				
+				break;
 			}
 		}
 		return safe;
