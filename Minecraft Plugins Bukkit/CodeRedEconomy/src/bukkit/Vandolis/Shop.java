@@ -222,6 +222,22 @@ public class Shop extends EconEntity {
 					iter.setAmountAvail(iter.getMaxAvail());
 				}
 			}
+			
+			if (force) {
+				boolean found = false;
+				for (ShopItem iter : DataManager.getItemList()) {
+					found = false;
+					for (ShopItem current : availableItems) {
+						if (iter.getItemId() == current.getItemId()) {
+							found = true;
+						}
+					}
+					
+					if (!found) {
+						availableItems.add(new ShopItemStack(iter.getItemId(), iter.getMaxAvail()));
+					}
+				}
+			}
 		}
 	}
 	

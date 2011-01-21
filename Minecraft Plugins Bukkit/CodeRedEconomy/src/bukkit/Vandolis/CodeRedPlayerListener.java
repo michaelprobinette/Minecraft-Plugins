@@ -102,7 +102,7 @@ public class CodeRedPlayerListener extends PlayerListener {
 				
 				event.setCancelled(true);
 			}
-			else if (split[0].equalsIgnoreCase("/saveredeco")) {
+			else if (split[0].equalsIgnoreCase("/redeconsave")) {
 				player.sendMessage(DataManager.getPluginMessage() + "Saving data...");
 				
 				DataManager.save();
@@ -126,12 +126,10 @@ public class CodeRedPlayerListener extends PlayerListener {
 				
 				event.setCancelled(true);
 			}
-			else if (split[0].equalsIgnoreCase("/restock") && DataManager.getDebug()) {
+			else if (split[0].equalsIgnoreCase("/restock") && (DataManager.getDebug() || plugin.isOp(player.getName()))) {
 				player.sendMessage(DataManager.getPluginMessage() + "Forcing all shops to restock.");
 				
-				if (DataManager.getDebug()) {
-					System.out.println(player.getName() + " is force restocking all shops.");
-				}
+				System.out.println(player.getName() + " is force restocking all shops.");
 				
 				for (Shop iter : DataManager.getShops()) {
 					iter.restock(true);

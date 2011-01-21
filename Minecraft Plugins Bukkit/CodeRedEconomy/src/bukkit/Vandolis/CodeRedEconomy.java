@@ -8,7 +8,10 @@
  */
 package bukkit.Vandolis;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
 
 import org.bukkit.Server;
 import org.bukkit.event.Event;
@@ -27,10 +30,33 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CodeRedEconomy extends JavaPlugin {
 	private final CodeRedPlayerListener	playerListener	= new CodeRedPlayerListener(this);
 	private final CodeRedBlockListener	blockListener	= new CodeRedBlockListener(this);
+	private ArrayList<String>			ops				= new ArrayList<String>();
 	
 	public CodeRedEconomy(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin,
 			ClassLoader cLoader) {
 		super(pluginLoader, instance, desc, folder, plugin, cLoader);
+		
+		loadOps();
+	}
+	
+	/**
+	 * 
+	 */
+	private void loadOps() {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File("ops.txt")));
+			
+			String raw = "";
+			
+			while ((raw = reader.readLine()) != null) {
+				if (!raw.equalsIgnoreCase("") && !raw.equalsIgnoreCase(" ")) {
+					ops.add(raw);
+				}
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -50,5 +76,19 @@ public class CodeRedEconomy extends JavaPlugin {
 		
 		PluginDescriptionFile pdfFile = getDescription();
 		System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
+	}
+	
+	/**
+	 * @param name
+	 * @return
+	 */
+	public boolean isOp(String name) {
+		for (String iter : ops) {
+			if (iter.equalsIgnoreCase(name)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

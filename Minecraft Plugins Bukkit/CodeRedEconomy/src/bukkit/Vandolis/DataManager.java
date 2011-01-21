@@ -34,7 +34,7 @@ public class DataManager {
 	/*
 	 * General stuff
 	 */
-	private static String					LOC					= "Econ/";
+	private static String					LOC					= "plugins/CodeRedEconomy/";
 	private static boolean					dirExists			= false;
 	private static PropertiesFile			props				= new PropertiesFile(LOC + "data.properties");	// Properties file
 	private static boolean					debug				= false;
@@ -75,7 +75,7 @@ public class DataManager {
 	/*
 	 * Privilege stuff
 	 */
-	private static final File				file_privGroups		= new File(LOC + "privGroups.txt");
+	private static final File				file_privGroups		= new File(LOC + "shopGroups.txt");
 	private static ArrayList<ShopGroup>		privGroups			= new ArrayList<ShopGroup>();
 	
 	/*
@@ -87,7 +87,7 @@ public class DataManager {
 	/*
 	 * Player data... stuff
 	 */
-	private static final File				file_playerData		= new File(LOC + "playerData.txt");
+	private static final File				file_playerData		= new File(LOC + "users.txt");
 	private static ArrayList<User>			users				= new ArrayList<User>();
 	private static long						autoDepositTime		= 60000;
 	private static int						autoDepositAmount	= 50;
@@ -400,7 +400,7 @@ public class DataManager {
 	}
 	
 	/**
-	 * Searches the list of shops for the given name. If nout found, adds a new {@link Shop} to the list and returns it.
+	 * Searches the list of shops for the given name. If not found, adds a new {@link Shop} to the list and returns it.
 	 * 
 	 * @param name
 	 * @return
@@ -601,10 +601,12 @@ public class DataManager {
 			try {
 				reader = new BufferedReader(new FileReader(file_badWords));
 				while ((raw = reader.readLine()) != null) {
-					String split[] = raw.split("=");
-					String word = split[0].trim();
-					int cost = Integer.valueOf(split[1].trim());
-					badWords.put(word, cost);
+					if (!raw.equalsIgnoreCase("") && !raw.equalsIgnoreCase(" ")) {
+						String split[] = raw.split("=");
+						String word = split[0].trim();
+						int cost = Integer.valueOf(split[1].trim());
+						badWords.put(word, cost);
+					}
 				}
 				reader.close();
 			}
@@ -638,11 +640,13 @@ public class DataManager {
 				reader = new BufferedReader(new FileReader(file_itemlist));
 				
 				while ((raw = reader.readLine()) != null) {
-					ShopItem temp = new ShopItem(raw);
-					itemList.add(temp);
-					if (debug) {
-						System.out.println("Raw item data read: " + raw);
-						System.out.println("Item data: " + temp.toString());
+					if (!raw.equalsIgnoreCase("") && !raw.equalsIgnoreCase(" ")) {
+						ShopItem temp = new ShopItem(raw);
+						itemList.add(temp);
+						if (debug) {
+							System.out.println("Raw item data read: " + raw);
+							System.out.println("Item data: " + temp.toString());
+						}
 					}
 				}
 				reader.close();
@@ -675,20 +679,22 @@ public class DataManager {
 			try {
 				reader = new BufferedReader(new FileReader(file_privGroups));
 				while ((raw = reader.readLine()) != null) {
-					String split[] = raw.split(":");
-					if (split.length >= 2) {
-						String groupName = split[0];
-						String a[] = split[1].split(",");
-						int blocks[] = new int[a.length];
-						int count = 0;
-						for (String iter : a) {
-							iter = iter.trim();
-							int temp = Integer.valueOf(iter);
-							blocks[count] = temp;
-							count++;
+					if (!raw.equalsIgnoreCase("") && !raw.equalsIgnoreCase(" ")) {
+						String split[] = raw.split(":");
+						if (split.length >= 2) {
+							String groupName = split[0];
+							String a[] = split[1].split(",");
+							int blocks[] = new int[a.length];
+							int count = 0;
+							for (String iter : a) {
+								iter = iter.trim();
+								int temp = Integer.valueOf(iter);
+								blocks[count] = temp;
+								count++;
+							}
+							ShopGroup temp = new ShopGroup(groupName, blocks);
+							privGroups.add(temp);
 						}
-						ShopGroup temp = new ShopGroup(groupName, blocks);
-						privGroups.add(temp);
 					}
 				}
 				reader.close();
@@ -814,7 +820,9 @@ public class DataManager {
 			try {
 				reader = new BufferedReader(new FileReader(file_shop));
 				while ((raw = reader.readLine()) != null) {
-					addShop(new Shop(raw));
+					if (!raw.equalsIgnoreCase("") && !raw.equalsIgnoreCase(" ")) {
+						addShop(new Shop(raw));
+					}
 				}
 				reader.close();
 			}
@@ -847,7 +855,9 @@ public class DataManager {
 				reader = new BufferedReader(new FileReader(file_stats));
 				ArrayList<String> data = new ArrayList<String>();
 				while ((raw = reader.readLine()) != null) {
-					data.add(raw);
+					if (!raw.equalsIgnoreCase("") && !raw.equalsIgnoreCase(" ")) {
+						data.add(raw);
+					}
 				}
 				EconStats.loadStats(data);
 				reader.close();
@@ -885,8 +895,10 @@ public class DataManager {
 					if (debug) {
 						System.out.println("Raw user data read: " + raw);
 					}
-					if (!raw.split(":")[0].equalsIgnoreCase("")) {
-						users.add(new User(raw));
+					if (!raw.equalsIgnoreCase("") && !raw.equalsIgnoreCase(" ")) {
+						if (!raw.split(":")[0].equalsIgnoreCase("")) {
+							users.add(new User(raw));
+						}
 					}
 				}
 				reader.close();
