@@ -6,7 +6,7 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package bukkit.Vandolis;
+package com.bukkit.Vandolis.CodeRedEconomy;
 
 /**
  * Class that handles any sort of economy action. Processes {@link Transaction} by adding/removing money/items
@@ -409,8 +409,8 @@ public class Transaction {
 			/*
 			 * Item transaction. Invert all of the values and send it to be processed.
 			 */
-			if (process(new Transaction(trans.getBuyer(), trans.getSeller(), new ShopItemStack(trans.getStack().getItemId(), trans
-					.getStack().getBuyPrice(), trans.getStack().getSellPrice(), trans.getStack().getAmountAvail())), true, true)) {
+			if (process(new Transaction(trans.getBuyer(), trans.getSeller(), new ShopItemStack(trans.getStack().getItemId(), trans.getStack().getBuyPrice(), trans
+							.getStack().getSellPrice(), trans.getStack().getAmountAvail())), true, true)) {
 				/*
 				 * Succeeded
 				 * Remove the transaction from their lists for keeping tally of maxBuy and maxSell

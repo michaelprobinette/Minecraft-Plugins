@@ -6,7 +6,7 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package bukkit.Vandolis;
+package com.bukkit.Vandolis.CodeRedEconomy;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,6 +30,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CodeRedEconomy extends JavaPlugin {
 	private final CodeRedPlayerListener	playerListener	= new CodeRedPlayerListener(this);
 	private final CodeRedBlockListener	blockListener	= new CodeRedBlockListener(this);
+	private final DataManager			dataMan			= new DataManager(this);
 	private ArrayList<String>			ops				= new ArrayList<String>();
 	
 	public CodeRedEconomy(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin,
@@ -72,7 +73,7 @@ public class CodeRedEconomy extends JavaPlugin {
 		pm.registerEvent(Type.BLOCK_DAMAGED, blockListener, Priority.Normal, this);
 		
 		// Load the datamanager
-		DataManager.load(this);
+		//		DataManager.load(this);
 		
 		PluginDescriptionFile pdfFile = getDescription();
 		System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
@@ -90,5 +91,9 @@ public class CodeRedEconomy extends JavaPlugin {
 		}
 		
 		return false;
+	}
+	
+	public DataManager getDataManager() {
+		return dataMan;
 	}
 }

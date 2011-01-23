@@ -6,7 +6,7 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package bukkit.Vandolis;
+package com.bukkit.Vandolis.CodeRedEconomy;
 
 /**
  * Main class for anything money related. Includes name and amount

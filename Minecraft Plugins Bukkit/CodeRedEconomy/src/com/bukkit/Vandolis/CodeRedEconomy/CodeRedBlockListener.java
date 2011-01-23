@@ -7,7 +7,7 @@
  * <http://www.gnu.org/licenses/>
  */
 
-package bukkit.Vandolis;
+package com.bukkit.Vandolis.CodeRedEconomy;
 
 import org.bukkit.block.BlockDamageLevel;
 import org.bukkit.entity.Player;

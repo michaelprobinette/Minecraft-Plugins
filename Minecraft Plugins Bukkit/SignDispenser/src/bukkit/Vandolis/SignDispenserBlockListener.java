@@ -67,6 +67,11 @@ public class SignDispenserBlockListener extends BlockListener {
 						catch (Exception e) {
 							si.setLine(1, "Incorrect Id");
 						}
+						finally {
+							if (si.getLine(1).equalsIgnoreCase("")) {
+								si.setLine(1, "Incorrect Id");
+							}
+						}
 						si.setLine(2, "Amount:");
 						try {
 							temp = Integer.valueOf(lines[3].trim());

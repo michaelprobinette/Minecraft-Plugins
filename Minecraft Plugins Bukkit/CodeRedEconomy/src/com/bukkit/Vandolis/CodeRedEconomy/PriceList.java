@@ -6,7 +6,7 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package bukkit.Vandolis;
+package com.bukkit.Vandolis.CodeRedEconomy;
 
 import java.util.ArrayList;
 
@@ -40,7 +40,15 @@ public class PriceList {
 		ArrayList<ShopItem> items = new ArrayList<ShopItem>();
 		
 		// FIXME chance once bukkit implements permissions
-		for (ShopItem iter : DataManager.getItemList()) {
+		//		for (ShopItem iter : DataManager.getItemList()) {
+		//			items.add(iter);
+		//		}
+		
+		/*
+		 * Currently have it set to only show items the shop has in stock.
+		 * In the future filter this list based on what the player is allowed to buy.
+		 */
+		for (ShopItem iter : shop.getAvailItems()) {
 			items.add(iter);
 		}
 		
@@ -67,13 +75,17 @@ public class PriceList {
 				for (ShopItemStack iters : shop.getAvailItems()) {
 					if (iters.getItemId() == iter.getItemId()) {
 						amount = iters.getAmountAvail();
+						break;
 					}
 				}
 				
-				if (amount != DataManager.getInfValue()) {
+				/*
+				 * Skips items with 0 amount
+				 */
+				if ((amount != DataManager.getInfValue()) && (amount != 0)) {
 					temp += iter.getName() + ": §a" + iter.getBuyPrice() + " §c" + iter.getSellPrice() + " §e" + amount;
 				}
-				else {
+				else if (amount == DataManager.getInfValue()) {
 					temp += iter.getName() + ": §a" + iter.getBuyPrice() + " §c" + iter.getSellPrice() + " §eInfinite";
 				}
 				
@@ -101,25 +113,31 @@ public class PriceList {
 	 * @param shop
 	 */
 	public static void priceList(User user, int page, Shop shop) {
-		populate(user, shop);
-		
-		if ((pages.size() >= page) && (page > 0) && (pages.size() != 0)) {
-			user.sendMessage("Price List: (Page " + page + " of " + pages.size() + ")");
+		if (!shop.isHidden()) {
+			populate(user, shop);
 			
-			for (String iter : pages.get(page - 1)) {
-				if (iter != null) {
-					user.sendMessage("   " + iter);
+			if ((pages.size() >= page) && (page > 0) && (pages.size() != 0)) {
+				user.sendMessage("Price List for " + shop.getName() + ": (Page " + page + " of " + pages.size() + ")");
+				
+				for (String iter : pages.get(page - 1)) {
+					if (iter != null) {
+						user.sendMessage("   " + iter);
+					}
 				}
 			}
-		}
-		else if (pages.size() == 0) {
-			user.sendMessage("There are no items you can buy.");
-		}
-		else if (pages.size() >= 1) {
-			user.sendMessage("Page numbers are 1 - " + pages.size());
+			else if (pages.size() == 0) {
+				user.sendMessage("There are no items you can buy.");
+			}
+			else if (pages.size() >= 1) {
+				priceList(user, 1, shop);
+				//				user.sendMessage("Page numbers are 1 - " + pages.size());
+			}
+			else {
+				System.out.println("Uknown situation in priceList");
+			}
 		}
 		else {
-			System.out.println("Uknown situation in priceList");
+			user.sendMessage("This shop is hidden.");
 		}
 	}
 }

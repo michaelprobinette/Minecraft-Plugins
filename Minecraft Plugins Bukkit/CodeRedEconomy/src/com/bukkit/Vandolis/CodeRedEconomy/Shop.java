@@ -6,7 +6,7 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package bukkit.Vandolis;
+package com.bukkit.Vandolis.CodeRedEconomy;
 
 import org.bukkit.Server;
 
@@ -16,40 +16,14 @@ import org.bukkit.Server;
  * @author Vandolis
  */
 public class Shop extends EconEntity {
-	private final String	regex		= DataManager.getShopRegex();
-	private final String	regex2		= DataManager.getShop2Regex();
-	private boolean			infItems	= false;
-	private long			lastRestock	= 0;
-	
-	/**
-	 * Default Constructor. Loads the stock without infinite values. Starts with 0 {@link Money}.
-	 */
-	public Shop() {
-		initialize();
-	}
-	
-	/**
-	 * Makes a shop with the given setting of infinite items. Starts with 0 {@link Money}.
-	 * 
-	 * @param infItems
-	 * @param infMoney
-	 */
-	public Shop(boolean infItems) {
-		this.infItems = infItems;
-		initialize();
-	}
-	
-	/**
-	 * Use to set infItems and to set the base amount of money use DataManager.getInfValue() in the amountMoney for infMoney
-	 * 
-	 * @param infItems
-	 * @param amountMoney
-	 */
-	public Shop(boolean infItems, int amountMoney) {
-		this.infItems = infItems;
-		money.setAmount(amountMoney);
-		initialize();
-	}
+	private final String	regex			= DataManager.getShopRegex();
+	private final String	regex2			= DataManager.getShop2Regex();
+	private boolean			infItems		= false;
+	private long			lastRestock		= 0;
+	private boolean			canRestock		= true;
+	private boolean			usersCanBuy		= true;
+	private boolean			usersCanSell	= true;
+	private boolean			hidden			= false;
 	
 	/**
 	 * Loads a shop from a save string.
@@ -65,15 +39,36 @@ public class Shop extends EconEntity {
 	 * Makes a shop with the given name, given infItems value, and given {@link Money} amount. Preferred constructor.
 	 * 
 	 * @param name
+	 *            Name of the shop
 	 * @param infItems
+	 *            Have infinite stock of items or not
 	 * @param amountMoney
+	 *            Starting amount of money.
+	 * @param canRestock
+	 *            Let the shop restock
 	 */
-	public Shop(String name, boolean infItems, int amountMoney) {
+	public Shop(String name, boolean infItems, int amountMoney, boolean canRestock) {
 		super(new Money(amountMoney));
 		this.infItems = infItems;
 		this.name = name;
+		this.canRestock = canRestock;
 		setShop(this);
 		initialize();
+	}
+	
+	/**
+	 * @return the restock
+	 */
+	public boolean isRestock() {
+		return canRestock;
+	}
+	
+	/**
+	 * @param restock
+	 *            the restock to set
+	 */
+	public void setRestock(boolean restock) {
+		canRestock = restock;
 	}
 	
 	/**
@@ -132,7 +127,7 @@ public class Shop extends EconEntity {
 						System.out.println("Valid, processing.");
 					}
 					
-					ShopItemStack stack = new ShopItemStack(DataManager.getItemId(itemName), amount);
+					ShopItemStack stack = new ShopItemStack(ShopItem.getId(itemName), amount);
 					
 					Transaction.process(new Transaction(this, user, stack));
 				}
@@ -153,18 +148,7 @@ public class Shop extends EconEntity {
 	 * Stocks the shop with items.
 	 */
 	private void initialize() {
-		/*
-		 * Load all of the implemented items from the DataManager
-		 */
-		for (ShopItem iter : DataManager.getItemList()) {
-			if (infItems) {
-				availableItems.add(new ShopItemStack(iter.getItemId(), DataManager.getInfValue())); // Inf items value
-			}
-			else {
-				availableItems.add(new ShopItemStack(iter.getItemId(), iter.getMaxAvail()));
-			}
-		}
-		lastRestock = DataManager.getServer().getTime();
+		restock();
 		setShop(this);
 	}
 	
@@ -192,7 +176,19 @@ public class Shop extends EconEntity {
 				if (!iter.equalsIgnoreCase(sc[0]) && !iter.equalsIgnoreCase(sc[1]) && !iter.equalsIgnoreCase(sc[2])
 						&& !iter.equalsIgnoreCase(sc[3])) {
 					String[] ss = iter.split(regex2);
-					availableItems.add(new ShopItemStack(Integer.valueOf(ss[0].trim()), Integer.valueOf(ss[1].trim())));
+					if (ss.length == 2) {
+						/*
+						 * Old format
+						 */
+						availableItems.add(new ShopItemStack(Integer.valueOf(ss[0].trim()), Integer.valueOf(ss[1].trim())));
+					}
+					else {
+						/*
+						 * New format
+						 */
+						availableItems.add(new ShopItemStack(Integer.valueOf(ss[0].trim()), Integer.valueOf(ss[2].trim()), Integer
+								.valueOf(ss[1].trim()), Integer.valueOf(ss[3].trim())));
+					}
 				}
 			}
 		}
@@ -210,7 +206,7 @@ public class Shop extends EconEntity {
 		/*
 		 * Check the current time against the last restock time
 		 */
-		if ((DataManager.getServer().getTime() - lastRestock >= DataManager.getRestockTime()) || force) {
+		if (((DataManager.getServer().getTime() - lastRestock >= DataManager.getRestockTime()) || force) && canRestock) {
 			System.out.println("Restocking " + name);
 			lastRestock = DataManager.getServer().getTime();
 			for (ShopItemStack iter : availableItems) {
@@ -328,7 +324,7 @@ public class Shop extends EconEntity {
 		String temp = name + regex + money.getAmount() + regex + infItems + regex + lastRestock;
 		
 		for (ShopItemStack iter : availableItems) {
-			temp += regex + iter.getItemId() + regex2 + iter.getAmountAvail();
+			temp += regex + iter.getItemId() + regex2 + iter.getBuyPrice() + regex2 + iter.getSellPrice() + regex2 + iter.getAmountAvail();
 		}
 		
 		return temp;
@@ -350,5 +346,81 @@ public class Shop extends EconEntity {
 	 */
 	public long getLastRestock() {
 		return lastRestock;
+	}
+	
+	/**
+	 * @return the canRestock
+	 */
+	protected boolean isCanRestock() {
+		return canRestock;
+	}
+	
+	/**
+	 * @param canRestock
+	 *            the canRestock to set
+	 */
+	protected void setCanRestock(boolean canRestock) {
+		this.canRestock = canRestock;
+	}
+	
+	/**
+	 * @return the usersCanBuy
+	 */
+	protected boolean isUsersCanBuy() {
+		return usersCanBuy;
+	}
+	
+	/**
+	 * @param usersCanBuy
+	 *            the usersCanBuy to set
+	 */
+	protected void setUsersCanBuy(boolean usersCanBuy) {
+		this.usersCanBuy = usersCanBuy;
+	}
+	
+	/**
+	 * @return the usersCanSell
+	 */
+	protected boolean isUsersCanSell() {
+		return usersCanSell;
+	}
+	
+	/**
+	 * @param usersCanSell
+	 *            the usersCanSell to set
+	 */
+	protected void setUsersCanSell(boolean usersCanSell) {
+		this.usersCanSell = usersCanSell;
+	}
+	
+	/**
+	 * @return the showInLists
+	 */
+	protected boolean isHidden() {
+		return hidden;
+	}
+	
+	/**
+	 * @param showInLists
+	 *            the showInLists to set
+	 */
+	protected void setShowInLists(boolean showInLists) {
+		hidden = showInLists;
+	}
+	
+	/**
+	 * @param infItems
+	 *            the infItems to set
+	 */
+	protected void setInfItems(boolean infItems) {
+		this.infItems = infItems;
+	}
+	
+	/**
+	 * @param lastRestock
+	 *            the lastRestock to set
+	 */
+	protected void setLastRestock(long lastRestock) {
+		this.lastRestock = lastRestock;
 	}
 }

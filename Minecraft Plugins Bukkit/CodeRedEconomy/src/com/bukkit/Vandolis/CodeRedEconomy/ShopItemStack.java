@@ -6,7 +6,7 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package bukkit.Vandolis;
+package com.bukkit.Vandolis.CodeRedEconomy;
 
 import org.bukkit.inventory.ItemStack;
 
@@ -16,9 +16,9 @@ import org.bukkit.inventory.ItemStack;
  * @author Vandolis
  */
 public class ShopItemStack extends ShopItem {
-	private int			amountAvail		= 0;
-	private final Money	totalBuyPrice	= new Money();
-	private final Money	totalSellPrice	= new Money();
+	private int		amountAvail		= 0;
+	private Money	totalBuyPrice	= new Money();
+	private Money	totalSellPrice	= new Money();
 	
 	/**
 	 * Creates a ShopItemStack from the given {@link ShopItem} and the amount given.
@@ -42,11 +42,11 @@ public class ShopItemStack extends ShopItem {
 	 * Used by the undo transaction to make an inverted item.
 	 * 
 	 * @param itemId
-	 * @param sellPrice
 	 * @param buyPrice
+	 * @param sellPrice
 	 * @param amountAvail2
 	 */
-	public ShopItemStack(int itemId, int sellPrice, int buyPrice, int amountAvail) {
+	public ShopItemStack(int itemId, int buyPrice, int sellPrice, int amountAvail) {
 		super(itemId, sellPrice, buyPrice);
 		
 		/*
@@ -121,5 +121,19 @@ public class ShopItemStack extends ShopItem {
 	@Override
 	public String toString() {
 		return amountAvail + " " + getName();
+	}
+	
+	/**
+	 * @param money
+	 */
+	public void setTotalBuyPrice(Money money) {
+		totalBuyPrice = money;
+	}
+	
+	/**
+	 * @param money
+	 */
+	public void setTotalSellPrice(Money money) {
+		totalSellPrice = money;
 	}
 }

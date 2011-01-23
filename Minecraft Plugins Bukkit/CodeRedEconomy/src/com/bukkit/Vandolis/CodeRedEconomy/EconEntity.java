@@ -6,7 +6,7 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package bukkit.Vandolis;
+package com.bukkit.Vandolis.CodeRedEconomy;
 
 import java.util.ArrayList;
 
@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 public abstract class EconEntity {
 	protected Money						money			= new Money();
 	protected ArrayList<ShopItemStack>	availableItems	= new ArrayList<ShopItemStack>();
+	protected ArrayList<ShopItemStack>	pendingItems	= new ArrayList<ShopItemStack>();
 	protected String					name			= "";
 	protected Transaction				lastTrans		= null;
 	private User						user			= null;
@@ -683,5 +684,12 @@ public abstract class EconEntity {
 	 */
 	public int getNumTransactionsSell() {
 		return numTransSell;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return name;
 	}
 }

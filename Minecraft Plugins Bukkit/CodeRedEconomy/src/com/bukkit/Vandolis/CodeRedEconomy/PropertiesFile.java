@@ -1,7 +1,7 @@
 /*
  * Borrowed from the now dead hMod. Still a handy way to save settings
  */
-package bukkit.Vandolis;
+package com.bukkit.Vandolis.CodeRedEconomy;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -6,7 +6,7 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package bukkit.Vandolis;
+package com.bukkit.Vandolis.CodeRedEconomy;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -107,26 +107,53 @@ public class DataManager {
 	private static final File				file_badWords		= new File(LOC + "badWords.txt");
 	private static final boolean			messageOnBadWord	= true;
 	
+	public DataManager(CodeRedEconomy instance) {
+		load(instance);
+	}
+	
+	public static String getDataLoc() {
+		return LOC;
+	}
+	
 	/**
 	 * Adds a {@link Shop} to the list of shops. Writes the array to file.
 	 * 
 	 * @param shop
 	 */
 	public static void addShop(Shop shop) {
-		if (debug) {
-			System.out.println("Adding shop under the name of: " + shop.getName());
-		}
-		shops.add(shop);
-		
 		/*
-		 * Write the new array to file.
+		 * Double check to make sure a shop under the same name does not exist
 		 */
-		try {
-			write("shops");
+		boolean found = false;
+		
+		for (Shop iter : shops) {
+			if (iter.getName().equalsIgnoreCase(shop.getName())) {
+				found = true;
+			}
 		}
-		catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		
+		if (!found) {
+			if (debug) {
+				System.out.println("Adding shop under the name of: " + shop.getName());
+			}
+			shops.add(shop);
+			ShopList.populate();
+			
+			/*
+			 * Write the new array to file.
+			 */
+			try {
+				write("shops");
+			}
+			catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {
+			if (debug) {
+				System.out.println("Shop not added, found a duplicate.");
+			}
 		}
 	}
 	
@@ -396,7 +423,28 @@ public class DataManager {
 	 * @return
 	 */
 	public static Shop getShop(EconEntity ent) {
-		return getShop(ent.getName());
+		for (Shop iter : shops) {
+			if (iter.getName().equalsIgnoreCase(ent.getName())) {
+				if (debug) {
+					System.out.println("Shop found under the name of " + iter.getName() + " returning.");
+				}
+				return iter;
+			}
+		}
+		
+		/*
+		 * No shop found, make a new one with default values
+		 */
+		Shop temp;
+		if (ent instanceof Shop) {
+			temp = (Shop) ent;
+		}
+		else {
+			temp = new Shop(ent.getName());
+		}
+		
+		addShop(temp);
+		return temp;
 	}
 	
 	/**
@@ -418,7 +466,7 @@ public class DataManager {
 		/*
 		 * No shop found, make a new one with default values
 		 */
-		Shop temp = new Shop(name, false, -1);
+		Shop temp = new Shop(name, false, -1, true);
 		addShop(temp);
 		return temp;
 	}
@@ -578,8 +626,10 @@ public class DataManager {
 		/*Read from the shop file*/
 		readShopFile();
 		
-		/*Read bad words file*/
-		readBadWords();
+		if (blockBadWords) {
+			/*Read bad words file*/
+			readBadWords();
+		}
 	}
 	
 	/**

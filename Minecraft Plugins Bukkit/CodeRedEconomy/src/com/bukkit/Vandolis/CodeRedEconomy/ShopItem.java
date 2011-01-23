@@ -6,7 +6,7 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package bukkit.Vandolis;
+package com.bukkit.Vandolis.CodeRedEconomy;
 
 import org.bukkit.inventory.ItemStack;
 
@@ -16,16 +16,16 @@ import org.bukkit.inventory.ItemStack;
  * @author Vandolis
  */
 public class ShopItem {
-	private final String			REGEX			= DataManager.getItemRegex();
-	private final int				itemId;
-	private final String			itemName;
-	private final int				buyPrice;
-	private final int				sellPrice;
-	private final int				maxAvail;
+	private String					REGEX			= DataManager.getItemRegex();
+	private int						itemId;
+	private String					itemName;
+	private int						buyPrice;
+	private int						sellPrice;
+	private int						maxAvail;
 	private ItemStack				item;
-	private final int				maxSell;
+	private int						maxSell;
 	private final Money				breakValue;
-	private final int				maxBuy;
+	private int						maxBuy;
 	private boolean					valid			= true;
 	
 	private static final String[]	blockNames		=
@@ -61,6 +61,21 @@ public class ShopItem {
 													};
 	
 	/**
+	 * Fills with default values
+	 */
+	public ShopItem() {
+		itemId = 0;
+		itemName = "";
+		buyPrice = 0;
+		sellPrice = 0;
+		maxAvail = 0;
+		item = null;
+		maxSell = 0;
+		breakValue = new Money();
+		maxBuy = 0;
+	}
+	
+	/**
 	 * Creates a {@link ShopItem} based on the itemId given. Loads the rest of the data from the {@link DataManager}.
 	 * 
 	 * @param itemID
@@ -73,13 +88,24 @@ public class ShopItem {
 		 * Load the data from the DataManager
 		 */
 		ShopItem temp = DataManager.getItem(itemID);
-		buyPrice = temp.getBuyPrice();
-		sellPrice = temp.getSellPrice();
-		maxAvail = temp.getMaxAvail();
-		item = new ItemStack(itemID, 1);
-		maxSell = temp.getMaxSell();
-		breakValue = temp.getBreakValue();
-		maxBuy = temp.getMaxBuy();
+		if (temp != null) {
+			buyPrice = temp.getBuyPrice();
+			sellPrice = temp.getSellPrice();
+			maxAvail = temp.getMaxAvail();
+			item = new ItemStack(itemID, 1);
+			maxSell = temp.getMaxSell();
+			breakValue = temp.getBreakValue();
+			maxBuy = temp.getMaxBuy();
+		}
+		else {
+			buyPrice = 0;
+			sellPrice = 0;
+			maxAvail = 0;
+			item = null;
+			maxSell = 0;
+			breakValue = null;
+			maxBuy = 0;
+		}
 	}
 	
 	/**
@@ -118,58 +144,21 @@ public class ShopItem {
 		 * Load the data from the DataManager
 		 */
 		ShopItem temp = DataManager.getItem(itemId);
-		maxAvail = temp.getMaxAvail();
-		item = new ItemStack(itemId, 1);
-		maxSell = temp.getMaxSell();
-		breakValue = temp.getBreakValue();
-		maxBuy = temp.getMaxBuy();
-		
-		valid = (itemId != 0);
-	}
-	
-	/**
-	 * Returns the amount of money a entity gets for destroying this item.
-	 * 
-	 * @return
-	 */
-	public Money getBreakValue() {
-		return breakValue;
-	}
-	
-	/**
-	 * Returns the maximum amount a player can buy.
-	 * 
-	 * @return
-	 */
-	public int getBuyMax() {
-		return maxBuy;
-	}
-	
-	/**
-	 * Returns the buy price of the item.
-	 * 
-	 * @return
-	 */
-	public int getBuyPrice() {
-		return buyPrice;
-	}
-	
-	/**
-	 * Returns the actual {@link ItemStack} object.
-	 * 
-	 * @return
-	 */
-	public ItemStack getItem() {
-		return item;
-	}
-	
-	/**
-	 * Returns the itemId.
-	 * 
-	 * @return
-	 */
-	public int getItemId() {
-		return itemId;
+		if (temp != null) {
+			maxAvail = temp.getMaxAvail();
+			item = new ItemStack(itemId, 1);
+			maxSell = temp.getMaxSell();
+			breakValue = temp.getBreakValue();
+			maxBuy = temp.getMaxBuy();
+		}
+		else {
+			maxAvail = 0;
+			item = null;
+			maxSell = 0;
+			breakValue = null;
+			maxBuy = 0;
+		}
+		valid = (itemId <= 0);
 	}
 	
 	/**
@@ -177,33 +166,6 @@ public class ShopItem {
 	 */
 	public boolean isValid() {
 		return valid;
-	}
-	
-	/**
-	 * Returns the maximum amount a {@link Shop} can restock to. Check {@link DataManager} for the infinite value.
-	 * 
-	 * @return
-	 */
-	public int getMaxAvail() {
-		return maxAvail;
-	}
-	
-	/**
-	 * Returns the maximum amount a player can buy.
-	 * 
-	 * @return
-	 */
-	public int getMaxBuy() {
-		return maxBuy;
-	}
-	
-	/**
-	 * Returns the maximum amount a player can sell.
-	 * 
-	 * @return
-	 */
-	public int getMaxSell() {
-		return maxSell;
 	}
 	
 	/**
@@ -221,7 +183,7 @@ public class ShopItem {
 	 * @param itemID
 	 * @return
 	 */
-	private String getName(int itemID) {
+	public static String getName(int itemID) {
 		if (itemID < 255) {
 			return blockNames[itemID];
 		}
@@ -239,21 +201,32 @@ public class ShopItem {
 	}
 	
 	/**
-	 * Returns the sell price of the item.
+	 * Searches to find the item's id number. Returns 0 if not found
 	 * 
-	 * @return
+	 * @param name
+	 *            of the item
+	 * @return The items id. 0 if not found
 	 */
-	public int getSellPrice() {
-		return sellPrice;
-	}
-	
-	/**
-	 * Sets the item to the given itemStack.
-	 * 
-	 * @param itemStack
-	 */
-	protected void setItem(ItemStack itemStack) {
-		item = itemStack;
+	public static int getId(String name) {
+		for (int i = 0; i < blockNames.length; i++) {
+			if (blockNames[i].equalsIgnoreCase(name)) {
+				return i;
+			}
+		}
+		
+		for (int i = 0; i < itemNames.length; i++) {
+			if (itemNames[i].equalsIgnoreCase(name)) {
+				return 256 + i;
+			}
+		}
+		
+		for (int i = 0; i < specialItems.length; i++) {
+			if (specialItems[i].equalsIgnoreCase(name)) {
+				return 2256 + i;
+			}
+		}
+		
+		return 0;
 	}
 	
 	/**
@@ -273,4 +246,92 @@ public class ShopItem {
 	public String toString() {
 		return itemName;
 	}
+	
+	/**
+	 * @return the item
+	 */
+	protected ItemStack getItem() {
+		return item;
+	}
+	
+	/**
+	 * @param item
+	 *            the item to set
+	 */
+	protected void setItem(ItemStack item) {
+		this.item = item;
+	}
+	
+	/**
+	 * @return the maxSell
+	 */
+	protected int getMaxSell() {
+		return maxSell;
+	}
+	
+	/**
+	 * @param maxSell
+	 *            the maxSell to set
+	 */
+	protected void setMaxSell(int maxSell) {
+		this.maxSell = maxSell;
+	}
+	
+	/**
+	 * @return the maxBuy
+	 */
+	protected int getMaxBuy() {
+		return maxBuy;
+	}
+	
+	/**
+	 * @param maxBuy
+	 *            the maxBuy to set
+	 */
+	protected void setMaxBuy(int maxBuy) {
+		this.maxBuy = maxBuy;
+	}
+	
+	/**
+	 * @return the itemId
+	 */
+	protected int getItemId() {
+		return itemId;
+	}
+	
+	/**
+	 * @return the itemName
+	 */
+	protected String getItemName() {
+		return itemName;
+	}
+	
+	/**
+	 * @return the buyPrice
+	 */
+	protected int getBuyPrice() {
+		return buyPrice;
+	}
+	
+	/**
+	 * @return the sellPrice
+	 */
+	protected int getSellPrice() {
+		return sellPrice;
+	}
+	
+	/**
+	 * @return the maxAvail
+	 */
+	protected int getMaxAvail() {
+		return maxAvail;
+	}
+	
+	/**
+	 * @return the breakValue
+	 */
+	protected Money getBreakValue() {
+		return breakValue;
+	}
+	
 }
