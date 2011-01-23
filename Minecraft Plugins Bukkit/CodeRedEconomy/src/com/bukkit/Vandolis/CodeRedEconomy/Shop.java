@@ -298,7 +298,12 @@ public class Shop extends EconEntity {
 					/*
 					 * Process a new transaction with the parsed data
 					 */
-					Transaction.process(new Transaction(user, this, new ShopItemStack(DataManager.getItemId(itemName), amount)));
+					try {
+						Transaction.process(new Transaction(user, this, new ShopItemStack(DataManager.getItemId(itemName), amount)));
+					}
+					catch (NullPointerException e1) {
+						user.sendMessage(itemName + " cannot be sold.");
+					}
 				}
 				else {
 					user.sendMessage("Please enter a valid amount and/or item name.");
