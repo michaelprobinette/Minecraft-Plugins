@@ -188,7 +188,8 @@ public class CodeRedPlayerListener extends PlayerListener {
 						PriceList.priceList(user, page, DataManager.getShop(shopName));
 					}
 					catch (Exception e) {
-						user.sendMessage("Please enter a valid page number.");
+						String itemName = event.getMessage().substring(7).trim().toLowerCase();
+						PriceList.priceSingleItem(DataManager.getUser(player), itemName, DataManager.getShop("The Shop"));
 					}
 				}
 				else {

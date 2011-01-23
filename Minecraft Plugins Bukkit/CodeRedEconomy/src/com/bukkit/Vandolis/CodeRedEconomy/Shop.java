@@ -428,4 +428,19 @@ public class Shop extends EconEntity {
 	protected void setLastRestock(long lastRestock) {
 		this.lastRestock = lastRestock;
 	}
+	
+	/**
+	 * Returns the number of items in the inventory with a given name. Returns 0 if the item is not listed.
+	 * 
+	 * @param itemName
+	 * @return
+	 */
+	public int getAvailableCount(String itemName) {
+		for (ShopItemStack iter : availableItems) {
+			if (iter.getName().equalsIgnoreCase(itemName)) {
+				return iter.getAmountAvail();
+			}
+		}
+		return 0;
+	}
 }
