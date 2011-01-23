@@ -140,4 +140,21 @@ public class PriceList {
 			user.sendMessage("This shop is hidden.");
 		}
 	}
+	
+	/**
+	 * Populates and displays a single item's price to the given {@link User}.
+	 * 
+	 * @param user
+	 * @param itemName
+	 * @param shop
+	 */
+	public static void priceSingleItem(User user, String itemName, Shop shop) {
+		for (ShopItem iter : DataManager.getItemList()) {
+			if (iter.getName().equalsIgnoreCase(itemName)) {
+				user.sendMessage("   " + iter.getName() + ": §a" + iter.getBuyPrice() + " §c" + iter.getSellPrice() + " §e"
+						+ shop.getAvailableCount(itemName));
+				break;
+			}
+		}
+	}
 }

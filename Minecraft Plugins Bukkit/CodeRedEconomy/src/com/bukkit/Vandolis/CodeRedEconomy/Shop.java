@@ -298,7 +298,13 @@ public class Shop extends EconEntity {
 					/*
 					 * Process a new transaction with the parsed data
 					 */
-					Transaction.process(new Transaction(user, this, new ShopItemStack(DataManager.getItemId(itemName), amount)));
+					try {
+						
+						Transaction.process(new Transaction(user, this, new ShopItemStack(DataManager.getItemId(itemName), amount)));
+					}
+					catch (NullPointerException e1) {
+						user.sendMessage(itemName + " cannot be sold.");
+					}
 				}
 				else {
 					user.sendMessage("Please enter a valid amount and/or item name.");
@@ -422,5 +428,20 @@ public class Shop extends EconEntity {
 	 */
 	protected void setLastRestock(long lastRestock) {
 		this.lastRestock = lastRestock;
+	}
+	
+	/**
+	 * Returns the number of items in the inventory with a given name. Returns 0 if the item is not listed.
+	 * 
+	 * @param itemName
+	 * @return
+	 */
+	public int getAvailableCount(String itemName) {
+		for (ShopItemStack iter : availableItems) {
+			if (iter.getName().equalsIgnoreCase(itemName)) {
+				return iter.getAmountAvail();
+			}
+		}
+		return 0;
 	}
 }
