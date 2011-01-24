@@ -113,11 +113,17 @@ public class Transaction {
 		 * If not then an exception will be thrown and will be handled.
 		 */
 		try {
-			/*
-			 * Check the buyer and seller, store the results in the check boolean
-			 */
-			canSell = seller.canSell(trans.getStack());
-			canBuy = buyer.canBuy(trans.getStack());
+			if (!trans.cashOnly()) {
+				/*
+				 * Check the buyer and seller, store the results in the check boolean
+				 */
+				canSell = seller.canSell(trans.getStack());
+				canBuy = buyer.canBuy(trans.getStack());
+			}
+			else {
+				canBuy = buyer.canBuy(trans.getAmount());
+				canSell = true;
+			}
 		}
 		catch (EconException e) {
 			if (DataManager.getDebug()) {
@@ -329,25 +335,25 @@ public class Transaction {
 						}
 					}
 				}
-				else {
+			}
+			else {
+				/*
+				 * Cash only transaction messages
+				 */
+				if (!undo) {
 					/*
-					 * Cash only transaction messages
+					 * First, normal transaction messages
+					 * Send messages to the seller and buyer telling the success
 					 */
-					if (!undo) {
-						/*
-						 * First, normal transaction messages
-						 * Send messages to the seller and buyer telling the success
-						 */
-						if (buyer.getUser() != null) {
-							// EconStats.paid(trans);
-							buyer.getUser().sendMessage("You have paid " + seller.getName() + " " + trans.getAmount());
-							buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney());
-						}
-						if (seller.getUser() != null) {
-							// Nothing
-							seller.getUser().sendMessage(buyer.getName() + " has paid you " + trans.getAmount());
-							seller.getUser().sendMessage("Your new balance is: " + seller.getMoney());
-						}
+					if (buyer.getUser() != null) {
+						// EconStats.paid(trans);
+						buyer.getUser().sendMessage("You have paid " + seller.getName() + " " + trans.getAmount());
+						buyer.getUser().sendMessage("Your new balance is: " + buyer.getMoney());
+					}
+					if (seller.getUser() != null) {
+						// Nothing
+						seller.getUser().sendMessage(buyer.getName() + " has paid you " + trans.getAmount());
+						seller.getUser().sendMessage("Your new balance is: " + seller.getMoney());
 					}
 				}
 			}
@@ -409,8 +415,8 @@ public class Transaction {
 			/*
 			 * Item transaction. Invert all of the values and send it to be processed.
 			 */
-			if (process(new Transaction(trans.getBuyer(), trans.getSeller(), new ShopItemStack(trans.getStack().getItemId(), trans.getStack().getBuyPrice(), trans
-							.getStack().getSellPrice(), trans.getStack().getAmountAvail())), true, true)) {
+			if (process(new Transaction(trans.getBuyer(), trans.getSeller(), new ShopItemStack(trans.getStack().getItemId(), trans
+					.getStack().getBuyPrice(), trans.getStack().getSellPrice(), trans.getStack().getAmountAvail())), true, true)) {
 				/*
 				 * Succeeded
 				 * Remove the transaction from their lists for keeping tally of maxBuy and maxSell

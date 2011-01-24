@@ -123,27 +123,36 @@ public class CodeRedPlayerListener extends PlayerListener {
 						User target = DataManager.getUser(pTarget);
 						
 						try {
-							/*
-							 * The way it is formatted the person receiving money is the seller, and the person loosing money is the buyer,
-							 * so this is formatted target, user so the money goes from the user to the target
-							 */
-							Transaction.process(new Transaction(target, user, new Money(Integer.valueOf(split[2]))));
+							int amount = 0;
+							amount = Integer.valueOf(split[2]);
+							Money money = new Money(amount);
+							
+							if (amount > 0) {
+								/*
+								 * The way it is formatted the person receiving money is the seller, and the person loosing money is the buyer,
+								 * so this is formatted target, user so the money goes from the user to the target
+								 */
+								Transaction.process(new Transaction(target, user, money));
+							}
+							else {
+								user.sendMessage(money + " is not a valid amount.");
+							}
 						}
 						catch (NumberFormatException e) {
-							user.sendMessage("The correct use is \"/pay [name] [amount]\"");
+							user.sendMessage("The correct use is /pay [name] [amount]");
 						}
 					}
 					else {
-						user.sendMessage("The player must be online to be payed.");
+						user.sendMessage("Player not online.");
 					}
 				}
 				else {
-					user.sendMessage("Correct use is \"/pay [player] [amount]\"");
+					user.sendMessage("Correct use is /pay [player] [amount]");
 				}
 				
 				event.setCancelled(true);
 			}
-			else if (split[0].equalsIgnoreCase("/add") && DataManager.getDebug()) {
+			else if (split[0].equalsIgnoreCase("/add") && (DataManager.getDebug() || plugin.isOp(user.getName()))) {
 				if (split.length >= 2) {
 					if (split.length >= 3) {
 						DataManager.getUser(split[1]).getMoney().addAmount(Integer.valueOf(split[2]));
@@ -212,6 +221,25 @@ public class CodeRedPlayerListener extends PlayerListener {
 					iter.restock(true);
 				}
 				
+				event.setCancelled(true);
+			}
+			else if (split[0].equalsIgnoreCase("/econ")) {
+				if (split.length >= 2) {
+					if (split[1].equalsIgnoreCase("reset") && plugin.isOp(user.getName())) {
+						if (split.length >= 3) {
+							if (split[2].equalsIgnoreCase("shops") || split[2].equalsIgnoreCase("shop")) {
+								
+							}
+							else if (split[2].equalsIgnoreCase("stats")) {
+								user.sendMessage("Resetting stats.");
+								EconStats.reset();
+							}
+						}
+						else {
+							user.sendMessage("Useage is /econ reset [items,stats]");
+						}
+					}
+				}
 				event.setCancelled(true);
 			}
 		}

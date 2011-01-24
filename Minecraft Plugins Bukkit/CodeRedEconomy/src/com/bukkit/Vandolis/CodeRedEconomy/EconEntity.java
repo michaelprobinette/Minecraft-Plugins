@@ -692,4 +692,21 @@ public abstract class EconEntity {
 	public String toString() {
 		return name;
 	}
+	
+	/**
+	 * @param amount
+	 * @return
+	 * @throws EconException
+	 */
+	public boolean canBuy(Money amount) throws EconException {
+		if ((amount.getAmount() > money.getAmount()) && (money.getAmount() != DataManager.getInfValue())) {
+			if (money.getAmount() > 0) {
+				throw new EconException("You can't afford to pay that much.", name + " can't afford to pay that much.", money);
+			}
+			else {
+				throw new EconException("You can't afford to pay that much.", name + " can't afford to pay that much.");
+			}
+		}
+		return true;
+	}
 }

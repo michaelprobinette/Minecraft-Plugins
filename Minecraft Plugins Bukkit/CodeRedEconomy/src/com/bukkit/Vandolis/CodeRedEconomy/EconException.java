@@ -18,6 +18,7 @@ public class EconException extends Exception {
 	private String				buyMsg				= "";
 	private String				sellMsg				= "";
 	private ShopItemStack		stack				= null;
+	private Money				amount				= null;
 	
 	/**
 	 * Creates a {@link EconException} with the given messages.
@@ -44,6 +45,17 @@ public class EconException extends Exception {
 	}
 	
 	/**
+	 * @param buyMsg
+	 * @param sellMsg
+	 * @param money
+	 */
+	public EconException(String buyMsg, String sellMsg, Money money) {
+		this.buyMsg = buyMsg;
+		this.sellMsg = sellMsg;
+		amount = money;
+	}
+	
+	/**
 	 * @return The stack of item an {@link EconEntity} can buy/sell without the offending problem
 	 */
 	public ShopItemStack getStack() {
@@ -62,5 +74,12 @@ public class EconException extends Exception {
 	 */
 	public String getSellMsg() {
 		return sellMsg;
+	}
+	
+	/**
+	 * @return amount of money for new transaction
+	 */
+	public Money getAmount() {
+		return amount;
 	}
 }

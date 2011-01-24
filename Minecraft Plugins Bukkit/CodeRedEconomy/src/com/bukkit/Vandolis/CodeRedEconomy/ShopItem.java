@@ -59,6 +59,17 @@ public class ShopItem {
 	private static final String[]	specialItems	= {
 			"Gold Music Disk", "Green Music Disk"
 													};
+	private static final String[]	dyes			=
+															{
+			"Ink Sac", "Rose Red", "Cactus Green", "Coco Beans", "Lapis Lazuli", "Purple Dye", "Cyan Dye", "Light Gray Dye", "Gray Dye",
+			"Pink Dye", "Lime Dye", "Dandelion Yellow Dye", "Light Blue", "Magenta Dye", "Orange Dye", "Bone Meal"
+															};
+	private static final String[]	cloth			=
+															{
+			"Wool", "Orange Wool", "Magenta Wool", "Light Blue Wool", "Yellow Wool", "Light Green Wool", "Pink Wool", "Gray Wool",
+			"Light Gray Wool", "Cyan Wool", "Purple Wool", "Blue Wool", "Brown Wool", "Dark Green Wool", "Red Wool", "Red Wool",
+			"Black Wool"
+															};
 	
 	/**
 	 * Fills with default values
@@ -250,7 +261,7 @@ public class ShopItem {
 	/**
 	 * @return the item
 	 */
-	protected ItemStack getItem() {
+	public ItemStack getItem() {
 		return item;
 	}
 	
@@ -265,7 +276,7 @@ public class ShopItem {
 	/**
 	 * @return the maxSell
 	 */
-	protected int getMaxSell() {
+	public int getMaxSell() {
 		return maxSell;
 	}
 	
@@ -280,7 +291,7 @@ public class ShopItem {
 	/**
 	 * @return the maxBuy
 	 */
-	protected int getMaxBuy() {
+	public int getMaxBuy() {
 		return maxBuy;
 	}
 	
@@ -295,43 +306,67 @@ public class ShopItem {
 	/**
 	 * @return the itemId
 	 */
-	protected int getItemId() {
+	public int getItemId() {
 		return itemId;
 	}
 	
 	/**
 	 * @return the itemName
 	 */
-	protected String getItemName() {
+	public String getItemName() {
 		return itemName;
 	}
 	
 	/**
 	 * @return the buyPrice
 	 */
-	protected int getBuyPrice() {
+	public int getBuyPrice() {
 		return buyPrice;
 	}
 	
 	/**
 	 * @return the sellPrice
 	 */
-	protected int getSellPrice() {
+	public int getSellPrice() {
 		return sellPrice;
 	}
 	
 	/**
 	 * @return the maxAvail
 	 */
-	protected int getMaxAvail() {
+	public int getMaxAvail() {
 		return maxAvail;
 	}
 	
 	/**
 	 * @return the breakValue
 	 */
-	protected Money getBreakValue() {
+	public Money getBreakValue() {
 		return breakValue;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
+		int hash = 0;
+		hash += itemId * 32;
+		hash += buyPrice * 5;
+		hash += sellPrice * 6;
+		return hash;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object obj) {
+		if (obj instanceof ShopItem) {
+			ShopItem compare = (ShopItem) obj;
+			if (compare.hashCode() == hashCode()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }

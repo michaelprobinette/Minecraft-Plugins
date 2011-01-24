@@ -688,4 +688,15 @@ public class EconStats {
 			}
 		}
 	}
+	
+	/**
+	 * Resets all of the stat data
+	 */
+	public static void reset() {
+		itemsBought = new ArrayList<ShopItemStack>();
+		itemsSold = new ArrayList<ShopItemStack>();
+		numTrans = 0;
+		playersPaid = new ArrayList<Transaction>();
+		shopStats = new HashMap<EconEntity, ArrayList<Transaction>>();
+	}
 }
