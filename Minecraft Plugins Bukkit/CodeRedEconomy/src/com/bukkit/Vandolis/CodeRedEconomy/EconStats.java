@@ -699,4 +699,32 @@ public class EconStats {
 		playersPaid = new ArrayList<Transaction>();
 		shopStats = new HashMap<EconEntity, ArrayList<Transaction>>();
 	}
+	
+	/**
+	 * @return List of player bought items
+	 */
+	public static ArrayList<ShopItemStack> getBought() {
+		return itemsBought;
+	}
+	
+	/**
+	 * @return List of player sold items
+	 */
+	public static ArrayList<ShopItemStack> getSold() {
+		return itemsSold;
+	}
+	
+	/**
+	 * @return List of player to player payments
+	 */
+	public static ArrayList<Transaction> getPaid() {
+		return playersPaid;
+	}
+	
+	/**
+	 * @return Map of shops and their transactions
+	 */
+	public static HashMap<EconEntity, ArrayList<Transaction>> getShopStats() {
+		return shopStats;
+	}
 }

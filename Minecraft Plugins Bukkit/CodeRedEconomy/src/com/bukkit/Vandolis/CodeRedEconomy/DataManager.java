@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class DataManager {
 	 * SQLite
 	 */
 	private static boolean					useSQL				= false;
-	private static final String				DB					= "jdbc:sqlite:CodeRedEconomy";
+	private static String					DB					= "";
 	
 	/*
 	 * Regex stuff
@@ -591,9 +592,12 @@ public class DataManager {
 	 * Used to load a static {@link DataManager}. Sets the server to the given one, and reads all the files.
 	 * 
 	 * @param instance
+	 * @throws SQLException
 	 */
 	public static void load(CodeRedEconomy instance) {
 		System.out.println("Loading CodeRedEconomy...");
+		
+		DB = "jdbc:sqlite:" + instance.getDataFolder().getPath() + "/CodeRedEconomy.db";
 		
 		server = instance.getServer();
 		
@@ -608,27 +612,41 @@ public class DataManager {
 		/*Change the folder location to the given one*/
 		//		LOC = instance.getDataFolder().getPath();
 		
-		/*Read data from properties file*/
-		readProps();
+		if (useSQL) {
+			try {
+				Class.forName("org.sqlite.JDBC");
+			}
+			catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		}
 		
-		/*Read from the items file*/
-		readItemFile();
-		
-		/*Read from the users file*/
-		readUserFile();
-		
-		/*Read from the group priv file*/
-		readPrivFile();
-		
-		/*Read from the stats file*/
-		readStatsFile();
-		
-		/*Read from the shop file*/
-		readShopFile();
-		
-		if (blockBadWords) {
-			/*Read bad words file*/
-			readBadWords();
+		try {
+			/*Read data from properties file*/
+			readProps();
+			
+			/*Read from the items file*/
+			readItemFile();
+			
+			/*Read from the users file*/
+			readUserFile();
+			
+			/*Read from the group priv file*/
+			readPrivFile();
+			
+			/*Read from the stats file*/
+			readStatsFile();
+			
+			/*Read from the shop file*/
+			readShopFile();
+			
+			if (blockBadWords) {
+				/*Read bad words file*/
+				readBadWords();
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -641,8 +659,10 @@ public class DataManager {
 	
 	/**
 	 * Loads the bad words from file
+	 * 
+	 * @throws SQLException
 	 */
-	private static void readBadWords() {
+	private static void readBadWords() throws SQLException {
 		if (dirExists) {
 			System.out.println("Reading Bad Words File...");
 			
@@ -674,14 +694,29 @@ public class DataManager {
 				}
 			}
 		}
+		else if (useSQL) {
+			Connection conn = DriverManager.getConnection(DB);
+			Statement stat = conn.createStatement();
+			ResultSet rs = stat.executeQuery("select * from badwords;");
+			
+			while (rs.next()) {
+				badWords.put(rs.getString(1), rs.getInt(2));
+			}
+			
+			rs.close();
+			stat.close();
+			conn.close();
+		}
 	}
 	
 	/**
 	 * Loads the item data from file.
 	 * Item file formatting is "itemID:buyPrice:sellPrice:maxAvail"
+	 * 
+	 * @throws SQLException
 	 */
-	private static void readItemFile() {
-		if (dirExists) {
+	private static void readItemFile() throws SQLException {
+		if (dirExists && !useSQL) {
 			BufferedReader reader;
 			String raw = "";
 			itemList = new ArrayList<ShopItem>();
@@ -714,6 +749,20 @@ public class DataManager {
 					e1.printStackTrace();
 				}
 			}
+		}
+		else if (useSQL) {
+			Connection conn = DriverManager.getConnection(DB);
+			Statement stat = conn.createStatement();
+			ResultSet rs = stat.executeQuery("select * from items;");
+			
+			while (rs.next()) {
+				itemList.add(new ShopItem(rs.getString(1), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs
+						.getInt(7), rs.getInt(8)));
+			}
+			
+			rs.close();
+			stat.close();
+			conn.close();
 		}
 	}
 	
@@ -762,6 +811,9 @@ public class DataManager {
 					e1.printStackTrace();
 				}
 			}
+		}
+		else if (useSQL) {
+			
 		}
 	}
 	
@@ -855,14 +907,23 @@ public class DataManager {
 			else {
 				props.setLong("maxbuyselltimeout", maxBuySellTime);
 			}
+			
+			if (props.containsKey("usesqlite")) {
+				useSQL = props.getBoolean("usesqlite");
+			}
+			else {
+				props.setBoolean("usesqlite", useSQL);
+			}
 		}
 	}
 	
 	/**
 	 * Loads the {@link Shop} data from file
+	 * 
+	 * @throws SQLException
 	 */
-	private static void readShopFile() {
-		if (dirExists) {
+	private static void readShopFile() throws SQLException {
+		if (dirExists && !useSQL) {
 			System.out.println("Reading Shops File...");
 			
 			BufferedReader reader;
@@ -890,13 +951,27 @@ public class DataManager {
 				}
 			}
 		}
+		else if (useSQL) {
+			Connection conn = DriverManager.getConnection(DB);
+			Statement stat = conn.createStatement();
+			ResultSet rs = stat.executeQuery("select * from shoplist;");
+			
+			while (rs.next()) {
+				shops.add(new Shop(rs.getString(1), rs.getLong(2), rs.getBoolean(3), rs.getLong(4), rs.getBoolean(5), rs.getBoolean(6), rs
+						.getBoolean(7), rs.getBoolean(8), rs.getString(9)));
+			}
+			
+			rs.close();
+			stat.close();
+			conn.close();
+		}
 	}
 	
 	/**
 	 * Loads the {@link EconStats} from file
 	 */
 	private static void readStatsFile() {
-		if (dirExists) {
+		if (dirExists && !useSQL) {
 			System.out.println("Reading Stats File...");
 			
 			BufferedReader reader;
@@ -926,13 +1001,16 @@ public class DataManager {
 				}
 			}
 		}
+		else if (useSQL) {
+			
+		}
 	}
 	
 	/**
 	 * Loads the {@link User} data from file.
 	 */
 	private static void readUserFile() {
-		if (dirExists) {
+		if (dirExists && !useSQL) {
 			System.out.println("Reading Users File...");
 			
 			BufferedReader reader;
@@ -971,6 +1049,9 @@ public class DataManager {
 				}
 			}
 		}
+		else if (useSQL) {
+			
+		}
 	}
 	
 	/**
@@ -978,6 +1059,15 @@ public class DataManager {
 	 */
 	public static void save() {
 		System.out.println("Saving player and item data.");
+		
+		if (useSQL) {
+			try {
+				Class.forName("org.sqlite.JDBC");
+			}
+			catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		}
 		
 		/*
 		  * Perform save actions
@@ -1024,7 +1114,6 @@ public class DataManager {
 	 */
 	private static void write(String fileName) throws SQLException {
 		if (fileName.equalsIgnoreCase("player")) {
-			// TODO Player SQL Stuff
 			if (useSQL) {
 				Connection conn = DriverManager.getConnection(DB);
 				Statement stat = conn.createStatement();
@@ -1032,23 +1121,22 @@ public class DataManager {
 				stat.executeUpdate("drop table if exists players;");
 				
 				// Create new table
-				stat.executeUpdate("create table players (Name, Money, NumTransBuy, NumTransSell, Spent, Gained, LastAutoPayment);");
+				stat.executeUpdate("create table players (Name, Money, LastAutoPayment);");
 				
-				PreparedStatement prep = conn.prepareStatement("insert into players values (?, ?, ?, ?, ?, ?, ?);");
+				PreparedStatement prep = conn.prepareStatement("insert into players values (?, ?, ?);");
 				for (User iter : users) {
 					prep.setString(1, iter.getName());
-					prep.setInt(2, iter.getMoney().getAmount());
-					prep.setInt(3, iter.getNumTransactionsBuy());
-					prep.setInt(4, iter.getNumTransactionsSell());
-					prep.setInt(5, iter.getMoney().getSpent());
-					prep.setInt(6, iter.getMoney().getGained());
-					prep.setLong(7, iter.getLastAutoDeposit());
+					prep.setLong(2, iter.getMoney().getAmount());
+					prep.setLong(3, iter.getLastAutoDeposit());
 					prep.addBatch();
 				}
 				
 				conn.setAutoCommit(false);
 				prep.executeBatch();
 				conn.setAutoCommit(true);
+				
+				prep.close();
+				stat.close();
 				conn.close();
 			}
 			else if (dirExists) {
@@ -1067,12 +1155,35 @@ public class DataManager {
 			}
 		}
 		else if (fileName.equalsIgnoreCase("item")) {
-			// TODO Item SQL Stuff
 			if (useSQL) {
 				Connection conn = DriverManager.getConnection(DB);
 				Statement stat = conn.createStatement();
-				stat
-						.executeUpdate("create table if not exists items (ItemId, BuyPrice, SellPrice, ShopMaxSell, PlayerMaxSell, PlayerMaxBuy, BreakValue);");
+				
+				/*
+				 * Drop old tables
+				 */
+				stat.executeUpdate("drop table if exists items;");
+				
+				stat.executeUpdate("create table if not exists items (Name, Id, BuyPrice, SellPrice, ShopMaxSell, PlayerMaxBuy, PlayerMaxSell, BreakValue);");
+				PreparedStatement prep = conn.prepareStatement("insert into items values (?, ?, ?, ?, ?, ?, ?, ?);");
+				for (ShopItem iter : itemList) {
+					prep.setString(1, iter.getName());
+					prep.setInt(2, iter.getItemId());
+					prep.setInt(3, iter.getBuyPrice());
+					prep.setInt(4, iter.getSellPrice());
+					prep.setInt(5, iter.getMaxAvail());
+					prep.setInt(6, iter.getMaxBuy());
+					prep.setInt(7, iter.getMaxSell());
+					prep.setInt(8, iter.getBreakValue().getAmount());
+					prep.addBatch();
+				}
+				
+				conn.setAutoCommit(false);
+				prep.executeBatch();
+				conn.setAutoCommit(true);
+				
+				prep.close();
+				stat.close();
 				conn.close();
 			}
 			else if (dirExists) {
@@ -1091,12 +1202,88 @@ public class DataManager {
 			}
 		}
 		else if (fileName.equalsIgnoreCase("stats")) {
-			// TODO Stats SQL Stuff
-			// if (useSQL) {
-			// stat.executeUpdate("create table if not exists stats ();");
-			// }
-			
-			if (dirExists) {
+			if (useSQL) {
+				Connection conn = DriverManager.getConnection(DB);
+				Statement stat = conn.createStatement();
+				
+				/*
+				 * Drop old tables
+				 */
+				stat.executeUpdate("drop table if exists itemstats;");
+				stat.executeUpdate("drop table if exists playerstats;");
+				stat.executeUpdate("drop table if exists paystats;");
+				
+				stat.executeUpdate("create table if not exists itemstats (Name, Id, Bought, Sold, Cost, Revenue);");
+				stat.executeUpdate("create table if not exists playerstats (Name, NumPay, NumBuy, NumSell, Spent, Gained);");
+				stat.executeUpdate("create table if not exists paystats (Payer, Reciever, Amount);");
+				
+				PreparedStatement prep = conn.prepareStatement("insert into itemstats values (?, ?, ?, ?, ?, ?);");
+				
+				for (ShopItem iter : itemList) {
+					long numBought = 0;
+					long numSold = 0;
+					
+					for (ShopItemStack bought : EconStats.getBought()) {
+						if (bought.getItemId() == iter.getItemId()) {
+							numBought = bought.getAmountAvail();
+						}
+					}
+					for (ShopItemStack sold : EconStats.getSold()) {
+						if (sold.getItemId() == iter.getItemId()) {
+							numSold = sold.getAmountAvail();
+						}
+					}
+					
+					prep.setString(1, iter.getName());
+					prep.setInt(2, iter.getItemId());
+					prep.setLong(3, numBought);
+					prep.setLong(4, numSold);
+					prep.setLong(5, numBought * iter.getBuyPrice());
+					prep.setLong(6, numSold * iter.getSellPrice());
+					
+					prep.addBatch();
+				}
+				
+				conn.setAutoCommit(false);
+				prep.executeBatch();
+				conn.setAutoCommit(true);
+				
+				prep = conn.prepareStatement("insert into playerstats values (?, ?, ?, ?, ?, ?);");
+				
+				for (User iter : users) {
+					prep.setString(1, iter.getName());
+					prep.setInt(2, iter.getNumTransPay());
+					prep.setInt(3, iter.getNumTransBuy());
+					prep.setInt(4, iter.getNumTransSell());
+					prep.setLong(5, iter.getMoney().getSpent());
+					prep.setLong(6, iter.getMoney().getGained());
+					
+					prep.addBatch();
+				}
+				
+				conn.setAutoCommit(false);
+				prep.executeBatch();
+				conn.setAutoCommit(true);
+				
+				prep = conn.prepareStatement("insert into paystats values (?, ?, ?);");
+				
+				for (Transaction iter : EconStats.getPaid()) {
+					prep.setString(1, iter.getBuyer().getName());
+					prep.setString(2, iter.getSeller().getName());
+					prep.setLong(3, iter.getAmount().getAmount());
+					
+					prep.addBatch();
+				}
+				
+				conn.setAutoCommit(false);
+				prep.executeBatch();
+				conn.setAutoCommit(true);
+				
+				prep.close();
+				stat.close();
+				conn.close();
+			}
+			else if (dirExists) {
 				// Write stats file
 				try {
 					BufferedWriter writer = new BufferedWriter(new FileWriter(file_stats));
@@ -1115,37 +1302,32 @@ public class DataManager {
 			if (useSQL) {
 				Connection conn = DriverManager.getConnection(DB);
 				Statement stat = conn.createStatement();
-				// TODO Shops SQL Stuff
 				
 				// Drop existing tables, this is a total write
 				stat.executeUpdate("drop table if exists shoplist;");
 				
 				// Create the new tables
-				stat.executeUpdate("create table shoplist (Name, Money, InfItems, LastRestock, StockId);");
+				stat.executeUpdate("create table shoplist (Name, Money, InfItems, LastRestock, CanRestock, UsersCanBuy, UsersCanSell, Hidden, Stock);");
 				
-				PreparedStatement prep = conn.prepareStatement("insert into shoplist values (?, ?, ?, ?, ?);"); // Shops entry
-				int stockId = 0; // The Id for the shopstocks entry
+				PreparedStatement prep = conn.prepareStatement("insert into shoplist values (?, ?, ?, ?, ?, ?, ?, ?, ?);"); // Shops entry
 				for (Shop iter : shops) {
-					stockId++;
 					prep.setString(1, iter.getName());
 					prep.setInt(2, iter.getMoney().getAmount());
 					prep.setBoolean(3, iter.getInfItems());
 					prep.setLong(4, iter.getLastRestock());
-					prep.setInt(5, stockId);
-					prep.addBatch();
+					prep.setBoolean(5, iter.isRestock());
+					prep.setBoolean(6, iter.isUsersCanBuy());
+					prep.setBoolean(7, iter.isUsersCanSell());
+					prep.setBoolean(8, iter.isHidden());
 					
-					stat.executeUpdate("drop table if exists " + iter.getName() + ";");
-					stat.executeUpdate("create table " + iter.getName() + " (ItemId, Amount);");
-					PreparedStatement prep2 = conn.prepareStatement("insert into " + iter.getName() + " values (?, ?);");
+					String items = "";
 					for (ShopItemStack stack : iter.getAvailItems()) {
-						prep2.setInt(1, stack.getItemId());
-						prep2.setInt(2, stack.getAmountAvail());
-						prep2.addBatch();
+						items += ":" + stack.getItemId() + " " + stack.getAmountAvail();
 					}
+					items = items.replaceFirst(":", "");
+					prep.setString(9, items);
 					
-					conn.setAutoCommit(false);
-					prep2.executeBatch();
-					conn.setAutoCommit(true);
+					prep.addBatch();
 				}
 				
 				// Commit the data
@@ -1178,5 +1360,101 @@ public class DataManager {
 	 */
 	public static long getMaxBuySellTime() {
 		return maxBuySellTime;
+	}
+	
+	/**
+	 * @param query
+	 *            to execute
+	 * @throws SQLException
+	 */
+	public static void executeSQL(String query) throws SQLException {
+		Connection conn = DriverManager.getConnection(DB);
+		Statement stat = conn.createStatement();
+		stat.executeUpdate(query);
+		stat.close();
+		conn.close();
+	}
+	
+	/**
+	 * @return true if use sql
+	 */
+	public static boolean useSql() {
+		return useSQL;
+	}
+	
+	/**
+	 * @param user
+	 *            to update in sql
+	 * @throws SQLException
+	 */
+	public static void updatePlayer(User user) throws SQLException {
+		Connection conn = DriverManager.getConnection(DB);
+		
+		Statement stat = conn.createStatement();
+		
+		stat.executeUpdate("delete from players where Name = '" + user.getName() + "';");
+		
+		PreparedStatement prep = conn.prepareStatement("insert into players values (?, ?, ?);");
+		
+		prep.setString(1, user.getName());
+		prep.setInt(2, user.getMoney().getAmount());
+		prep.setLong(3, user.getLastAutoDeposit());
+		prep.addBatch();
+		
+		conn.setAutoCommit(false);
+		prep.executeBatch();
+		conn.setAutoCommit(true);
+		
+		prep.close();
+		stat.close();
+		conn.close();
+	}
+	
+	/**
+	 * @param shop
+	 *            to update in sql
+	 * @throws SQLException
+	 */
+	public static void updateShop(Shop shop) throws SQLException {
+		Connection conn = DriverManager.getConnection(DB);
+		
+		Statement stat = conn.createStatement();
+		
+		stat.executeUpdate("delete from shoplist where Name = '" + shop.getName() + "';");
+		
+		PreparedStatement prep = conn.prepareStatement("insert into shoplist values (?, ?, ?, ?, ?, ?, ?, ?, ?);");
+		
+		prep.setString(1, shop.getName());
+		prep.setInt(2, shop.getMoney().getAmount());
+		prep.setBoolean(3, shop.getInfItems());
+		prep.setLong(4, shop.getLastRestock());
+		prep.setBoolean(5, shop.isRestock());
+		prep.setBoolean(6, shop.isUsersCanBuy());
+		prep.setBoolean(7, shop.isUsersCanSell());
+		prep.setBoolean(8, shop.isHidden());
+		prep.setString(9, shop.getItemString());
+		prep.addBatch();
+		
+		PreparedStatement prep2 = conn.prepareStatement("insert into " + shop.getName() + " values (?, ?);");
+		for (ShopItemStack stack : shop.getAvailItems()) {
+			prep2.setInt(1, stack.getItemId());
+			prep2.setInt(2, stack.getAmountAvail());
+			prep2.addBatch();
+		}
+		
+		conn.setAutoCommit(false);
+		prep2.executeBatch();
+		conn.setAutoCommit(true);
+		
+		prep.close();
+		stat.close();
+		conn.close();
+	}
+	
+	/**
+	 * @param b
+	 */
+	public static void setUseSQL(boolean b) {
+		useSQL = b;
 	}
 }

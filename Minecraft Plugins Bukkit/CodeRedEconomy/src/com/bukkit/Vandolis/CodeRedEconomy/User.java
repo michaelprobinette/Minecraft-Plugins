@@ -37,7 +37,7 @@ public class User extends EconEntity {
 	public User(Player player) {
 		super();
 		this.player = player;
-		name = player.getName();
+		setName(player.getName());
 		
 		// FIXME Once bukkit has a permissions system
 		
@@ -69,37 +69,25 @@ public class User extends EconEntity {
 		 */
 		String split[] = saveString.split(regex);
 		if (split.length >= 2) {
-			name = split[0];
+			setName(split[0]);
 			int temp = Integer.valueOf(split[1]);
-			money.setAmount(temp);
+			getMoney().setAmount(temp);
 			if (split.length >= 3) {
-				lastAutoDeposit = Integer.valueOf(split[2]);
+				setLastAutoDeposit(Integer.valueOf(split[2]));
 			}
-			setPlayer(DataManager.getServer().getPlayer(name));
+			setPlayer(DataManager.getServer().getPlayer(getName()));
 		}
 		else if (split.length == 1) {
 			/*
 			 * Came from a new user, only the name
 			 */
 			if (DataManager.getDebug()) {
-				System.out.println("Creating a new user with the name of " + name);
+				System.out.println("Creating a new user with the name of " + getName());
 			}
 			
-			name = saveString;
-			setPlayer(DataManager.getServer().getPlayer(name));
+			setName(saveString);
+			setPlayer(DataManager.getServer().getPlayer(getName()));
 		}
-		setUser(this);
-	}
-	
-	/**
-	 * Used for loading from the file
-	 * 
-	 * @param user
-	 */
-	public User(User user) {
-		super(user.getMoney());
-		player = user.getPlayer();
-		name = user.getPlayer().getName();
 		setUser(this);
 	}
 	
@@ -157,8 +145,8 @@ public class User extends EconEntity {
 	 */
 	public void showBalance() {
 		autoDesposit(DataManager.getServer().getTime());
-		if (money.getAmount() != DataManager.getInfValue()) {
-			sendMessage("Your balance is: " + money.toString());
+		if (getMoney().getAmount() != DataManager.getInfValue()) {
+			sendMessage("Your balance is: " + getMoney().toString());
 		}
 		else {
 			sendMessage("You have Infinite money.");
@@ -171,16 +159,16 @@ public class User extends EconEntity {
 	 * @return
 	 */
 	public String getSaveString() {
-		return name + regex + money.getAmount() + regex + lastAutoDeposit;
+		return getName() + regex + getMoney().getAmount() + regex + getLastAutoDeposit();
 	}
 	
 	/**
 	 * Tries to undo the users last {@link Transaction}.
 	 */
 	public void undoLastTrans() {
-		if (lastTrans != null) {
-			if (Transaction.undoTransaction(lastTrans)) {
-				lastTrans = null;
+		if (getLastTrans() != null) {
+			if (Transaction.undoTransaction(getLastTrans())) {
+				setLastTrans(null);
 			}
 		}
 		else {
@@ -196,13 +184,13 @@ public class User extends EconEntity {
 		 * Checks to make sure the player is not null, if it is grab the player from the server
 		 */
 		if (player == null) {
-			player = DataManager.getServer().getPlayer(name);
+			player = DataManager.getServer().getPlayer(getName());
 		}
 		
 		/*
 		 * Clear the availableItems to prevent errors.
 		 */
-		availableItems.clear();
+		getAvailableItems().clear();
 		
 		/*
 		 * Iterate through the players inventory and add the items to the availableItems array.
@@ -214,7 +202,7 @@ public class User extends EconEntity {
 					 * Check if it is already in the array
 					 */
 					boolean found = false;
-					for (ShopItemStack siter : availableItems) {
+					for (ShopItemStack siter : getAvailableItems()) {
 						if (siter.getItemId() == iter.getTypeId()) {
 							/*
 							 * Already in available items, so add to the amount
@@ -227,7 +215,7 @@ public class User extends EconEntity {
 					 * Add it to the array if it was not found already
 					 */
 					if (!found && DataManager.validId(iter.getTypeId())) {
-						availableItems.add(new ShopItemStack(iter.getTypeId(), iter.getAmount()));
+						getAvailableItems().add(new ShopItemStack(iter.getTypeId(), iter.getAmount()));
 					}
 				}
 			}
@@ -244,7 +232,7 @@ public class User extends EconEntity {
 		 * Checks to make sure the player is not null, if it is grab the player from the server
 		 */
 		if (player == null) {
-			player = DataManager.getServer().getPlayer(name);
+			player = DataManager.getServer().getPlayer(getName());
 		}
 		
 		getPlayer().getInventory().addItem(stack.getItem());
@@ -260,7 +248,7 @@ public class User extends EconEntity {
 		 * Checks to make sure the player is not null, if it is grab the player from the server
 		 */
 		if (player == null) {
-			player = DataManager.getServer().getPlayer(name);
+			player = DataManager.getServer().getPlayer(getName());
 		}
 		
 		getPlayer().getInventory().removeItem(stack.getItem());

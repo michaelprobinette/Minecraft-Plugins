@@ -50,10 +50,55 @@ public class Shop extends EconEntity {
 	public Shop(String name, boolean infItems, int amountMoney, boolean canRestock) {
 		super(new Money(amountMoney));
 		this.infItems = infItems;
-		this.name = name;
+		setName(name);
 		this.canRestock = canRestock;
 		setShop(this);
 		initialize();
+	}
+	
+	/**
+	 * @param string
+	 * @param long1
+	 * @param boolean1
+	 * @param long2
+	 * @param boolean2
+	 * @param boolean3
+	 * @param boolean4
+	 * @param boolean5
+	 * @param string2
+	 */
+	public Shop(String string, long long1, boolean boolean1, long long2, boolean boolean2, boolean boolean3, boolean boolean4,
+			boolean boolean5, String string2) {
+		setName(string);
+		getMoney().setAmount((int) long1);
+		infItems = boolean1;
+		lastRestock = long2;
+		canRestock = boolean2;
+		usersCanBuy = boolean3;
+		usersCanSell = boolean4;
+		hidden = boolean5;
+		loadItems(string2);
+	}
+	
+	/**
+	 * @param string2
+	 */
+	private void loadItems(String string2) {
+		if (DataManager.getDebug()) {
+			System.out.println("Loading items from \"" + string2 + "\"");
+		}
+		
+		String split[] = string2.split(":");
+		
+		for (String iter : split) {
+			if (DataManager.getDebug()) {
+				System.out.println("Loading an item from: " + iter);
+			}
+			String ss[] = iter.split(" ");
+			if (ss.length == 2) {
+				getAvailableItems().add(new ShopItemStack(Integer.valueOf(ss[0]), Integer.valueOf(ss[1])));
+			}
+		}
 	}
 	
 	/**
@@ -69,6 +114,24 @@ public class Shop extends EconEntity {
 	 */
 	public void setRestock(boolean restock) {
 		canRestock = restock;
+	}
+	
+	/**
+	 * @return item string for SQL
+	 */
+	public String getItemString() {
+		String temp = "";
+		
+		for (ShopItemStack iter : getAvailableItems()) {
+			temp += ":" + iter.getItemId() + " " + iter.getAmountAvail();
+		}
+		temp = temp.replaceFirst(":", "");
+		
+		if (DataManager.getDebug()) {
+			System.out.println("Item string is \"" + temp + "\"");
+		}
+		
+		return temp;
 	}
 	
 	/**
@@ -168,8 +231,8 @@ public class Shop extends EconEntity {
 		 * Safety check of length then load the data.
 		 */
 		if (sc.length >= 4) {
-			name = sc[0];
-			money.setAmount(Integer.valueOf(sc[1]));
+			setName(sc[0]);
+			getMoney().setAmount(Integer.valueOf(sc[1]));
 			infItems = Boolean.valueOf(sc[2]);
 			lastRestock = Long.valueOf(sc[3]);
 			for (String iter : sc) {
@@ -180,14 +243,15 @@ public class Shop extends EconEntity {
 						/*
 						 * Old format
 						 */
-						availableItems.add(new ShopItemStack(Integer.valueOf(ss[0].trim()), Integer.valueOf(ss[1].trim())));
+						getAvailItems().add(new ShopItemStack(Integer.valueOf(ss[0].trim()), Integer.valueOf(ss[1].trim())));
 					}
 					else {
 						/*
 						 * New format
 						 */
-						availableItems.add(new ShopItemStack(Integer.valueOf(ss[0].trim()), Integer.valueOf(ss[2].trim()), Integer
-								.valueOf(ss[1].trim()), Integer.valueOf(ss[3].trim())));
+						getAvailItems().add(
+								new ShopItemStack(Integer.valueOf(ss[0].trim()), Integer.valueOf(ss[2].trim()), Integer.valueOf(ss[1]
+										.trim()), Integer.valueOf(ss[3].trim())));
 					}
 				}
 			}
@@ -207,9 +271,9 @@ public class Shop extends EconEntity {
 		 * Check the current time against the last restock time
 		 */
 		if (((DataManager.getServer().getTime() - lastRestock >= DataManager.getRestockTime()) || force) && canRestock) {
-			System.out.println("Restocking " + name);
+			System.out.println("Restocking " + getName());
 			lastRestock = DataManager.getServer().getTime();
-			for (ShopItemStack iter : availableItems) {
+			for (ShopItemStack iter : getAvailItems()) {
 				/*
 				 * Checks the current value against the max value for the item. 
 				 * Only restocks the item if the current amount is less than the max.
@@ -223,14 +287,14 @@ public class Shop extends EconEntity {
 				boolean found = false;
 				for (ShopItem iter : DataManager.getItemList()) {
 					found = false;
-					for (ShopItem current : availableItems) {
+					for (ShopItem current : getAvailItems()) {
 						if (iter.getItemId() == current.getItemId()) {
 							found = true;
 						}
 					}
 					
 					if (!found) {
-						availableItems.add(new ShopItemStack(iter.getItemId(), iter.getMaxAvail()));
+						getAvailItems().add(new ShopItemStack(iter.getItemId(), iter.getMaxAvail()));
 					}
 				}
 			}
@@ -326,9 +390,9 @@ public class Shop extends EconEntity {
 	public String getSaveString() {
 		// Used for saving the shop, data needed is:
 		// 
-		String temp = name + regex + money.getAmount() + regex + infItems + regex + lastRestock;
+		String temp = getName() + regex + getMoney().getAmount() + regex + infItems + regex + lastRestock;
 		
-		for (ShopItemStack iter : availableItems) {
+		for (ShopItemStack iter : getAvailItems()) {
 			temp += regex + iter.getItemId() + regex2 + iter.getBuyPrice() + regex2 + iter.getSellPrice() + regex2 + iter.getAmountAvail();
 		}
 		
@@ -436,7 +500,7 @@ public class Shop extends EconEntity {
 	 * @return
 	 */
 	public int getAvailableCount(String itemName) {
-		for (ShopItemStack iter : availableItems) {
+		for (ShopItemStack iter : getAvailItems()) {
 			if (iter.getName().equalsIgnoreCase(itemName)) {
 				return iter.getAmountAvail();
 			}

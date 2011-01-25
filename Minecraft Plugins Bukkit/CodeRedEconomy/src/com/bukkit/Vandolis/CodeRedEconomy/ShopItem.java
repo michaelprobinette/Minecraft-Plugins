@@ -28,8 +28,7 @@ public class ShopItem {
 	private int						maxBuy;
 	private boolean					valid			= true;
 	
-	private static final String[]	blockNames		=
-															{
+	private static final String[]	blockNames		= {
 			"Other", "Stone", "Grass", "Dirt", "Cobblestone", "Wooden Planks", "Sapling", "Bedrock", "Water", "Stationary Water", "Lava",
 			"Stationary Lava", "Sand", "Gravel", "Gold Ore", "Iron Ore", "Coal Ore", "Wood", "Leaves", "Sponge", "Glass",
 			"Lapis Lazuli Ore", "Lapis Lazuli Block", "Dispenser", "Sandstone", "Note Block", "", "", "", "", "", "", "", "", "", "Wool",
@@ -40,9 +39,8 @@ public class ShopItem {
 			"Iron Door", "Wooden Pressure Plate", "Redstone Ore", "GlowingRedstone", "RedstoneTorchOf", "RedstoneTorchOn", "StoneButton",
 			"Snow", "Ice", "SnowBlock", "Cactus", "Clay", "Sugar Cane", "Jukebox", "Fence", "Pumpkin", "Netherrack", "Soul Sand",
 			"Glowstone", "Portal", "Jack-O-Lantern", "Cake Block"
-															};
-	private static final String[]	itemNames		=
-															{
+													};
+	private static final String[]	itemNames		= {
 			"Iron Shovel", "Iron Pickaxe", "Iron Axe", "Flint and Steel", "Apple", "Bow", "Arrow", "Coal", "Diamond", "Iron Ingot",
 			"Gold Ingot", "Iron Sword", "Wooden Sword", "Woodern Shovel", "Wooden Pickaxe", "Wooden Axe", "Stone Sword", "Stone Shovel",
 			"Stone Pickaxe", "Stone Axe", "Diamond Sword", "Diamond Shovel", "Diamond Pickaxe", "Diamond Axe", "Stick", "Bowl",
@@ -55,21 +53,19 @@ public class ShopItem {
 			"Redstone", "Snowball", "Boat", "Leather", "Milk", "Clay Brick", "Clay Balls", "Reed", "Paper", "Book", "Slimeball",
 			"Storage Minecart", "Powered Minecart", "Egg", "Compass", "Fishing Rod", "Clock", "Glowstone Dust", "Raw Fish", "Cooked Fish",
 			"Ink Sack", "Bone", "Sugar", "Cake"
-															};
+													};
 	private static final String[]	specialItems	= {
 			"Gold Music Disk", "Green Music Disk"
 													};
-	private static final String[]	dyes			=
-															{
+	private static final String[]	dyes			= {
 			"Ink Sac", "Rose Red", "Cactus Green", "Coco Beans", "Lapis Lazuli", "Purple Dye", "Cyan Dye", "Light Gray Dye", "Gray Dye",
 			"Pink Dye", "Lime Dye", "Dandelion Yellow Dye", "Light Blue", "Magenta Dye", "Orange Dye", "Bone Meal"
-															};
-	private static final String[]	cloth			=
-															{
+													};
+	private static final String[]	cloth			= {
 			"Wool", "Orange Wool", "Magenta Wool", "Light Blue Wool", "Yellow Wool", "Light Green Wool", "Pink Wool", "Gray Wool",
 			"Light Gray Wool", "Cyan Wool", "Purple Wool", "Blue Wool", "Brown Wool", "Dark Green Wool", "Red Wool", "Red Wool",
 			"Black Wool"
-															};
+													};
 	
 	/**
 	 * Fills with default values
@@ -170,6 +166,38 @@ public class ShopItem {
 			maxBuy = 0;
 		}
 		valid = (itemId <= 0);
+	}
+	
+	/**
+	 * Used by SQL
+	 * 
+	 * @param name
+	 *            of the item
+	 * @param itemId
+	 *            of the item
+	 * @param sellPrice
+	 *            of the item
+	 * @param buyPrice
+	 *            of the item
+	 * @param buyMax
+	 *            of the item
+	 * @param sellMax
+	 *            of the item
+	 * @param shopStock
+	 *            of the item
+	 * @param breakValue
+	 *            of the item
+	 */
+	public ShopItem(String name, int itemId, int sellPrice, int buyPrice, int buyMax, int sellMax, int shopStock, int breakValue) {
+		itemName = name;
+		this.itemId = itemId;
+		this.buyPrice = buyPrice;
+		this.sellPrice = sellPrice;
+		maxAvail = shopStock;
+		item = new ItemStack(itemId);
+		maxSell = sellMax;
+		this.breakValue = new Money(breakValue);
+		maxBuy = buyMax;
 	}
 	
 	/**

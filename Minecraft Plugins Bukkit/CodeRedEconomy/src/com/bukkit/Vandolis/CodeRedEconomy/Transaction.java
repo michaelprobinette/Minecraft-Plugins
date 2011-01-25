@@ -8,6 +8,8 @@
  */
 package com.bukkit.Vandolis.CodeRedEconomy;
 
+import java.sql.SQLException;
+
 /**
  * Class that handles any sort of economy action. Processes {@link Transaction} by adding/removing money/items
  * 
@@ -57,6 +59,7 @@ public class Transaction {
 	 * 
 	 * @param trans
 	 * @return represents the status of it. 0 mean all went fine, if negative something went wrong
+	 * @throws SQLException
 	 */
 	public static boolean process(Transaction trans) {
 		// call process with messages on
@@ -69,6 +72,7 @@ public class Transaction {
 	 * 
 	 * @param trans
 	 * @param loud
+	 * @throws SQLException
 	 */
 	public static boolean process(Transaction trans, boolean loud) {
 		// call process with messages on
@@ -82,6 +86,7 @@ public class Transaction {
 	 * @param flag
 	 *            Undo trans or not. Changes the messages shown to the players
 	 * @return
+	 * @throws SQLException
 	 */
 	public static boolean process(Transaction trans, boolean undo, boolean loud) {
 		/*
@@ -358,10 +363,56 @@ public class Transaction {
 				}
 			}
 			
-			/*
-			 * Save on each transaction
-			 */
-			DataManager.save();
+			if (!DataManager.useSql()) {
+				/*
+				 * Save on each transaction
+				 */
+				DataManager.save();
+			}
+			else {
+				try {
+					/*
+					 * Execute a SQL update
+					 */
+					if (trans.cashOnly()) {
+						/*
+						 * Cash only /pay
+						 */
+						DataManager.updatePlayer(trans.getSeller().getUser());
+						DataManager.updatePlayer(trans.getBuyer().getUser());
+					}
+					else {
+						if (trans.getSeller().getUser() != null) {
+							/*
+							 * Seller is a player
+							 */
+							DataManager.updatePlayer(trans.getSeller().getUser());
+						}
+						else {
+							/*
+							 * Seller is a shop
+							 */
+							DataManager.updateShop(trans.getSeller().getShop());
+						}
+						
+						if (trans.getBuyer().getUser() != null) {
+							/*
+							 * Buyer is a player
+							 */
+							DataManager.updatePlayer(trans.getSeller().getUser());
+						}
+						else {
+							/*
+							 * Buyer is a shop
+							 */
+							DataManager.updateShop(trans.getBuyer().getShop());
+						}
+					}
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			return true;
 		}
 		return false;
@@ -382,6 +433,7 @@ public class Transaction {
 	 * 
 	 * @param trans
 	 *            the transaction to be reversed
+	 * @throws SQLException
 	 */
 	public static boolean undoTransaction(Transaction trans) {
 		if (DataManager.getDebug()) {

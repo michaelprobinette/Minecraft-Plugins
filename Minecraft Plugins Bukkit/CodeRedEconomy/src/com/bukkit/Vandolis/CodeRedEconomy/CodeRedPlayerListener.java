@@ -46,72 +46,7 @@ public class CodeRedPlayerListener extends PlayerListener {
 				DataManager.getShop("The Shop").sell(user, split);
 				event.setCancelled(true);
 			}
-			// if (split[0].equalsIgnoreCase("/trade") && player.canUseCommand("/trade")) {
-			//					
-			// return true;
-			// }
-			else if (split[0].equalsIgnoreCase("/shops")) {
-				
-				/*
-				 * Display the shops to the user
-				 */
-				if (split.length >= 2) {
-					int page = Integer.valueOf(split[1]);
-					ShopList.showPage(user, page);
-				}
-				else {
-					ShopList.showPage(user, 1);
-				}
-				
-				event.setCancelled(true);
-			}
-			else if (split[0].equalsIgnoreCase("/setshop")) {
-				
-				if (split.length >= 2) {
-					String shopName = "";
-					for (int i = 1; i < split.length; i++) {
-						shopName += split[i] + " ";
-					}
-					
-					if (DataManager.getDebug()) {
-						System.out.println("Searching shop names for: \"" + shopName.trim() + "\"");
-					}
-					
-					boolean found = false;
-					
-					for (Shop shopIter : DataManager.getShops()) {
-						if (shopIter.getName().equalsIgnoreCase(shopName.trim())) {
-							/*
-							 * Valid shop
-							 */
-							playerShops.put(player.getName(), shopIter.getName());
-							found = true;
-							user.sendMessage("Set your active shop to: " + shopIter.getName());
-							break;
-						}
-					}
-					
-					if (!found) {
-						user.sendMessage("Please enter a valid shop name. Type /shops for a list.");
-					}
-				}
-				else {
-					String shopName = playerShops.get(user.getName());
-					
-					if (shopName == null) {
-						/*
-						 * Add them to default shop, "The Shop"
-						 */
-						shopName = "The Shop";
-						
-						playerShops.put(user.getName(), "The Shop");
-					}
-					user.sendMessage("Active shop is: " + shopName + ". To change use /setshop [shop name] Type /shops for a list.");
-				}
-				
-				event.setCancelled(true);
-			}
-			else if (split[0].equalsIgnoreCase("/balance")) {
+			else if (split[0].equalsIgnoreCase("/balance") || split[0].equalsIgnoreCase("/money")) {
 				user.showBalance();
 				event.setCancelled(true);
 			}
@@ -238,6 +173,72 @@ public class CodeRedPlayerListener extends PlayerListener {
 						else {
 							user.sendMessage("Useage is /econ reset [items,stats]");
 						}
+					}
+					else if (split[1].equalsIgnoreCase("sql") && (plugin.isOp(user.getName()) || DataManager.getDebug())) {
+						DataManager.setUseSQL(true);
+						DataManager.save();
+					}
+					else if (split[1].equalsIgnoreCase("shops")) {
+						
+						/*
+						 * Display the shops to the user
+						 */
+						if (split.length >= 3) {
+							int page = Integer.valueOf(split[2]);
+							ShopList.showPage(user, page);
+						}
+						else {
+							ShopList.showPage(user, 1);
+						}
+						
+						event.setCancelled(true);
+					}
+					else if (split[1].equalsIgnoreCase("setshop")) {
+						
+						if (split.length >= 3) {
+							String shopName = "";
+							for (int i = 2; i < split.length; i++) {
+								shopName += split[i] + " ";
+							}
+							
+							if (DataManager.getDebug()) {
+								System.out.println("Searching shop names for: \"" + shopName.trim() + "\"");
+							}
+							
+							boolean found = false;
+							
+							for (Shop shopIter : DataManager.getShops()) {
+								if (shopIter.getName().equalsIgnoreCase(shopName.trim())) {
+									/*
+									 * Valid shop
+									 */
+									playerShops.put(player.getName(), shopIter.getName());
+									found = true;
+									user.sendMessage("Set your active shop to: " + shopIter.getName());
+									break;
+								}
+							}
+							
+							if (!found) {
+								user.sendMessage("Please enter a valid shop name. Type /econ shops for a list.");
+							}
+						}
+						else {
+							String shopName = playerShops.get(user.getName());
+							
+							if (shopName == null) {
+								/*
+								 * Add them to default shop, "The Shop"
+								 */
+								shopName = "The Shop";
+								
+								playerShops.put(user.getName(), "The Shop");
+							}
+							user.sendMessage("Active shop is: " + shopName
+									+ ". To change use /econ setshop [shop name] Type /shops for a list.");
+						}
+						
+						event.setCancelled(true);
 					}
 				}
 				event.setCancelled(true);

@@ -20,17 +20,18 @@ import org.bukkit.inventory.ItemStack;
  * @author Vandolis
  */
 public abstract class EconEntity {
-	protected Money						money			= new Money();
-	protected ArrayList<ShopItemStack>	availableItems	= new ArrayList<ShopItemStack>();
-	protected ArrayList<ShopItemStack>	pendingItems	= new ArrayList<ShopItemStack>();
-	protected String					name			= "";
-	protected Transaction				lastTrans		= null;
+	private Money						money			= new Money();
+	private ArrayList<ShopItemStack>	availableItems	= new ArrayList<ShopItemStack>();
+	private ArrayList<ShopItemStack>	pendingItems	= new ArrayList<ShopItemStack>();
+	private String						name			= "";
+	private Transaction					lastTrans		= null;
 	private User						user			= null;
 	private Shop						shop			= null;
-	protected long						lastAutoDeposit	= 0;
-	protected ArrayList<Transaction>	transactions	= new ArrayList<Transaction>();
-	protected int						numTransBuy		= 0;
-	protected int						numTransSell	= 0;
+	private long						lastAutoDeposit	= 0;
+	private ArrayList<Transaction>		transactions	= new ArrayList<Transaction>();
+	private int							numTransBuy		= 0;
+	private int							numTransSell	= 0;
+	private int							numTransPay		= 0;
 	
 	/**
 	 * Default entity constructor
@@ -668,24 +669,6 @@ public abstract class EconEntity {
 		}
 	}
 	
-	/**
-	 * Returns the Entities number of buy {@link Transaction}.
-	 * 
-	 * @return
-	 */
-	public int getNumTransactionsBuy() {
-		return numTransBuy;
-	}
-	
-	/**
-	 * Returns the entities number of sell {@link Transaction}.
-	 * 
-	 * @return
-	 */
-	public int getNumTransactionsSell() {
-		return numTransSell;
-	}
-	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -708,5 +691,119 @@ public abstract class EconEntity {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * @return the availableItems
+	 */
+	protected ArrayList<ShopItemStack> getAvailableItems() {
+		return availableItems;
+	}
+	
+	/**
+	 * @param availableItems
+	 *            the availableItems to set
+	 */
+	protected void setAvailableItems(ArrayList<ShopItemStack> availableItems) {
+		this.availableItems = availableItems;
+	}
+	
+	/**
+	 * @return the pendingItems
+	 */
+	protected ArrayList<ShopItemStack> getPendingItems() {
+		return pendingItems;
+	}
+	
+	/**
+	 * @param pendingItems
+	 *            the pendingItems to set
+	 */
+	protected void setPendingItems(ArrayList<ShopItemStack> pendingItems) {
+		this.pendingItems = pendingItems;
+	}
+	
+	/**
+	 * @return the numTransBuy
+	 */
+	protected int getNumTransBuy() {
+		return numTransBuy;
+	}
+	
+	/**
+	 * @param numTransBuy
+	 *            the numTransBuy to set
+	 */
+	protected void setNumTransBuy(int numTransBuy) {
+		this.numTransBuy = numTransBuy;
+	}
+	
+	/**
+	 * @return the numTransSell
+	 */
+	protected int getNumTransSell() {
+		return numTransSell;
+	}
+	
+	/**
+	 * @param numTransSell
+	 *            the numTransSell to set
+	 */
+	protected void setNumTransSell(int numTransSell) {
+		this.numTransSell = numTransSell;
+	}
+	
+	/**
+	 * @return the numTransPay
+	 */
+	protected int getNumTransPay() {
+		return numTransPay;
+	}
+	
+	/**
+	 * @param numTransPay
+	 *            the numTransPay to set
+	 */
+	protected void setNumTransPay(int numTransPay) {
+		this.numTransPay = numTransPay;
+	}
+	
+	/**
+	 * @return the lastTrans
+	 */
+	protected Transaction getLastTrans() {
+		return lastTrans;
+	}
+	
+	/**
+	 * @param money
+	 *            the money to set
+	 */
+	protected void setMoney(Money money) {
+		this.money = money;
+	}
+	
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	protected void setName(String name) {
+		this.name = name;
+	}
+	
+	/**
+	 * @param lastAutoDeposit
+	 *            the lastAutoDeposit to set
+	 */
+	protected void setLastAutoDeposit(long lastAutoDeposit) {
+		this.lastAutoDeposit = lastAutoDeposit;
+	}
+	
+	/**
+	 * @param transactions
+	 *            the transactions to set
+	 */
+	protected void setTransactions(ArrayList<Transaction> transactions) {
+		this.transactions = transactions;
 	}
 }
