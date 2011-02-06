@@ -6,7 +6,9 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package com.bukkit.Vandolis.CodeRedEconomy;
+package com.bukkit.Vandolis.CodeRedEconomy.FlatFile;
+
+import com.bukkit.Vandolis.CodeRedEconomy.EconomyProperties;
 
 /**
  * Main class for anything money related. Includes name and amount
@@ -24,7 +26,7 @@ public class Money {
 	 * Makes a new {@link Money} with all 0.
 	 */
 	public Money() {
-		name = DataManager.getMoneyName();
+		name = EconomyProperties.getMoneyName();
 	}
 	
 	/**
@@ -33,7 +35,7 @@ public class Money {
 	 * @param amount
 	 */
 	public Money(int amount) {
-		name = DataManager.getMoneyName();
+		name = EconomyProperties.getMoneyName();
 		this.amount = amount;
 		if (amount < 0) {
 			valid = false;
@@ -48,10 +50,10 @@ public class Money {
 		/*
 		 * Check to make sure they don't accidently go into inf range
 		 */
-		if ((this.amount + amount == DataManager.getInfValue()) && (this.amount != DataManager.getInfValue())) {
+		if ((this.amount + amount == EconomyProperties.getInfValue()) && (this.amount != EconomyProperties.getInfValue())) {
 			this.amount += (amount + 1);
 		}
-		else if (this.amount != DataManager.getInfValue()) {
+		else if (this.amount != EconomyProperties.getInfValue()) {
 			this.amount += amount;
 		}
 		
@@ -92,10 +94,10 @@ public class Money {
 		/*
 		 * Check to make sure they don't accidently go into inf range
 		 */
-		if ((this.amount - amount == DataManager.getInfValue()) && (this.amount != DataManager.getInfValue())) {
+		if ((this.amount - amount == EconomyProperties.getInfValue()) && (this.amount != EconomyProperties.getInfValue())) {
 			this.amount -= (amount + 1);
 		}
-		else if (this.amount != DataManager.getInfValue()) {
+		else if (this.amount != EconomyProperties.getInfValue()) {
 			this.amount -= amount;
 		}
 		
@@ -115,7 +117,7 @@ public class Money {
 	 */
 	public boolean setAmount(int amount) {
 		this.amount = amount;
-		if ((amount < 0) && (amount != DataManager.getInfValue())) {
+		if ((amount < 0) && (amount != EconomyProperties.getInfValue())) {
 			valid = false;
 		}
 		return valid;

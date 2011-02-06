@@ -8,6 +8,10 @@
  */
 package com.bukkit.Vandolis.CodeRedEconomy;
 
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.EconEntity;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.Money;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.ShopItemStack;
+
 /**
  * Custom exception class for the economy. Contains messages for the buyer and seller, as well as an allowed stack size if needed
  * 

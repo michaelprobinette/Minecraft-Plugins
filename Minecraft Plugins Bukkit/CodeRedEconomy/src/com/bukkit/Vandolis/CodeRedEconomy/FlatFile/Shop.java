@@ -6,9 +6,11 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package com.bukkit.Vandolis.CodeRedEconomy;
+package com.bukkit.Vandolis.CodeRedEconomy.FlatFile;
 
 import org.bukkit.Server;
+
+import com.bukkit.Vandolis.CodeRedEconomy.EconomyProperties;
 
 /**
  * Class that handles buy/sell of items.
@@ -78,6 +80,7 @@ public class Shop extends EconEntity {
 		usersCanSell = boolean4;
 		hidden = boolean5;
 		loadItems(string2);
+		setShop(this);
 	}
 	
 	/**
@@ -97,6 +100,10 @@ public class Shop extends EconEntity {
 			String ss[] = iter.split(" ");
 			if (ss.length == 2) {
 				getAvailableItems().add(new ShopItemStack(Integer.valueOf(ss[0]), Integer.valueOf(ss[1])));
+			}
+			else if (ss.length == 4) {
+				getAvailableItems().add(
+						new ShopItemStack(Integer.valueOf(ss[0]), Integer.valueOf(ss[1]), Integer.valueOf(ss[2]), Integer.valueOf(ss[3])));
 			}
 		}
 	}
@@ -123,7 +130,7 @@ public class Shop extends EconEntity {
 		String temp = "";
 		
 		for (ShopItemStack iter : getAvailableItems()) {
-			temp += ":" + iter.getItemId() + " " + iter.getAmountAvail();
+			temp += ":" + iter.getItemId() + " " + iter.getAmountAvail() + " " + iter.getBuyPrice() + " " + iter.getSellPrice();
 		}
 		temp = temp.replaceFirst(":", "");
 		
@@ -132,79 +139,6 @@ public class Shop extends EconEntity {
 		}
 		
 		return temp;
-	}
-	
-	/**
-	 * Function ran when a player tries to buy an item. Parses the command used to get the item name as well as the amount. If no amount is
-	 * given the default value is 1.
-	 * 
-	 * @param user
-	 * @param split
-	 */
-	public void buy(User user, String[] split) {
-		String itemName = "";
-		int amount = 1;
-		
-		/*
-		 * Check the command length to make sure it is at least 2. [0] = /buy [1] = itemName
-		 */
-		if (split.length >= 2) {
-			try {
-				/*
-				 * Loop through the split and grab the itemName as well as the amount.
-				 */
-				for (String iter : split) {
-					/*
-					 * Skip the first value as it is the /buy
-					 */
-					if (!iter.equalsIgnoreCase(split[0])) {
-						/*
-						 * Try and convert into the amount, if that fails it must be part of the name.
-						 */
-						try {
-							amount = Integer.valueOf(iter);
-						}
-						catch (NumberFormatException e) {
-							/*
-							 * Not a number, add to name.
-							 */
-							itemName += iter + " ";
-						}
-					}
-				}
-				
-				/*
-				 * Trim the name for use and show debug info.
-				 */
-				itemName = itemName.trim();
-				
-				if (DataManager.getDebug()) {
-					System.out.println("Item name is: " + itemName);
-				}
-				
-				/*
-				 * Check to make sure the amount is nonnegative as well as the itemName has a value.
-				 */
-				if ((amount > 0) && !itemName.equalsIgnoreCase("")) {
-					if (DataManager.getDebug()) {
-						System.out.println("Valid, processing.");
-					}
-					
-					ShopItemStack stack = new ShopItemStack(ShopItem.getId(itemName), amount);
-					
-					Transaction.process(new Transaction(this, user, stack));
-				}
-				else {
-					user.sendMessage("Please enter a valid amount and/or item name.");
-				}
-			}
-			catch (Exception e2) {
-				user.sendMessage("The correct use is /buy [item name] [amount]");
-			}
-		}
-		else {
-			user.sendMessage("The correct use is /buy [item name] [amount]");
-		}
 	}
 	
 	/**
@@ -270,7 +204,7 @@ public class Shop extends EconEntity {
 		/*
 		 * Check the current time against the last restock time
 		 */
-		if (((DataManager.getServer().getTime() - lastRestock >= DataManager.getRestockTime()) || force) && canRestock) {
+		if (((DataManager.getServer().getTime() - lastRestock >= EconomyProperties.getRestockTime()) || force) && canRestock) {
 			System.out.println("Restocking " + getName());
 			lastRestock = DataManager.getServer().getTime();
 			for (ShopItemStack iter : getAvailItems()) {
@@ -306,80 +240,6 @@ public class Shop extends EconEntity {
 	 */
 	public void restock() {
 		restock(false);
-	}
-	
-	/**
-	 * Function ran when a player tries to sell an item. Parses the command used to get the item name as well as the amount. If no amount is
-	 * given the default value is 1.
-	 * 
-	 * @param user
-	 * @param split
-	 */
-	public void sell(User user, String[] split) {
-		String itemName = "";
-		int amount = 1;
-		
-		/*
-		 * Check the command length to make sure it is at least 2. [0] = /sell [1] = itemName
-		 */
-		if (split.length >= 2) {
-			try {
-				/*
-				 * Loop through the split and grab the itemName as well as the amount.
-				 */
-				for (String iter : split) {
-					/*
-					 * Skip the first one as it is /sell
-					 */
-					if (!iter.equalsIgnoreCase(split[0])) {
-						/*
-						 * Try and convert it into the amount, if that fails it must be part of the name
-						 */
-						try {
-							amount = Integer.valueOf(iter);
-						}
-						catch (NumberFormatException e) {
-							/*
-							 * Not a number, add to the name.
-							 */
-							itemName += iter + " ";
-						}
-					}
-				}
-				
-				/*
-				 * Trim the name for use and print debug info
-				 */
-				itemName = itemName.trim();
-				if (DataManager.getDebug()) {
-					System.out.println("Item name is: " + itemName);
-				}
-				
-				/*
-				 * Check to make sure the amount is nonnegative and the itemName is not empty.
-				 */
-				if ((amount > 0) && !itemName.equalsIgnoreCase("")) {
-					/*
-					 * Process a new transaction with the parsed data
-					 */
-					try {
-						Transaction.process(new Transaction(user, this, new ShopItemStack(DataManager.getItemId(itemName), amount)));
-					}
-					catch (NullPointerException e1) {
-						user.sendMessage(itemName + " cannot be sold.");
-					}
-				}
-				else {
-					user.sendMessage("Please enter a valid amount and/or item name.");
-				}
-			}
-			catch (NumberFormatException e1) {
-				user.sendMessage("The correct use is /sell [item name] [amount]");
-			}
-		}
-		else {
-			user.sendMessage("The correct use is /sell [item name] [amount]");
-		}
 	}
 	
 	/**

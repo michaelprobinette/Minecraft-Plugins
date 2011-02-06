@@ -6,13 +6,16 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package com.bukkit.Vandolis.CodeRedEconomy;
+package com.bukkit.Vandolis.CodeRedEconomy.FlatFile;
 
 import java.util.ArrayList;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import com.bukkit.Vandolis.CodeRedEconomy.EconException;
+import com.bukkit.Vandolis.CodeRedEconomy.EconomyProperties;
 
 /**
  * Base entity for the economy. Shops and {@link User} extend this.
@@ -56,7 +59,7 @@ public abstract class EconEntity {
 	public void addShopItems(ShopItemStack stack) {
 		ShopItemStack sis = getStack(availableItems, stack);
 		if (sis != null) {
-			if (sis.getAmountAvail() != DataManager.getInfValue()) {
+			if (sis.getAmountAvail() != EconomyProperties.getInfValue()) {
 				sis.addAmountAvail(stack.getAmountAvail());
 			}
 		}
@@ -87,12 +90,13 @@ public abstract class EconEntity {
 	 * @param serverTime
 	 */
 	public void autoDesposit(long serverTime) {
-		if ((serverTime - lastAutoDeposit >= DataManager.getAutoDepositTime()) && (money.getAmount() != DataManager.getInfValue())) {
+		if ((serverTime - lastAutoDeposit >= EconomyProperties.getAutoDepositTime())
+				&& (money.getAmount() != EconomyProperties.getInfValue())) {
 			if (DataManager.getDebug()) {
-				System.out.println("Auto Depositing " + DataManager.getAutoDepositAmount() + " into " + name + " Server: " + serverTime
-						+ " Last: " + lastAutoDeposit);
+				System.out.println("Auto Depositing " + EconomyProperties.getAutoDepositAmount() + " into " + name + " Server: "
+						+ serverTime + " Last: " + lastAutoDeposit);
 			}
-			money.addAmount(DataManager.getAutoDepositAmount());
+			money.addAmount(EconomyProperties.getAutoDepositAmount());
 			lastAutoDeposit = serverTime;
 		}
 	}
@@ -135,7 +139,7 @@ public abstract class EconEntity {
 				checkEnoughSlots(stack);
 				
 				/* Return if the player has the money*/
-				if ((stack.getTotalBuyPrice().getAmount() > money.getAmount()) && (money.getAmount() != DataManager.getInfValue())) {
+				if ((stack.getTotalBuyPrice().getAmount() > money.getAmount()) && (money.getAmount() != EconomyProperties.getInfValue())) {
 					/*
 					 * Find the largest stack size they can afford
 					 */
@@ -155,7 +159,7 @@ public abstract class EconEntity {
 				/*Shop*/
 
 				/*Check the money*/
-				if ((stack.getTotalBuyPrice().getAmount() > money.getAmount()) && (money.getAmount() != DataManager.getInfValue())) {
+				if ((stack.getTotalBuyPrice().getAmount() > money.getAmount()) && (money.getAmount() != EconomyProperties.getInfValue())) {
 					/*
 					 * Find the largest stack size they can afford
 					 */
@@ -325,7 +329,7 @@ public abstract class EconEntity {
 		 * Check to make sure it is not air, as that would mean it is not an item that can be sold or bought
 		 */
 		if (stack.getItemId() != 0) {
-			if ((current < stack.getAmountAvail()) && (current != DataManager.getInfValue())) {
+			if ((current < stack.getAmountAvail()) && (current != EconomyProperties.getInfValue())) {
 				/*
 				 * Not enough of the item, throw an exception with the correct messages and with a new stack size of the max the entity has
 				 */
@@ -381,7 +385,7 @@ public abstract class EconEntity {
 			}
 		}
 		
-		if ((totBought + stack.getAmountAvail() > stack.getMaxBuy()) && (stack.getMaxBuy() != DataManager.getInfValue())) {
+		if ((totBought + stack.getAmountAvail() > stack.getMaxBuy()) && (stack.getMaxBuy() != EconomyProperties.getInfValue())) {
 			// Print debug info to console
 			if (DataManager.getDebug()) {
 				System.out.println(name + " can only buy " + (stack.getMaxBuy() - totBought) + " more " + stack.getName() + ".");
@@ -430,7 +434,7 @@ public abstract class EconEntity {
 				}
 			}
 		}
-		if ((totSold + stack.getAmountAvail() > stack.getMaxSell()) && (stack.getMaxSell() != DataManager.getInfValue())) {
+		if ((totSold + stack.getAmountAvail() > stack.getMaxSell()) && (stack.getMaxSell() != EconomyProperties.getInfValue())) {
 			// Print debug info to console
 			if (DataManager.getDebug()) {
 				System.out.println(name + " can only sell " + (stack.getMaxSell() - totSold) + " more " + stack.getName() + ".");
@@ -458,7 +462,7 @@ public abstract class EconEntity {
 		long time = DataManager.getServer().getTime();
 		
 		for (Transaction iter : transactions) {
-			if (time - iter.getTime() >= DataManager.getMaxBuySellTime()) {
+			if (time - iter.getTime() >= EconomyProperties.getMaxBuySellTime()) {
 				
 			}
 		}
@@ -586,7 +590,7 @@ public abstract class EconEntity {
 		}
 		for (ShopItemStack iter : availableItems) {
 			if (iter.getItemId() == stack.getItemId()) {
-				if ((iter.getAmountAvail() >= stack.getAmountAvail()) || (iter.getAmountAvail() == DataManager.getInfValue())) {
+				if ((iter.getAmountAvail() >= stack.getAmountAvail()) || (iter.getAmountAvail() == EconomyProperties.getInfValue())) {
 					return true;
 				}
 			}
@@ -620,7 +624,7 @@ public abstract class EconEntity {
 		ShopItemStack sis = getStack(availableItems, stack);
 		
 		if (sis != null) {
-			if (sis.getAmountAvail() != DataManager.getInfValue()) {
+			if (sis.getAmountAvail() != EconomyProperties.getInfValue()) {
 				sis.addAmountAvail(-stack.getAmountAvail());
 			}
 		}
@@ -682,7 +686,7 @@ public abstract class EconEntity {
 	 * @throws EconException
 	 */
 	public boolean canBuy(Money amount) throws EconException {
-		if ((amount.getAmount() > money.getAmount()) && (money.getAmount() != DataManager.getInfValue())) {
+		if ((amount.getAmount() > money.getAmount()) && (money.getAmount() != EconomyProperties.getInfValue())) {
 			if (money.getAmount() > 0) {
 				throw new EconException("You can't afford to pay that much.", name + " can't afford to pay that much.", money);
 			}

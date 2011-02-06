@@ -3,10 +3,10 @@
  */
 package com.Vandolis.TheWall;
 
-import com.bukkit.Vandolis.CodeRedEconomy.Money;
-import com.bukkit.Vandolis.CodeRedEconomy.ShopItem;
-import com.bukkit.Vandolis.CodeRedEconomy.ShopItemStack;
-import com.bukkit.Vandolis.CodeRedEconomy.User;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.Money;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.ShopItem;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.ShopItemStack;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.User;
 
 /**
  * @author Vandolis

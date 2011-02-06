@@ -15,6 +15,12 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockListener;
 
+import com.bukkit.Vandolis.CodeRedEconomy.Database.Items;
+import com.bukkit.Vandolis.CodeRedEconomy.Database.Players;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.DataManager;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.Money;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.ShopItem;
+
 /**
  * Block Listener class for any {@link BlockEvent}
  * 
@@ -41,13 +47,32 @@ public class CodeRedBlockListener extends BlockListener {
 			 * Broken block, check to see if there is a value attached to it.
 			 * If there is go ahead and pay the user
 			 */
-			ShopItem broken = DataManager.getItem(event.getBlock().getTypeId());
-			
-			if (broken != null) {
-				Money breakValue = broken.getBreakValue();
+
+			if (EconomyProperties.isUseSQL()) {
+				int playerID = Players.getID(player);
 				
-				if (breakValue.getAmount() != 0) {
-					DataManager.getUser(player).getMoney().addAmount(breakValue.getAmount());
+				Players p = null;
+				
+				if (playerID == 0) {
+					p = new Players(player.getName());
+				}
+				else {
+					p = new Players(playerID);
+				}
+				
+				Items item = new Items(Items.getID(event.getBlock().getTypeId(), event.getBlock().getData()));
+				
+				p.setBalance(p.getBalance() + item.getBreakValue());
+			}
+			else {
+				ShopItem broken = DataManager.getItem(event.getBlock().getTypeId());
+				
+				if (broken != null) {
+					Money breakValue = broken.getBreakValue();
+					
+					if (breakValue.getAmount() != 0) {
+						DataManager.getUser(player).getMoney().addAmount(breakValue.getAmount());
+					}
 				}
 			}
 		}

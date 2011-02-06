@@ -7,11 +7,12 @@
  * <http://www.gnu.org/licenses/>
  */
 
-package com.bukkit.Vandolis.CodeRedEconomy;
+package com.bukkit.Vandolis.CodeRedEconomy.FlatFile;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 
 /**
  * A class for handling all of the buy/sell/pay stats going on.
@@ -33,7 +34,6 @@ public class EconStats {
 	 * @param trans
 	 */
 	public static void log(Transaction trans) {
-		ShopItemStack stack = trans.getStack();
 		if (trans.cashOnly()) {
 			/*
 			 * The transaction is a /pay

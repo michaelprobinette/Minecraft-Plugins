@@ -6,7 +6,7 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package com.bukkit.Vandolis.CodeRedEconomy;
+package com.bukkit.Vandolis.CodeRedEconomy.FlatFile;
 
 /**
  * A class that contains group names as well as a list of the items that group is allowed to buy

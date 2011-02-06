@@ -21,7 +21,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.bukkit.Vandolis.CodeRedEconomy.CodeRedEconomy;
-import com.bukkit.Vandolis.CodeRedEconomy.DataManager;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.DataManager;
 
 /**
  * @author Vandolis

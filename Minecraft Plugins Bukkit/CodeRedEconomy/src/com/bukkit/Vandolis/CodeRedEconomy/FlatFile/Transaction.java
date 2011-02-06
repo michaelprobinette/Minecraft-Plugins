@@ -6,9 +6,12 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package com.bukkit.Vandolis.CodeRedEconomy;
+package com.bukkit.Vandolis.CodeRedEconomy.FlatFile;
 
 import java.sql.SQLException;
+
+import com.bukkit.Vandolis.CodeRedEconomy.EconException;
+import com.bukkit.Vandolis.CodeRedEconomy.EconomyProperties;
 
 /**
  * Class that handles any sort of economy action. Processes {@link Transaction} by adding/removing money/items
@@ -22,6 +25,7 @@ public class Transaction {
 	private final boolean		cashOnly;
 	private final long			time;
 	private Money				amount	= null;
+	private boolean				undo	= false;
 	
 	/**
 	 * Cash Only {@link Transaction} constructor.
@@ -36,7 +40,7 @@ public class Transaction {
 		cashOnly = true;
 		this.amount = amount;
 		stack = null;
-		time = DataManager.getServer().getTime();
+		time = EconomyProperties.getTime();
 	}
 	
 	/**
@@ -51,7 +55,22 @@ public class Transaction {
 		this.buyer = buyer;
 		this.stack = stack;
 		cashOnly = false;
-		time = DataManager.getServer().getTime();
+		time = EconomyProperties.getTime();
+	}
+	
+	/**
+	 * @return the undo
+	 */
+	protected boolean isUndo() {
+		return undo;
+	}
+	
+	/**
+	 * @param undo
+	 *            the undo to set
+	 */
+	protected void setUndo(boolean undo) {
+		this.undo = undo;
 	}
 	
 	/**
@@ -85,7 +104,7 @@ public class Transaction {
 	 * @param trans
 	 * @param flag
 	 *            Undo trans or not. Changes the messages shown to the players
-	 * @return
+	 * @return succeeded
 	 * @throws SQLException
 	 */
 	public static boolean process(Transaction trans, boolean undo, boolean loud) {
@@ -103,8 +122,8 @@ public class Transaction {
 		boolean canSell = false;
 		
 		/*Check if they need to autoDeposit*/
-		buyer.autoDesposit(DataManager.getServer().getTime());
-		seller.autoDesposit(DataManager.getServer().getTime());
+		buyer.autoDesposit(EconomyProperties.getTime());
+		seller.autoDesposit(EconomyProperties.getTime());
 		
 		/*
 		 * Check if the seller is a shop, if it is check if it needs to restock
@@ -114,7 +133,7 @@ public class Transaction {
 		}
 		
 		/*
-		 * See if the buyer can buy and if the seller can sell. 
+		 * See if the buyer can buy and if the seller can sell.
 		 * If not then an exception will be thrown and will be handled.
 		 */
 		try {
@@ -148,7 +167,7 @@ public class Transaction {
 			}
 			
 			/*
-			 * Check to see if the stack attached to the exception is null. If it is not null, 
+			 * Check to see if the stack attached to the exception is null. If it is not null,
 			 * then we need to re-process the transaction with the new stack
 			 */
 			if (e.getStack() != null) {
@@ -165,7 +184,7 @@ public class Transaction {
 		}
 		
 		/*
-		 * If they can buy and sell go ahead and process. 
+		 * If they can buy and sell go ahead and process.
 		 * If the transaction is forced, skip the check altogether
 		 */
 		if ((canBuy && canSell) || !loud) {
@@ -174,8 +193,8 @@ public class Transaction {
 			}
 			
 			/*
-			 * Variables that hold the amount of money each entity must be modified by. 
-			 * Spent is for the buyer. 
+			 * Variables that hold the amount of money each entity must be modified by.
+			 * Spent is for the buyer.
 			 * Earned is for the seller.
 			 */
 			int spent = 0;
@@ -192,7 +211,7 @@ public class Transaction {
 			}
 			
 			/*
-			 * If the transaction is not cash only and is loud (Not a forced transaction) 
+			 * If the transaction is not cash only and is loud (Not a forced transaction)
 			 * then set the last transaction for the buyer and seller.
 			 */
 			if (!trans.cashOnly() && loud) {
@@ -363,56 +382,10 @@ public class Transaction {
 				}
 			}
 			
-			if (!DataManager.useSql()) {
-				/*
-				 * Save on each transaction
-				 */
-				DataManager.save();
-			}
-			else {
-				try {
-					/*
-					 * Execute a SQL update
-					 */
-					if (trans.cashOnly()) {
-						/*
-						 * Cash only /pay
-						 */
-						DataManager.updatePlayer(trans.getSeller().getUser());
-						DataManager.updatePlayer(trans.getBuyer().getUser());
-					}
-					else {
-						if (trans.getSeller().getUser() != null) {
-							/*
-							 * Seller is a player
-							 */
-							DataManager.updatePlayer(trans.getSeller().getUser());
-						}
-						else {
-							/*
-							 * Seller is a shop
-							 */
-							DataManager.updateShop(trans.getSeller().getShop());
-						}
-						
-						if (trans.getBuyer().getUser() != null) {
-							/*
-							 * Buyer is a player
-							 */
-							DataManager.updatePlayer(trans.getSeller().getUser());
-						}
-						else {
-							/*
-							 * Buyer is a shop
-							 */
-							DataManager.updateShop(trans.getBuyer().getShop());
-						}
-					}
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
+			/*
+			 * Save on each transaction
+			 */
+			DataManager.save();
 			return true;
 		}
 		return false;
@@ -485,7 +458,7 @@ public class Transaction {
 	/**
 	 * Returns the boolean of whether or not it is a cash only {@link Transaction}.
 	 * 
-	 * @return
+	 * @return cashOnly
 	 */
 	public boolean cashOnly() {
 		return cashOnly;
@@ -494,7 +467,7 @@ public class Transaction {
 	/**
 	 * Gets the amount of {@link Money} for a cash only {@link Transaction}.
 	 * 
-	 * @return
+	 * @return amount of pay
 	 */
 	public Money getAmount() {
 		return amount;
@@ -503,7 +476,7 @@ public class Transaction {
 	/**
 	 * Returns the buyer {@link EconEntity}.
 	 * 
-	 * @return
+	 * @return buyer entity
 	 */
 	public EconEntity getBuyer() {
 		return buyer;
@@ -512,7 +485,7 @@ public class Transaction {
 	/**
 	 * Returns the seller {@link EconEntity}.
 	 * 
-	 * @return
+	 * @return seller entity
 	 */
 	public EconEntity getSeller() {
 		return seller;
@@ -521,7 +494,7 @@ public class Transaction {
 	/**
 	 * Returns the {@link ShopItemStack} if the {@link Transaction} is an item transaction. Null if not an item transaction.
 	 * 
-	 * @return
+	 * @return item stack
 	 */
 	public ShopItemStack getStack() {
 		return stack;
@@ -530,7 +503,7 @@ public class Transaction {
 	/**
 	 * Returns the time the {@link Transaction} occurred.
 	 * 
-	 * @return
+	 * @return time occurred
 	 */
 	public long getTime() {
 		return time;

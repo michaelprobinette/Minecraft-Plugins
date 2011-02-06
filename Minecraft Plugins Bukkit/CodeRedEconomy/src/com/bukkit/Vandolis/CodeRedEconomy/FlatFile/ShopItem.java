@@ -6,7 +6,7 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package com.bukkit.Vandolis.CodeRedEconomy;
+package com.bukkit.Vandolis.CodeRedEconomy.FlatFile;
 
 import org.bukkit.inventory.ItemStack;
 
@@ -26,6 +26,8 @@ public class ShopItem {
 	private int						maxSell;
 	private final Money				breakValue;
 	private int						maxBuy;
+	private byte					damage			= 0;
+	
 	private boolean					valid			= true;
 	
 	private static final String[]	blockNames		= {
@@ -371,6 +373,22 @@ public class ShopItem {
 	 */
 	public Money getBreakValue() {
 		return breakValue;
+	}
+	
+	/**
+	 * @return the damage
+	 */
+	protected byte getDamage() {
+		return damage;
+	}
+	
+	/**
+	 * @param damage
+	 *            the damage to set
+	 */
+	protected void setDamage(byte damage) {
+		this.damage = damage;
+		item.setDurability(damage);
 	}
 	
 	/* (non-Javadoc)

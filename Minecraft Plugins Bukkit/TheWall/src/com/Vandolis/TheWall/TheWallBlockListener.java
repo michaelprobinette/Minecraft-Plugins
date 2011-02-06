@@ -7,8 +7,8 @@ import org.bukkit.Material;
 import org.bukkit.event.block.BlockListener;
 import org.bukkit.event.block.BlockRightClickEvent;
 
-import com.bukkit.Vandolis.CodeRedEconomy.DataManager;
-import com.bukkit.Vandolis.CodeRedEconomy.User;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.DataManager;
+import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.User;
 
 /**
  * @author Vandolis

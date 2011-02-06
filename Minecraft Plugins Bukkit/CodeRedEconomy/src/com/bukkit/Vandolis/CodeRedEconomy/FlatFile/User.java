@@ -6,10 +6,12 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package com.bukkit.Vandolis.CodeRedEconomy;
+package com.bukkit.Vandolis.CodeRedEconomy.FlatFile;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import com.bukkit.Vandolis.CodeRedEconomy.EconomyProperties;
 
 /**
  * Main player class for the economy. Eventually holds the player that is being interacted with.
@@ -92,6 +94,17 @@ public class User extends EconEntity {
 	}
 	
 	/**
+	 * @param string
+	 * @param long1
+	 * @param long2
+	 */
+	public User(String string, long long1, long long2) {
+		setName(string);
+		getMoney().setAmount((int) long1);
+		setLastAutoDeposit(long2);
+	}
+	
+	/**
 	 * Returns the group the user belongs to.
 	 * 
 	 * @return
@@ -116,7 +129,7 @@ public class User extends EconEntity {
 	 */
 	public void sendMessage(String message) {
 		if (player != null) {
-			player.sendMessage(DataManager.getPluginMessage() + message);
+			player.sendMessage(EconomyProperties.getPluginMessage() + message);
 		}
 	}
 	
@@ -144,8 +157,8 @@ public class User extends EconEntity {
 	 * Prints the {@link User} balance.
 	 */
 	public void showBalance() {
-		autoDesposit(DataManager.getServer().getTime());
-		if (getMoney().getAmount() != DataManager.getInfValue()) {
+		autoDesposit(EconomyProperties.getTime());
+		if (getMoney().getAmount() != EconomyProperties.getInfValue()) {
 			sendMessage("Your balance is: " + getMoney().toString());
 		}
 		else {
@@ -214,7 +227,7 @@ public class User extends EconEntity {
 					/*
 					 * Add it to the array if it was not found already
 					 */
-					if (!found && DataManager.validId(iter.getTypeId())) {
+					if (!found) {
 						getAvailableItems().add(new ShopItemStack(iter.getTypeId(), iter.getAmount()));
 					}
 				}

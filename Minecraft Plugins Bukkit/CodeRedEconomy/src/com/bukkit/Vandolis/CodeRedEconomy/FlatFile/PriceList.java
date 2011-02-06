@@ -6,9 +6,11 @@
  * for more details. You should have received a copy of the GNU General Public License along with this program. If not, see
  * <http://www.gnu.org/licenses/>
  */
-package com.bukkit.Vandolis.CodeRedEconomy;
+package com.bukkit.Vandolis.CodeRedEconomy.FlatFile;
 
 import java.util.ArrayList;
+
+import com.bukkit.Vandolis.CodeRedEconomy.EconomyProperties;
 
 /**
  * Class used for displaying a shops stock to the player. Generates pages of items the player can look through
@@ -80,12 +82,12 @@ public class PriceList {
 				}
 				
 				/*
-				 * Skips items with 0 amount
+				 * Changed back to show items with 0.
 				 */
-				if ((amount != DataManager.getInfValue()) && (amount != 0)) {
+				if ((amount != EconomyProperties.getInfValue())) {
 					temp += iter.getName() + ": §a" + iter.getBuyPrice() + " §c" + iter.getSellPrice() + " §e" + amount;
 				}
-				else if (amount == DataManager.getInfValue()) {
+				else if (amount == EconomyProperties.getInfValue()) {
 					temp += iter.getName() + ": §a" + iter.getBuyPrice() + " §c" + iter.getSellPrice() + " §eInfinite";
 				}
 				
