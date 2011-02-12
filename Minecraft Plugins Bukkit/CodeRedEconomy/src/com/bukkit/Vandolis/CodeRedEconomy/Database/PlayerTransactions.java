@@ -4,13 +4,13 @@
 package com.bukkit.Vandolis.CodeRedEconomy.Database;
 
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.bukkit.entity.Player;
 
-import com.bukkit.Vandolis.CodeRedEconomy.CodeRedEconomy;
 import com.bukkit.Vandolis.CodeRedEconomy.EconomyProperties;
 
 /**
@@ -18,8 +18,8 @@ import com.bukkit.Vandolis.CodeRedEconomy.EconomyProperties;
  */
 public class PlayerTransactions {
 	private int		ID;
-	private int		senderID	= -1;
-	private int		recipientID	= -1;
+	private int		senderID	= 0;
+	private int		recipientID	= 0;
 	private int		itemID		= 0;
 	private int		itemAmount	= 0;
 	private int		moneyAmount	= 0;
@@ -61,15 +61,53 @@ public class PlayerTransactions {
 	}
 	
 	/**
-	 * @param player
-	 * @param string
-	 * @param valueOf
+	 * @param sender
+	 * @param reciever
+	 * @param moneyAmount
 	 */
-	public PlayerTransactions(Player player, String string, Integer valueOf) {
-		senderID = Players.getID(player);
-		recipientID = Players.getID(CodeRedEconomy.getPlayer(string));
-		moneyAmount = valueOf;
+	public PlayerTransactions(Player sender, Player reciever, Integer moneyAmount) {
+		senderID = Players.getID(sender);
+		recipientID = Players.getID(reciever);
+		this.moneyAmount = moneyAmount;
 		timestamp = EconomyProperties.getDate();
+		
+		newEntry = true;
+		
+		update();
+	}
+	
+	/**
+	 * 
+	 */
+	private void update() {
+		try {
+			if (newEntry) {
+				PreparedStatement prep =
+						EconomyProperties.getConn().prepareStatement(
+								"insert into PlayerTransactions (SenderID, RecipientID, ItemID, ItemAmount, MoneyAmount, TimeStamp) "
+										+ "values (?, ?, ?, ?, ?, ?);");
+				
+				prep.setInt(1, senderID);
+				prep.setInt(2, recipientID);
+				prep.setInt(3, itemID);
+				prep.setInt(4, itemAmount);
+				prep.setInt(5, moneyAmount);
+				prep.setDate(6, timestamp);
+				
+				prep.execute();
+				
+				prep.close();
+				
+				newEntry = false;
+			}
+			else {
+				
+			}
+		}
+		catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**

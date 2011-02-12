@@ -3,18 +3,23 @@
  */
 package com.bukkit.Vandolis.CodeRedEconomy;
 
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.Event.Type;
+import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 
 import com.bukkit.Vandolis.CodeRedEconomy.Database.Items;
 import com.bukkit.Vandolis.CodeRedEconomy.Database.PlayerTransactions;
 import com.bukkit.Vandolis.CodeRedEconomy.Database.Players;
+import com.bukkit.Vandolis.CodeRedEconomy.Database.ShopItems;
 import com.bukkit.Vandolis.CodeRedEconomy.Database.ShopTransactions;
 import com.bukkit.Vandolis.CodeRedEconomy.Database.Shops;
 import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.DataManager;
@@ -33,13 +38,26 @@ import com.bukkit.Vandolis.CodeRedEconomy.FlatFile.User;
  */
 public class CommandInterpreter {
 	public enum Command {
-		BUY, SELL, PAY, UNDO, ECON, PRICES, BALANCE, ECON_SQL, ECON_RESET, ECON_SHOPS, ECON_SETSHOP, RESTOCK
+		BUY, SELL, PAY, UNDO, ECON, PRICES, BALANCE, ECON_SQL, ECON_RESET, ECON_SHOPS, ECON_SETSHOP, RESTOCK, BLOCK_BROKEN, BAD_WORD
 	};
 	
 	private static HashMap<String, String>	playerShops	= new HashMap<String, String>();
 	private static CodeRedEconomy			plugin		= null;
 	
-	public static boolean interpret(Command cmd, Player player, String[] split) {
+	public static boolean interpret(Command cmd, Event event) {
+		Player player = null;
+		Block block = null;
+		String[] split = null;
+		
+		if (cmd == Command.BLOCK_BROKEN) {
+			player = ((BlockDamageEvent) event).getPlayer();
+			block = ((BlockDamageEvent) event).getBlock();
+		}
+		else if ((event.getType() == Event.Type.PLAYER_COMMAND) || (event.getType() == Type.PLAYER_CHAT)) {
+			player = ((PlayerChatEvent) event).getPlayer();
+			split = ((PlayerChatEvent) event).getMessage().split(" ");
+		}
+		
 		String shopName = playerShops.get(player.getName());
 		
 		if (shopName == null) {
@@ -86,7 +104,7 @@ public class CommandInterpreter {
 				break;
 			case ECON:
 				if (EconomyProperties.isUseSQL()) {
-					econDB(player, split);
+					econDB(player, event);
 				}
 				else {
 					econFlatfile(player, split);
@@ -148,11 +166,99 @@ public class CommandInterpreter {
 					restockFlatfile(player, split);
 				}
 				break;
+			case BLOCK_BROKEN:
+				if (EconomyProperties.isUseSQL()) {
+					blockBrokenDB(player, block);
+				}
+				else {
+					blockBrokenFlatfile(player, block);
+				}
+				break;
+			case BAD_WORD:
+				if (EconomyProperties.isUseSQL()) {
+					badWordDB(player, split);
+				}
+				else {
+					badWordFlatfile(player, split);
+				}
+				break;
 			default:
 				return false;
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * @param player
+	 * @param split
+	 */
+	private static void badWordFlatfile(Player player, String[] split) {
+		String message = "";
+		
+		for (String iter : split) {
+			message += " " + iter;
+		}
+		
+		message = message.trim();
+		
+		String word = "";
+		
+		do {
+			word = DataManager.getBadWord(message);
+			if (!word.equalsIgnoreCase("")) {
+				User user = DataManager.getUser(player);
+				User badWordEnt = DataManager.getUser("BadWord-" + word);
+				
+				Transaction.process(new Transaction(badWordEnt, user, new Money(DataManager.getBadWords().get(word))), false);
+			}
+			
+		} while (!word.equalsIgnoreCase(""));
+	}
+	
+	/**
+	 * @param player
+	 * @param split
+	 */
+	private static void badWordDB(Player player, String[] split) {
+		
+	}
+	
+	/**
+	 * @param player
+	 * @param block
+	 */
+	private static void blockBrokenFlatfile(Player player, Block block) {
+		ShopItem broken = DataManager.getItem(block.getTypeId());
+		
+		if (broken != null) {
+			Money breakValue = broken.getBreakValue();
+			
+			if (breakValue.getAmount() != 0) {
+				DataManager.getUser(player).getMoney().addAmount(breakValue.getAmount());
+			}
+		}
+	}
+	
+	/**
+	 * @param player
+	 * @param block
+	 */
+	private static void blockBrokenDB(Player player, Block block) {
+		int playerID = Players.getID(player);
+		
+		Players p = null;
+		
+		if (playerID == 0) {
+			p = new Players(player.getName());
+		}
+		else {
+			p = new Players(playerID);
+		}
+		
+		Items item = new Items(Items.getID(block.getTypeId(), block.getData()));
+		
+		p.setBalance(p.getBalance() + item.getBreakValue());
 	}
 	
 	/**
@@ -175,8 +281,7 @@ public class CommandInterpreter {
 	 */
 	private static void restockDB(Player player, String[] split) {
 		try {
-			Connection conn = DriverManager.getConnection(EconomyProperties.getDB());
-			Statement stat = conn.createStatement();
+			Statement stat = DriverManager.getConnection(EconomyProperties.getDB()).createStatement();
 			ResultSet rs = stat.executeQuery("select * from Items;");
 			Shops shop = null;
 			
@@ -190,9 +295,12 @@ public class CommandInterpreter {
 			}
 			
 			while (rs.next()) {
-				shop.addItem(new Items(rs.getInt("ItemID"), rs.getString("Name"), rs.getInt("BuyPrice"), rs.getInt("SellPrice"), rs
-						.getInt("BreakValue")));
+				shop.addItem(new Items(rs.getInt("ItemID"), rs.getBoolean("IsSubtyped"), rs.getInt("Subtype"), rs.getString("Name"), rs
+						.getInt("BuyPrice"), rs.getInt("SellPrice"), rs.getInt("BreakValue")));
 			}
+			
+			rs.close();
+			stat.close();
 		}
 		catch (SQLException e) {
 			
@@ -209,9 +317,64 @@ public class CommandInterpreter {
 		DataManager.load(plugin);
 		
 		for (ShopItem iter : DataManager.getItemList()) {
-			Items item =
-					new Items(iter.getItemId(), iter.getName(), iter.getBuyPrice(), iter.getSellPrice(), iter.getBreakValue().getAmount());
+			int itemId = Items.getId(iter.getName());
+			
+			if (itemId == 0) {
+				Items item =
+						new Items(iter.getItemId(), false, 0, iter.getName(), iter.getBuyPrice(), iter.getSellPrice(), iter.getBreakValue()
+								.getAmount());
+			}
+			else {
+				Items item = new Items(itemId);
+				item.setBuyPrice(iter.getBuyPrice());
+				item.setSellPrice(iter.getSellPrice());
+				item.setBreakValue(iter.getBreakValue().getAmount());
+				item.update();
+			}
 		}
+		
+		for (User iter : DataManager.getUsers()) {
+			int playerId = Players.getID(iter.getName());
+			
+			if (playerId == 0) {
+				Players p = new Players(iter.getName());
+				p.setBalance(iter.getMoney().getAmount());
+			}
+			else {
+				Players p = new Players(playerId);
+				p.setBalance(iter.getMoney().getAmount());
+			}
+		}
+		
+		for (Shop iter : DataManager.getShops()) {
+			Shops shop = null;
+			
+			int shopId = Shops.getId(iter.getName());
+			
+			if (shopId == 0) {
+				shop = new Shops(iter.getName());
+			}
+			else {
+				shop = new Shops(shopId);
+			}
+			
+			shop.setBalance(iter.getMoney().getAmount());
+			shop.setAllItemsInfinite(iter.getInfItems());
+			shop.setCanRestock(iter.isRestock());
+			shop.setAllowBuying(iter.isUsersCanBuy());
+			shop.setAllowSelling(iter.isUsersCanSell());
+			shop.setHidden(iter.isHidden());
+			
+			for (ShopItemStack stack : iter.getAvailItems()) {
+				ShopItems temp =
+						new ShopItems(Shops.getId(iter.getName()), Items.getID(stack.getItemId(), (short) 0), stack.getAmountAvail(),
+								stack.getAmountAvail() == EconomyProperties.getInfValue(), stack.getBuyPrice(), stack.getSellPrice());
+				//				shop.addItem(new ShopItems(Shops.getId(iter.getName()), Items.getID(stack.getItemId(), (short) 0), stack.getAmountAvail(),
+				//						stack.getAmountAvail() == EconomyProperties.getInfValue(), stack.getBuyPrice(), stack.getSellPrice()));
+			}
+		}
+		
+		DataManager.destroy();
 	}
 	
 	/**
@@ -275,7 +438,7 @@ public class CommandInterpreter {
 			String itemName = "";
 			for (String iter : split) {
 				try {
-					if (iter.equalsIgnoreCase(split[0])) {
+					if (!iter.equalsIgnoreCase(split[0])) {
 						int page = Integer.valueOf(iter.trim());
 						
 						com.bukkit.Vandolis.CodeRedEconomy.Database.PriceList.priceList(player, playerShops.get(player.getName()), page);
@@ -283,30 +446,41 @@ public class CommandInterpreter {
 						done = true;
 					}
 				}
-				catch (Exception e) {
+				catch (NumberFormatException e) {
 					itemName += " " + iter;
+				}
+				catch (Exception e1) {
+					e1.printStackTrace();
 				}
 			}
 			
+			itemName = itemName.trim();
+			
 			if (!done) {
+				if (EconomyProperties.isDebug()) {
+					System.out.println("Pricing single item: " + itemName);
+				}
+				
 				com.bukkit.Vandolis.CodeRedEconomy.Database.PriceList.priceSingleItem(player, playerShops.get(player.getName()), itemName);
 			}
 		}
 	}
 	
-	private static void econDB(Player player, String[] split) {
+	private static void econDB(Player player, Event event) {
+		String[] split = ((PlayerChatEvent) event).getMessage().split(" ");
+		
 		if (split.length >= 2) {
 			if (split[1].equalsIgnoreCase("reset") && CodeRedEconomy.isOp(player.getName())) {
-				interpret(Command.ECON_RESET, player, split);
+				interpret(Command.ECON_RESET, event);
 			}
 			else if (split[1].equalsIgnoreCase("sql") && CodeRedEconomy.isOp(player.getName())) {
-				interpret(Command.ECON_SQL, player, split);
+				interpret(Command.ECON_SQL, event);
 			}
 			else if (split[1].equalsIgnoreCase("shops")) {
-				interpret(Command.ECON_SHOPS, player, split);
+				interpret(Command.ECON_SHOPS, event);
 			}
 			else if (split[1].equalsIgnoreCase("setshop")) {
-				interpret(Command.ECON_SETSHOP, player, split);
+				interpret(Command.ECON_SETSHOP, event);
 			}
 		}
 	}
@@ -457,8 +631,22 @@ public class CommandInterpreter {
 		
 		itemName = itemName.trim();
 		
-		com.bukkit.Vandolis.CodeRedEconomy.Database.TransactionManager.add(new ShopTransactions(player, playerShops.get(player.getName()),
-				itemName, amount, true));
+		int shopId = Shops.getId(playerShops.get(player.getName()));
+		int itemId = Items.getId(itemName);
+		
+		int shopItemID = ShopItems.getShopItemId(shopId, itemId);
+		try {
+			if (shopItemID != 0) {
+				com.bukkit.Vandolis.CodeRedEconomy.Database.TransactionManager.add(new ShopTransactions(player, playerShops.get(player
+						.getName()), itemName, amount, true));
+			}
+			else {
+				throw new EconException("Invalid item.", "");
+			}
+		}
+		catch (EconException e) {
+			player.sendMessage(EconomyProperties.getPluginMessage() + e.getBuyMsg());
+		}
 	}
 	
 	private static void sellDB(Player player, String[] split) {
@@ -478,13 +666,39 @@ public class CommandInterpreter {
 		
 		itemName = itemName.trim();
 		
-		com.bukkit.Vandolis.CodeRedEconomy.Database.TransactionManager.add(new ShopTransactions(player, playerShops.get(player.getName()),
-				itemName, amount, true));
+		int shopId = Shops.getId(playerShops.get(player.getName()));
+		int itemId = Items.getId(itemName);
+		
+		int shopItemID = ShopItems.getShopItemId(shopId, itemId);
+		try {
+			if (shopItemID != 0) {
+				com.bukkit.Vandolis.CodeRedEconomy.Database.TransactionManager.add(new ShopTransactions(player, playerShops.get(player
+						.getName()), itemName, amount, false));
+			}
+			else {
+				throw new EconException("Invalid item.", "");
+			}
+		}
+		catch (EconException e) {
+			player.sendMessage(EconomyProperties.getPluginMessage() + e.getBuyMsg());
+		}
 	}
 	
 	private static void payDB(Player player, String[] split) {
-		com.bukkit.Vandolis.CodeRedEconomy.Database.TransactionManager.add(new PlayerTransactions(player, split[1], Integer
-				.valueOf(split[2])));
+		try {
+			int amount = Integer.valueOf(split[2]);
+			
+			if (amount > 0) {
+				com.bukkit.Vandolis.CodeRedEconomy.Database.TransactionManager.add(new PlayerTransactions(player, CodeRedEconomy
+						.getPlayer(split[1]), amount));
+			}
+			else {
+				player.sendMessage(EconomyProperties.getPluginMessage() + "Please enter a valid amount.");
+			}
+		}
+		catch (NumberFormatException e) {
+			player.sendMessage(EconomyProperties.getPluginMessage() + "Please enter a valid amount.");
+		}
 	}
 	
 	/**

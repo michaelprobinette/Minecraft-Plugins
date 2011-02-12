@@ -3,7 +3,6 @@
  */
 package com.bukkit.Vandolis.CodeRedEconomy.Database;
 
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,13 +30,14 @@ public class Items {
 	 */
 	public Items(int Id) {
 		try {
-			Connection conn = DriverManager.getConnection(EconomyProperties.getDB());
-			Statement stat = conn.createStatement();
+			Statement stat = DriverManager.getConnection(EconomyProperties.getDB()).createStatement();
 			ResultSet rs = stat.executeQuery("select * from Items where ID = " + Id + ";");
+			
+			ID = Id;
 			
 			while (rs.next()) {
 				itemID = rs.getInt("ItemID");
-				subtyped = rs.getBoolean("Subtyped");
+				subtyped = rs.getBoolean("IsSubtyped");
 				subtype = rs.getInt("Subtype");
 				breakValue = rs.getInt("BreakValue");
 				name = rs.getString("Name");
@@ -47,7 +47,6 @@ public class Items {
 			
 			rs.close();
 			stat.close();
-			conn.close();
 		}
 		catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -55,8 +54,10 @@ public class Items {
 		}
 	}
 	
-	public Items(int itemID, String itemName, int buyPrice, int sellPrice, int breakValue) {
+	public Items(int itemID, boolean isSubTyped, int subType, String itemName, int buyPrice, int sellPrice, int breakValue) {
 		this.itemID = itemID;
+		subtyped = isSubTyped;
+		subtype = subType;
 		name = itemName;
 		this.buyPrice = buyPrice;
 		this.sellPrice = sellPrice;
@@ -68,7 +69,7 @@ public class Items {
 	/**
 	 * 
 	 */
-	private void update() {
+	public void update() {
 		try {
 			PreparedStatement prep =
 					EconomyProperties.getConn().prepareStatement(
@@ -90,18 +91,59 @@ public class Items {
 	}
 	
 	/**
+	 * @param subtyped
+	 *            the subtyped to set
+	 */
+	public void setSubtyped(boolean subtyped) {
+		this.subtyped = subtyped;
+	}
+	
+	/**
+	 * @param subtype
+	 *            the subtype to set
+	 */
+	public void setSubtype(int subtype) {
+		this.subtype = subtype;
+	}
+	
+	/**
+	 * @param breakValue
+	 *            the breakValue to set
+	 */
+	public void setBreakValue(int breakValue) {
+		this.breakValue = breakValue;
+	}
+	
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	/**
 	 * @param itemName
 	 * @return SQL id
 	 */
-	protected static int getId(String itemName) {
+	public static int getId(String itemName) {
 		try {
 			Statement stat = EconomyProperties.getConn().createStatement();
 			
 			ResultSet rs = stat.executeQuery("select Items.ID from Items where Name = '" + itemName + "';");
 			
-			int id = rs.getInt("ID");
+			int id = 0;
+			
+			if (rs.next()) {
+				id = rs.getInt("ID");
+			}
 			
 			rs.close();
+			stat.close();
+			
+			if (EconomyProperties.isDebug()) {
+				System.out.println("Returning itemID: " + id);
+			}
 			
 			return id;
 		}
@@ -130,7 +172,15 @@ public class Items {
 				rs = stat.executeQuery("select Items.ID from Items where ItemID = " + itemID + ";");
 			}
 			
-			int id = rs.getInt("ID");
+			int id = 0;
+			
+			if (rs.next()) {
+				id = rs.getInt("ID");
+			}
+			
+			if (EconomyProperties.isDebug()) {
+				System.out.println("Returning itemID: " + id);
+			}
 			
 			rs.close();
 			stat.close();
@@ -242,19 +292,27 @@ public class Items {
 			Statement stat = EconomyProperties.getConn().createStatement();
 			ResultSet rs = stat.executeQuery("select * from Items where ItemID = " + typeId + ";");
 			
+			int id = 0;
+			
 			while (rs.next()) {
 				if (rs.getBoolean("IsSubtyped")) {
 					if (rs.getInt("Subtype") == durability) {
-						return rs.getInt("ID");
+						id = rs.getInt("ID");
 					}
 				}
 				else {
-					return rs.getInt("ID");
+					id = rs.getInt("ID");
 				}
 			}
 			
 			rs.close();
 			stat.close();
+			
+			if (EconomyProperties.isDebug()) {
+				System.out.println("Items getID returning: " + id);
+			}
+			
+			return id;
 		}
 		catch (SQLException e) {
 			e.printStackTrace();

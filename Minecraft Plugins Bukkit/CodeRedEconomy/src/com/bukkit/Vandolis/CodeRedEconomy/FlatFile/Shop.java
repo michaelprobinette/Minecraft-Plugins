@@ -184,7 +184,7 @@ public class Shop extends EconEntity {
 						 * New format
 						 */
 						getAvailItems().add(
-								new ShopItemStack(Integer.valueOf(ss[0].trim()), Integer.valueOf(ss[2].trim()), Integer.valueOf(ss[1]
+								new ShopItemStack(Integer.valueOf(ss[0].trim()), Integer.valueOf(ss[1].trim()), Integer.valueOf(ss[2]
 										.trim()), Integer.valueOf(ss[3].trim())));
 					}
 				}
@@ -204,9 +204,9 @@ public class Shop extends EconEntity {
 		/*
 		 * Check the current time against the last restock time
 		 */
-		if (((DataManager.getServer().getTime() - lastRestock >= EconomyProperties.getRestockTime()) || force) && canRestock) {
+		if (((EconomyProperties.getTime() - lastRestock >= EconomyProperties.getRestockTime()) || force) && canRestock) {
 			System.out.println("Restocking " + getName());
-			lastRestock = DataManager.getServer().getTime();
+			lastRestock = EconomyProperties.getTime();
 			for (ShopItemStack iter : getAvailItems()) {
 				/*
 				 * Checks the current value against the max value for the item. 
@@ -280,7 +280,7 @@ public class Shop extends EconEntity {
 	/**
 	 * @return the canRestock
 	 */
-	protected boolean isCanRestock() {
+	public boolean isCanRestock() {
 		return canRestock;
 	}
 	
@@ -288,14 +288,14 @@ public class Shop extends EconEntity {
 	 * @param canRestock
 	 *            the canRestock to set
 	 */
-	protected void setCanRestock(boolean canRestock) {
+	public void setCanRestock(boolean canRestock) {
 		this.canRestock = canRestock;
 	}
 	
 	/**
 	 * @return the usersCanBuy
 	 */
-	protected boolean isUsersCanBuy() {
+	public boolean isUsersCanBuy() {
 		return usersCanBuy;
 	}
 	
@@ -303,14 +303,14 @@ public class Shop extends EconEntity {
 	 * @param usersCanBuy
 	 *            the usersCanBuy to set
 	 */
-	protected void setUsersCanBuy(boolean usersCanBuy) {
+	public void setUsersCanBuy(boolean usersCanBuy) {
 		this.usersCanBuy = usersCanBuy;
 	}
 	
 	/**
 	 * @return the usersCanSell
 	 */
-	protected boolean isUsersCanSell() {
+	public boolean isUsersCanSell() {
 		return usersCanSell;
 	}
 	
@@ -318,14 +318,14 @@ public class Shop extends EconEntity {
 	 * @param usersCanSell
 	 *            the usersCanSell to set
 	 */
-	protected void setUsersCanSell(boolean usersCanSell) {
+	public void setUsersCanSell(boolean usersCanSell) {
 		this.usersCanSell = usersCanSell;
 	}
 	
 	/**
 	 * @return the showInLists
 	 */
-	protected boolean isHidden() {
+	public boolean isHidden() {
 		return hidden;
 	}
 	
@@ -333,7 +333,7 @@ public class Shop extends EconEntity {
 	 * @param showInLists
 	 *            the showInLists to set
 	 */
-	protected void setShowInLists(boolean showInLists) {
+	public void setShowInLists(boolean showInLists) {
 		hidden = showInLists;
 	}
 	
@@ -341,7 +341,7 @@ public class Shop extends EconEntity {
 	 * @param infItems
 	 *            the infItems to set
 	 */
-	protected void setInfItems(boolean infItems) {
+	public void setInfItems(boolean infItems) {
 		this.infItems = infItems;
 	}
 	
@@ -349,7 +349,7 @@ public class Shop extends EconEntity {
 	 * @param lastRestock
 	 *            the lastRestock to set
 	 */
-	protected void setLastRestock(long lastRestock) {
+	public void setLastRestock(long lastRestock) {
 		this.lastRestock = lastRestock;
 	}
 	

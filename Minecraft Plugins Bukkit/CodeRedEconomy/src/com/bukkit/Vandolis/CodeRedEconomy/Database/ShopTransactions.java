@@ -69,10 +69,14 @@ public class ShopTransactions {
 		
 		itemAmount = amount;
 		
-		ShopItems item = new ShopItems(shopItemID);
+		ShopItems item = null;
 		
-		moneyAmountBuy = (int) (Math.round(item.getBuyPrice()) * amount);
-		moneyAmountSell = (int) (Math.round(item.getSellPrice()) * amount);
+		if (shopItemID != 0) {
+			item = new ShopItems(shopItemID);
+			
+			moneyAmountBuy = (int) (Math.round(item.getBuyPrice()) * amount);
+			moneyAmountSell = (int) (Math.round(item.getSellPrice()) * amount);
+		}
 		
 		timestamp = EconomyProperties.getDate();
 		

@@ -1,3 +1,10 @@
 name: CodeRedEconomy
+description: An Economy plugin designed for the Redstype server.
+author: Vandolis
 main: com.bukkit.Vandolis.CodeRedEconomy.CodeRedEconomy
 version: 0.8.0
+
+permissions:
+  coderedeconomy:
+    description: CodeRedEconomy permissions
+    type: econ

@@ -90,6 +90,7 @@ public class CodeRedEconomy extends JavaPlugin {
 		PluginManager pm = getServer().getPluginManager();
 		
 		pm.registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.Normal, this);
+		pm.registerEvent(Type.PLAYER_CHAT, playerListener, Priority.Normal, this);
 		pm.registerEvent(Type.BLOCK_DAMAGED, blockListener, Priority.Normal, this);
 		
 		// Load the datamanager

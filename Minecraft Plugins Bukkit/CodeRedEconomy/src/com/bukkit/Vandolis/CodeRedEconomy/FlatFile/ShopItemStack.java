@@ -47,7 +47,7 @@ public class ShopItemStack extends ShopItem {
 	 * @param amountAvail2
 	 */
 	public ShopItemStack(int itemId, int buyPrice, int sellPrice, int amountAvail) {
-		super(itemId, sellPrice, buyPrice);
+		super(itemId, buyPrice, sellPrice);
 		
 		/*
 		 * Set the total buy and sell price.

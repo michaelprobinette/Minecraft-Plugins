@@ -34,29 +34,46 @@ public class PriceList {
 			shop = new Shops(shopID);
 		}
 		
+		if (EconomyProperties.isDebug()) {
+			System.out.println("ShopID: " + shop.getID());
+		}
+		
 		String[] page = new String[pageLength];
 		
 		try {
 			Statement stat = EconomyProperties.getConn().createStatement();
 			
-			ResultSet rs =
-					stat.executeQuery("select ShopItems.ItemID, ShopItems.CurrentStock, ShopItems.IsInfinite, ShopItems.BuyPrice, ShopItems.SellPrice"
-							+ " from ShopItems where ShopID = " + shop.getID() + ";");
+			ResultSet rs = stat.executeQuery("select ShopItems.ID from ShopItems where ShopID = " + shop.getID() + ";");
+			
+			//			ResultSet rs =
+			//					stat.executeQuery("select ShopItems.ItemID, ShopItems.CurrentStock, ShopItems.IsInfinite, ShopItems.BuyPrice, ShopItems.SellPrice"
+			//							+ " from ShopItems where ShopID = " + shop.getID() + ";");
+			
+			ArrayList<ShopItems> shopItems = new ArrayList<ShopItems>();
+			
+			while (rs.next()) {
+				shopItems.add(new ShopItems(rs.getInt("ID")));
+			}
+			
+			rs.close();
+			stat.close();
 			
 			int pos = 0;
 			
-			while (rs.next()) {
-				Items item = new Items(rs.getInt("ItemID"));
+			for (ShopItems iter : shopItems) {
+				Items item = new Items(iter.getItemID());
 				
-				if (rs.getBoolean("IsInfinite") || shop.isAllItemsInfinite()) {
-					page[pos] =
-							item.getName() + " §a" + (int) rs.getDouble("BuyPrice") + " §c" + (int) rs.getDouble("SellPrice")
-									+ "§eInfinite";
+				if (iter.isInfinite() || shop.isAllItemsInfinite() || (iter.getCurrentStock() == EconomyProperties.getInfValue())) {
+					page[pos] = item.getName() + " §a" + (int) iter.getBuyPrice() + " §c" + (int) iter.getSellPrice() + " §eInfinite";
 				}
 				else {
 					page[pos] =
-							item.getName() + " §a" + (int) rs.getDouble("BuyPrice") + " §c" + (int) rs.getDouble("SellPrice") + "§e"
-									+ rs.getInt("CurrentStock");
+							item.getName() + " §a" + (int) iter.getBuyPrice() + " §c" + (int) iter.getSellPrice() + " §e"
+									+ iter.getCurrentStock();
+				}
+				
+				if (EconomyProperties.isDebug()) {
+					System.out.println("Loaded line: " + page[pos]);
 				}
 				
 				pos++;
@@ -65,15 +82,13 @@ public class PriceList {
 					pages.add(page);
 					
 					page = new String[pageLength];
+					pos = 0;
 				}
 			}
 			
 			if (page[0] != null) {
 				pages.add(page);
 			}
-			
-			rs.close();
-			stat.close();
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
@@ -81,7 +96,11 @@ public class PriceList {
 	}
 	
 	public static void priceList(Player player, String shopName, int pageNum) {
-		if (!currentShop.equalsIgnoreCase(shopName)) {
+		if (!currentShop.equalsIgnoreCase(shopName) || (pages.size() == 0)) {
+			if (EconomyProperties.isDebug()) {
+				System.out.println("Populating the price list...");
+			}
+			
 			populate(shopName);
 		}
 		
@@ -90,7 +109,9 @@ public class PriceList {
 					+ pages.size() + ")");
 			
 			for (String iter : pages.get(pageNum - 1)) {
-				player.sendMessage(EconomyProperties.getPluginMessage() + "   " + iter);
+				if (iter != null) {
+					player.sendMessage(EconomyProperties.getPluginMessage() + "   " + iter);
+				}
 			}
 		}
 		else if (pages.size() == 0) {
@@ -105,6 +126,11 @@ public class PriceList {
 		Items item = new Items(Items.getId(itemName));
 		Shops shop = new Shops(Shops.getId(shopName));
 		
+		if (EconomyProperties.isDebug()) {
+			System.out.println("ItemID: " + item.getID());
+			System.out.println("ShopID: " + shop.getID());
+		}
+		
 		try {
 			Statement stat = EconomyProperties.getConn().createStatement();
 			
@@ -112,13 +138,18 @@ public class PriceList {
 					stat.executeQuery("select ShopItems.ItemID, ShopItems.CurrentStock, ShopItems.IsInfinite, ShopItems.BuyPrice, ShopItems.SellPrice"
 							+ " from ShopItems where ShopID = " + shop.getID() + " and ItemID = " + item.getID() + ";");
 			
-			if (rs.getBoolean("IsInfinite") || shop.isAllItemsInfinite()) {
-				player.sendMessage(EconomyProperties.getPluginMessage() + item.getName() + " §a" + (int) rs.getDouble("BuyPrice") + " §c"
-						+ (int) rs.getDouble("SellPrice") + "§eInfinite");
+			if (rs.next()) {
+				if (rs.getBoolean("IsInfinite") || shop.isAllItemsInfinite()) {
+					player.sendMessage(EconomyProperties.getPluginMessage() + item.getName() + " §a" + (int) rs.getDouble("BuyPrice")
+							+ " §c" + (int) rs.getDouble("SellPrice") + " §eInfinite");
+				}
+				else {
+					player.sendMessage(EconomyProperties.getPluginMessage() + item.getName() + " §a" + (int) rs.getDouble("BuyPrice")
+							+ " §c" + (int) rs.getDouble("SellPrice") + " §e" + rs.getInt("CurrentStock"));
+				}
 			}
 			else {
-				player.sendMessage(EconomyProperties.getPluginMessage() + item.getName() + " §a" + (int) rs.getDouble("BuyPrice") + " §c"
-						+ (int) rs.getDouble("SellPrice") + "§e" + rs.getInt("CurrentStock"));
+				player.sendMessage(EconomyProperties.getPluginMessage() + "Invalid item.");
 			}
 			
 			rs.close();

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Type;
+import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.bukkit.Vandolis.CodeRedEconomy.CodeRedEconomy;
@@ -73,7 +75,7 @@ public class TransactionManager {
 				player.sendMessage(EconomyProperties.getPluginMessage() + "You bought " + iter.getItemAmount() + " " + item.getName()
 						+ " for " + iter.getMoneyAmountBuy() + " " + EconomyProperties.getMoneyName());
 				
-				CommandInterpreter.interpret(Command.BALANCE, player, null);
+				CommandInterpreter.interpret(Command.BALANCE, new PlayerChatEvent(Type.PLAYER_COMMAND, player, ""));
 			}
 			else {
 				/*
@@ -95,17 +97,18 @@ public class TransactionManager {
 				player.sendMessage(EconomyProperties.getPluginMessage() + "You sold " + iter.getItemAmount() + " " + item.getName()
 						+ " for " + iter.getMoneyAmountSell() + " " + EconomyProperties.getMoneyName());
 				
-				CommandInterpreter.interpret(Command.BALANCE, player, null);
+				CommandInterpreter.interpret(Command.BALANCE, new PlayerChatEvent(Type.PLAYER_COMMAND, player, ""));
 			}
 		}
 		
 		for (PlayerTransactions iter : playerQue) {
 			Players s = new Players(iter.getSenderID());
 			Player sender = CodeRedEconomy.getPlayer(s.getName());
-			Players r = new Players(iter.getSenderID());
-			Player reciever = CodeRedEconomy.getPlayer(r.getName());
 			
 			s.setBalance(s.getBalance() - iter.getMoneyAmount());
+			
+			Players r = new Players(iter.getRecipientID());
+			Player reciever = CodeRedEconomy.getPlayer(r.getName());
 			
 			r.setBalance(r.getBalance() + iter.getMoneyAmount());
 			
@@ -115,9 +118,12 @@ public class TransactionManager {
 			reciever.sendMessage(EconomyProperties.getPluginMessage() + s.getName() + " has paid you " + iter.getMoneyAmount() + " "
 					+ EconomyProperties.getMoneyName());
 			
-			CommandInterpreter.interpret(Command.BALANCE, sender, null);
-			CommandInterpreter.interpret(Command.BALANCE, reciever, null);
+			CommandInterpreter.interpret(Command.BALANCE, new PlayerChatEvent(Type.PLAYER_COMMAND, sender, ""));
+			CommandInterpreter.interpret(Command.BALANCE, new PlayerChatEvent(Type.PLAYER_COMMAND, reciever, ""));
 		}
+		
+		playerQue = new ArrayList<PlayerTransactions>();
+		shopQue = new ArrayList<ShopTransactions>();
 	}
 	
 	/**
@@ -281,7 +287,16 @@ public class TransactionManager {
 			Players sender = new Players(iter.getSenderID());
 			Player send = CodeRedEconomy.getPlayer(sender.getName());
 			
+			Players reciever = new Players(iter.getRecipientID());
+			
 			try {
+				/*
+				 * Check if target player is online
+				 */
+				if (CodeRedEconomy.getPlayer(reciever.getName()) == null) {
+					throw new EconException("Player must be online to be paid.", "");
+				}
+				
 				/*
 				 * Check money
 				 */
@@ -411,7 +426,7 @@ public class TransactionManager {
 					
 					player.sendMessage(EconomyProperties.getPluginMessage() + "Last transaction undone.");
 					
-					CommandInterpreter.interpret(Command.BALANCE, player, null);
+					CommandInterpreter.interpret(Command.BALANCE, new PlayerChatEvent(Type.PLAYER_COMMAND, player, ""));
 					
 					p.setLastShopTransaction(null);
 					
@@ -450,7 +465,7 @@ public class TransactionManager {
 						
 						player.sendMessage(EconomyProperties.getPluginMessage() + "Last transaction undone.");
 						
-						CommandInterpreter.interpret(Command.BALANCE, player, null);
+						CommandInterpreter.interpret(Command.BALANCE, new PlayerChatEvent(Type.PLAYER_COMMAND, player, ""));
 						
 						p.setLastShopTransaction(null);
 						

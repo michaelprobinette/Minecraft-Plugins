@@ -147,7 +147,7 @@ public class EconomyProperties {
 				}
 				
 				if (props.containsKey("messageonbadword")) {
-					useStats = props.getBoolean("messageonbadword");
+					messageOnBadWord = props.getBoolean("messageonbadword");
 				}
 				else {
 					props.setBoolean("messageonbadword", messageOnBadWord);
@@ -168,7 +168,7 @@ public class EconomyProperties {
 				}
 				
 				if (props.containsKey("autopay")) {
-					useSQL = props.getBoolean("autopay");
+					autoPay = props.getBoolean("autopay");
 				}
 				else {
 					props.setBoolean("autopay", autoPay);
@@ -179,6 +179,22 @@ public class EconomyProperties {
 				}
 				else {
 					props.setInt("pagelength", pageLength);
+				}
+				
+				if (debug) {
+					System.out.println("AutoDepositAmount: " + autoDepositAmount);
+					System.out.println("AutoDepositTime: " + autoDepositTime);
+					System.out.println("AutoPay: " + autoPay);
+					System.out.println("BlockBadWords: " + blockBadWords);
+					System.out.println("InfValue: " + infValue);
+					System.out.println("MaxBuySellTime: " + maxBuySellTime);
+					System.out.println("MessageOnBadWord: " + messageOnBadWord);
+					System.out.println("MoneyName: " + moneyName);
+					System.out.println("PageLength: " + pageLength);
+					System.out.println("PluginMessage: " + pluginMessage);
+					System.out.println("RestockTime: " + restockTime);
+					System.out.println("UseSQL: " + useSQL);
+					System.out.println("UseStats: " + useStats);
 				}
 			}
 			else {
@@ -202,6 +218,10 @@ public class EconomyProperties {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static long getTime() {
+		return System.currentTimeMillis();
 	}
 	
 	/**
@@ -300,10 +320,6 @@ public class EconomyProperties {
 	 */
 	public static void setUseSQL(boolean b) {
 		useSQL = b;
-	}
-	
-	public static long getTime() {
-		return plugin.getServer().getWorlds()[0].getTime();
 	}
 	
 	public static Date getDate() {

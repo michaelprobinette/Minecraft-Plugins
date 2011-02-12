@@ -135,7 +135,7 @@ public class DataManager {
 	 * @param user
 	 */
 	public static void addUser(User user) {
-		user.autoDesposit(plugin.getServer().getTime());
+		user.autoDesposit(EconomyProperties.getTime());
 		// Check if user is already in there
 		boolean found = false;
 		for (User iter : users) {
@@ -393,7 +393,7 @@ public class DataManager {
 		for (User iter : users) {
 			if (iter.getName().equalsIgnoreCase(player.getName())) {
 				iter.setPlayer(player);
-				iter.autoDesposit(plugin.getServer().getTime());
+				iter.autoDesposit(EconomyProperties.getTime());
 				return iter;
 			}
 		}
@@ -403,7 +403,7 @@ public class DataManager {
 		 * Add the new user to the user list and write to file
 		 */
 		User temp = new User(player);
-		temp.autoDesposit(plugin.getServer().getTime());
+		temp.autoDesposit(EconomyProperties.getTime());
 		addUser(temp);
 		try {
 			write("player");
@@ -434,7 +434,7 @@ public class DataManager {
 				if (EconomyProperties.isDebug()) {
 					System.out.println("Was looking for: " + name + " and found " + iter.getName());
 				}
-				iter.autoDesposit(plugin.getServer().getTime());
+				iter.autoDesposit(EconomyProperties.getTime());
 				return iter;
 			}
 		}
@@ -444,7 +444,7 @@ public class DataManager {
 		 * Write to file.
 		 */
 		User temp = new User(name);
-		temp.autoDesposit(plugin.getServer().getTime());
+		temp.autoDesposit(EconomyProperties.getTime());
 		addUser(temp);
 		try {
 			write("player");
@@ -833,5 +833,16 @@ public class DataManager {
 			}
 		}
 		
+	}
+	
+	/**
+	 * 
+	 */
+	public static void destroy() {
+		badWords = new HashMap<String, Integer>();
+		itemList = new ArrayList<ShopItem>();
+		privGroups = new ArrayList<ShopGroup>();
+		shops = new ArrayList<Shop>();
+		users = new ArrayList<User>();
 	}
 }

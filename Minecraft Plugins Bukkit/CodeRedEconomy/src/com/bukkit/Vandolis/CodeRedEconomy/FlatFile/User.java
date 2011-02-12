@@ -75,7 +75,7 @@ public class User extends EconEntity {
 			int temp = Integer.valueOf(split[1]);
 			getMoney().setAmount(temp);
 			if (split.length >= 3) {
-				setLastAutoDeposit(Integer.valueOf(split[2]));
+				setLastAutoDeposit(Long.valueOf(split[2]));
 			}
 			setPlayer(DataManager.getServer().getPlayer(getName()));
 		}

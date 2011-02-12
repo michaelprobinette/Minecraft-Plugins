@@ -18,7 +18,7 @@ import com.bukkit.Vandolis.CodeRedEconomy.EconomyProperties;
  */
 public class Shops {
 	private int		ID;
-	private int		balance				= 0;
+	private int		balance				= EconomyProperties.getInfValue();
 	private boolean	allItemsInfinite	= true;
 	private Date	lastRestock			= null;
 	private boolean	canRestock			= true;
@@ -49,11 +49,16 @@ public class Shops {
 			try {
 				Connection conn = DriverManager.getConnection(EconomyProperties.getDB());
 				
+				conn.close();
+				
 				lastRestock = EconomyProperties.getDate();
 			}
 			catch (SQLException e) {
 				e.printStackTrace();
 			}
+		}
+		else {
+			lastRestock = EconomyProperties.getDate();
 		}
 	}
 	
@@ -64,15 +69,18 @@ public class Shops {
 		try {
 			Statement stat = EconomyProperties.getConn().createStatement();
 			ResultSet rs = stat.executeQuery("select * from Shops where ID = " + shopID + ";");
+			ID = shopID;
 			
-			balance = rs.getInt("Balance");
-			allItemsInfinite = rs.getBoolean("AllItemsInfinite");
-			lastRestock = rs.getDate("LastRestock");
-			canRestock = rs.getBoolean("CanRestock");
-			allowBuying = rs.getBoolean("AllowBuying");
-			allowSelling = rs.getBoolean("AllowSelling");
-			hidden = rs.getBoolean("Hidden");
-			name = rs.getString("Name");
+			if (rs.next()) {
+				balance = rs.getInt("Balance");
+				allItemsInfinite = rs.getBoolean("AllItemsInfinite");
+				lastRestock = rs.getDate("LastRestock");
+				canRestock = rs.getBoolean("CanRestock");
+				allowBuying = rs.getBoolean("AllowBuying");
+				allowSelling = rs.getBoolean("AllowSelling");
+				hidden = rs.getBoolean("Hidden");
+				name = rs.getString("Name");
+			}
 			
 			rs.close();
 			stat.close();
@@ -90,13 +98,18 @@ public class Shops {
 	public static int getId(String shopName) {
 		try {
 			Statement stat = EconomyProperties.getConn().createStatement();
-			
-			ResultSet rs = stat.executeQuery("select Shops.ID from Shops where Name = '" + shopName + "';");
+			PreparedStatement prep = EconomyProperties.getConn().prepareStatement("select Shops.ID from Shops where Name = ?;");
+			prep.setString(1, shopName);
+			ResultSet rs = prep.executeQuery();
 			
 			int ID = 0;
 			
 			if (rs.next()) {
 				ID = rs.getInt("ID");
+				
+				if (EconomyProperties.isDebug()) {
+					System.out.println("Set ID to: " + ID);
+				}
 			}
 			
 			rs.close();
@@ -114,7 +127,10 @@ public class Shops {
 	/**
 	 * 
 	 */
-	private void update() {
+	public void update() {
+		if (EconomyProperties.isDebug()) {
+			System.out.println("Updating " + name + " SQL entry.");
+		}
 		try {
 			PreparedStatement prep;
 			
@@ -134,15 +150,18 @@ public class Shops {
 				prep.setString(8, name);
 				
 				prep.execute();
+				prep.close();
 				
-				Statement stat = EconomyProperties.getConn().createStatement();
+				prep = EconomyProperties.getConn().prepareStatement("select ID from Shops where Name = ?;");
+				prep.setString(1, name);
 				
-				ResultSet rs = stat.executeQuery("select ID from Shops where Name = '" + name + "';");
+				ResultSet rs = prep.executeQuery();
 				
 				ID = rs.getInt("ID");
 				
 				rs.close();
-				stat.close();
+				
+				newEntry = false;
 			}
 			else {
 				prep =
@@ -173,7 +192,7 @@ public class Shops {
 	/**
 	 * @return the iD
 	 */
-	protected int getID() {
+	public int getID() {
 		return ID;
 	}
 	
@@ -181,14 +200,14 @@ public class Shops {
 	 * @param iD
 	 *            the iD to set
 	 */
-	protected void setID(int iD) {
+	public void setID(int iD) {
 		ID = iD;
 	}
 	
 	/**
 	 * @return the balance
 	 */
-	protected int getBalance() {
+	public int getBalance() {
 		return balance;
 	}
 	
@@ -196,7 +215,7 @@ public class Shops {
 	 * @param balance
 	 *            the balance to set
 	 */
-	protected void setBalance(int balance) {
+	public void setBalance(int balance) {
 		if (this.balance != EconomyProperties.getInfValue()) {
 			this.balance = balance;
 			update();
@@ -206,7 +225,7 @@ public class Shops {
 	/**
 	 * @return the allItemsInfinite
 	 */
-	protected boolean isAllItemsInfinite() {
+	public boolean isAllItemsInfinite() {
 		return allItemsInfinite;
 	}
 	
@@ -214,7 +233,7 @@ public class Shops {
 	 * @param allItemsInfinite
 	 *            the allItemsInfinite to set
 	 */
-	protected void setAllItemsInfinite(boolean allItemsInfinite) {
+	public void setAllItemsInfinite(boolean allItemsInfinite) {
 		this.allItemsInfinite = allItemsInfinite;
 		update();
 	}
@@ -222,7 +241,7 @@ public class Shops {
 	/**
 	 * @return the lastRestock
 	 */
-	protected Date getLastRestock() {
+	public Date getLastRestock() {
 		return lastRestock;
 	}
 	
@@ -230,7 +249,7 @@ public class Shops {
 	 * @param lastRestock
 	 *            the lastRestock to set
 	 */
-	protected void setLastRestock(Date lastRestock) {
+	public void setLastRestock(Date lastRestock) {
 		this.lastRestock = lastRestock;
 		update();
 	}
@@ -238,7 +257,7 @@ public class Shops {
 	/**
 	 * @return the canRestock
 	 */
-	protected boolean isCanRestock() {
+	public boolean isCanRestock() {
 		return canRestock;
 	}
 	
@@ -246,7 +265,7 @@ public class Shops {
 	 * @param canRestock
 	 *            the canRestock to set
 	 */
-	protected void setCanRestock(boolean canRestock) {
+	public void setCanRestock(boolean canRestock) {
 		this.canRestock = canRestock;
 		update();
 	}
@@ -254,7 +273,7 @@ public class Shops {
 	/**
 	 * @return the allowBuying
 	 */
-	protected boolean isAllowBuying() {
+	public boolean isAllowBuying() {
 		return allowBuying;
 	}
 	
@@ -262,7 +281,7 @@ public class Shops {
 	 * @param allowBuying
 	 *            the allowBuying to set
 	 */
-	protected void setAllowBuying(boolean allowBuying) {
+	public void setAllowBuying(boolean allowBuying) {
 		this.allowBuying = allowBuying;
 		update();
 	}
@@ -270,7 +289,7 @@ public class Shops {
 	/**
 	 * @return the allowSelling
 	 */
-	protected boolean isAllowSelling() {
+	public boolean isAllowSelling() {
 		return allowSelling;
 	}
 	
@@ -278,7 +297,7 @@ public class Shops {
 	 * @param allowSelling
 	 *            the allowSelling to set
 	 */
-	protected void setAllowSelling(boolean allowSelling) {
+	public void setAllowSelling(boolean allowSelling) {
 		this.allowSelling = allowSelling;
 		update();
 	}
@@ -286,7 +305,7 @@ public class Shops {
 	/**
 	 * @return the hidden
 	 */
-	protected boolean isHidden() {
+	public boolean isHidden() {
 		return hidden;
 	}
 	
@@ -294,7 +313,7 @@ public class Shops {
 	 * @param hidden
 	 *            the hidden to set
 	 */
-	protected void setHidden(boolean hidden) {
+	public void setHidden(boolean hidden) {
 		this.hidden = hidden;
 		update();
 	}
@@ -310,7 +329,7 @@ public class Shops {
 	 * @param name
 	 *            the name to set
 	 */
-	protected void setName(String name) {
+	public void setName(String name) {
 		this.name = name;
 		update();
 	}
@@ -318,7 +337,7 @@ public class Shops {
 	/**
 	 * Removes the Shops from the table
 	 */
-	protected void remove() {
+	public void remove() {
 		try {
 			Statement stat = EconomyProperties.getConn().createStatement();
 			stat.executeUpdate("delete from Shops where ID = " + ID + ";");
@@ -348,6 +367,37 @@ public class Shops {
 			prep.setInt(2, items.getID());
 			prep.setDouble(3, items.getBuyPrice());
 			prep.setDouble(4, items.getSellPrice());
+			
+			prep.execute();
+			
+			prep.close();
+			stat.close();
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * @param items
+	 */
+	public void addItem(ShopItems items) {
+		try {
+			Statement stat = EconomyProperties.getConn().createStatement();
+			stat.executeUpdate("delete from ShopItems where ShopID = " + ID + ";");
+			stat.close();
+			
+			PreparedStatement prep =
+					EconomyProperties.getConn().prepareStatement(
+							"insert into ShopItems (ShopID, ItemID, CurrentStock, IsInfinite, BuyPrice, SellPrice) "
+									+ "values (?, ?, ?, ?, ?, ?);");
+			
+			prep.setInt(1, ID);
+			prep.setInt(2, items.getItemID());
+			prep.setInt(3, items.getCurrentStock());
+			prep.setBoolean(4, items.isInfinite());
+			prep.setDouble(5, items.getBuyPrice());
+			prep.setDouble(6, items.getSellPrice());
 			
 			prep.execute();
 			

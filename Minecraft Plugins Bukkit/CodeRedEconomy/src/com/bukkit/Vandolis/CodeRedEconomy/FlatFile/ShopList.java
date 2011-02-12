@@ -10,6 +10,7 @@ package com.bukkit.Vandolis.CodeRedEconomy.FlatFile;
 
 import java.util.ArrayList;
 
+import com.bukkit.Vandolis.CodeRedEconomy.EconomyProperties;
 
 /**
  * Class used to display shops to the user
@@ -29,7 +30,7 @@ public class ShopList {
 			System.out.println("Populating the shops list.");
 		}
 		
-		lastPopulate = DataManager.getServer().getTime();
+		lastPopulate = EconomyProperties.getTime();
 		pages = new ArrayList<ArrayList<String>>();
 		shops = new ArrayList<String>();
 		for (Shop iter : DataManager.getShops()) {

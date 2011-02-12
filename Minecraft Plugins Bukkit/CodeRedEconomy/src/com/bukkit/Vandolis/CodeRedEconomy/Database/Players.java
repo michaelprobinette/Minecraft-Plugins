@@ -55,7 +55,7 @@ public class Players {
 			balance = rs.getInt("Balance");
 			lastAutoPayment = rs.getDate("LastAutoPayment");
 			
-			if (rs.getInt("LastShopTransaction") != -1) {
+			if (rs.getInt("LastShopTransaction") != 0) {
 				lastShopTransaction = new ShopTransactions(rs.getInt("LastShopTransaction"));
 			}
 			
@@ -85,7 +85,7 @@ public class Players {
 	
 	/**
 	 * @param player
-	 * @return -1 if not found
+	 * @return 0 if not found
 	 */
 	public static int getID(Player player) {
 		try {
@@ -98,6 +98,50 @@ public class Players {
 			
 			if (rs.next()) {
 				id = rs.getInt("ID");
+			}
+			else {
+				/*
+				 * not found, make a new player with this ID
+				 */
+				Players temp = new Players(player.getName());
+				temp = new Players(Players.getID(player));
+				id = temp.getID();
+			}
+			
+			rs.close();
+			prep.close();
+			
+			return id;
+		}
+		catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
+	}
+	
+	/**
+	 * @param name
+	 * @return 0 if not found
+	 */
+	public static int getID(String name) {
+		try {
+			PreparedStatement prep = EconomyProperties.getConn().prepareStatement("select Players.ID from Players where Name = ?;");
+			prep.setString(1, name);
+			
+			ResultSet rs = prep.executeQuery();
+			
+			int id = 0;
+			
+			if (rs.next()) {
+				id = rs.getInt("ID");
+			}
+			else {
+				/*
+				 * not found, make a new player with this ID
+				 */
+				Players temp = new Players(name);
+				id = Players.getID(name);
 			}
 			
 			rs.close();
@@ -226,7 +270,7 @@ public class Players {
 					prep.setInt(4, lastShopTransaction.getID());
 				}
 				else {
-					prep.setInt(4, -1);
+					prep.setInt(4, 0);
 				}
 				
 				prep.execute();
@@ -248,7 +292,7 @@ public class Players {
 					prep.setInt(4, lastShopTransaction.getID());
 				}
 				else {
-					prep.setInt(4, -1);
+					prep.setInt(4, 0);
 				}
 				
 				prep.execute();

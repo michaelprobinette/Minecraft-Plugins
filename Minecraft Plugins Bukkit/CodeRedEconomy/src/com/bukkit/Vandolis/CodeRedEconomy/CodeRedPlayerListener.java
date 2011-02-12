@@ -27,6 +27,10 @@ public class CodeRedPlayerListener extends PlayerListener {
 		CommandInterpreter.setPlugin(codeRedEconomy);
 	}
 	
+	public void onPlayerChat(PlayerChatEvent event) {
+		CommandInterpreter.interpret(Command.BAD_WORD, event);
+	}
+	
 	@Override
 	public void onPlayerCommand(PlayerChatEvent event) {
 		String[] split = event.getMessage().split(" ");
@@ -37,42 +41,42 @@ public class CodeRedPlayerListener extends PlayerListener {
 		 */
 		if (split.length >= 1) {
 			if (split[0].equalsIgnoreCase("/buy")) {
-				CommandInterpreter.interpret(Command.BUY, player, split);
+				CommandInterpreter.interpret(Command.BUY, event);
 				
 				event.setCancelled(true);
 			}
 			else if (split[0].equalsIgnoreCase("/sell")) {
-				CommandInterpreter.interpret(Command.SELL, player, split);
+				CommandInterpreter.interpret(Command.SELL, event);
 				
 				event.setCancelled(true);
 			}
 			else if (split[0].equalsIgnoreCase("/balance") || split[0].equalsIgnoreCase("/money")) {
-				CommandInterpreter.interpret(Command.BALANCE, player, split);
+				CommandInterpreter.interpret(Command.BALANCE, event);
 				
 				event.setCancelled(true);
 			}
 			else if (split[0].equalsIgnoreCase("/pay")) {
-				CommandInterpreter.interpret(Command.PAY, player, split);
+				CommandInterpreter.interpret(Command.PAY, event);
 				
 				event.setCancelled(true);
 			}
 			else if (split[0].equalsIgnoreCase("/prices")) {
-				CommandInterpreter.interpret(Command.PRICES, player, split);
+				CommandInterpreter.interpret(Command.PRICES, event);
 				
 				event.setCancelled(true);
 			}
 			else if (split[0].equalsIgnoreCase("/undo")) {
-				CommandInterpreter.interpret(Command.UNDO, player, split);
+				CommandInterpreter.interpret(Command.UNDO, event);
 				
 				event.setCancelled(true);
 			}
 			else if (split[0].equalsIgnoreCase("/restock") && (DataManager.getDebug() || CodeRedEconomy.isOp(player.getName()))) {
-				CommandInterpreter.interpret(Command.RESTOCK, player, split);
+				CommandInterpreter.interpret(Command.RESTOCK, event);
 				
 				event.setCancelled(true);
 			}
 			else if (split[0].equalsIgnoreCase("/econ")) {
-				CommandInterpreter.interpret(Command.ECON, player, split);
+				CommandInterpreter.interpret(Command.ECON, event);
 				
 				event.setCancelled(true);
 			}

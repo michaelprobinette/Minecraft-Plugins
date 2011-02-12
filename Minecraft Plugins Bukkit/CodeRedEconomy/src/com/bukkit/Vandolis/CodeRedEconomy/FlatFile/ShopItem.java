@@ -143,7 +143,7 @@ public class ShopItem {
 	 * @param sellPrice2
 	 * @param buyPrice2
 	 */
-	public ShopItem(int itemId, int sellPrice, int buyPrice) {
+	public ShopItem(int itemId, int buyPrice, int sellPrice) {
 		this.itemId = itemId;
 		itemName = getName(itemId);
 		this.buyPrice = buyPrice;

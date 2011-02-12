@@ -15,11 +15,11 @@ import com.bukkit.Vandolis.CodeRedEconomy.EconomyProperties;
  */
 public class ShopItems {
 	private int		ID;
-	private int		shopID			= -1;
-	private int		itemID			= -1;
+	private int		shopID			= 0;
+	private int		itemID			= 0;
 	private int		currentStock;
-	private int		minimumStock;
-	private int		maximumStock;
+	private int		minimumStock	= 0;
+	private int		maximumStock	= 0;
 	private boolean	infinite		= false;
 	private boolean	dynamicPrice	= false;
 	private double	dynamicPriceFactor;
@@ -27,10 +27,10 @@ public class ShopItems {
 	private double	sellPrice		= 0;
 	private float	buyMultiplier	= 1.0f;
 	private float	sellMultiplier	= 1.0f;
-	private int		maxSellAmount;
-	private int		maxBuyAmount;
-	private int		maxSellInterval;
-	private int		maxBuyInterval;
+	private int		maxSellAmount	= EconomyProperties.getInfValue();
+	private int		maxBuyAmount	= EconomyProperties.getInfValue();
+	private int		maxSellInterval	= 0;
+	private int		maxBuyInterval	= 0;
 	private boolean	newEntry		= false;
 	
 	/**
@@ -42,23 +42,25 @@ public class ShopItems {
 			
 			ResultSet rs = stat.executeQuery("select * from ShopItems where ID = " + shopItemID + ";");
 			
-			ID = rs.getInt("ID");
-			shopID = rs.getInt("ShopID");
-			itemID = rs.getInt("ItemID");
-			currentStock = rs.getInt("CurrentStock");
-			minimumStock = rs.getInt("MinimumStock");
-			maximumStock = rs.getInt("MaximumStock");
-			infinite = rs.getBoolean("IsInfinite");
-			dynamicPrice = rs.getBoolean("IsDynamicPrice");
-			dynamicPriceFactor = rs.getDouble("DynamicPriceFactor");
-			buyPrice = rs.getDouble("BuyPrice");
-			sellPrice = rs.getDouble("SellPrice");
-			buyMultiplier = rs.getFloat("BuyMultiplier");
-			sellMultiplier = rs.getFloat("SellMultiplier");
-			maxSellAmount = rs.getInt("MaxSellAmount");
-			maxBuyAmount = rs.getInt("MaxBuyAmount");
-			maxSellInterval = rs.getInt("MaxSellInterval");
-			maxBuyInterval = rs.getInt("MaxBuyInterval");
+			if (rs.next()) {
+				ID = rs.getInt("ID");
+				shopID = rs.getInt("ShopID");
+				itemID = rs.getInt("ItemID");
+				currentStock = rs.getInt("CurrentStock");
+				minimumStock = rs.getInt("MinimumStock");
+				maximumStock = rs.getInt("MaximumStock");
+				infinite = rs.getBoolean("IsInfinite");
+				dynamicPrice = rs.getBoolean("IsDynamicPrice");
+				dynamicPriceFactor = rs.getDouble("DynamicPriceFactor");
+				buyPrice = rs.getDouble("BuyPrice");
+				sellPrice = rs.getDouble("SellPrice");
+				buyMultiplier = rs.getFloat("BuyMultiplier");
+				sellMultiplier = rs.getFloat("SellMultiplier");
+				maxSellAmount = rs.getInt("MaxSellAmount");
+				maxBuyAmount = rs.getInt("MaxBuyAmount");
+				maxSellInterval = rs.getInt("MaxSellInterval");
+				maxBuyInterval = rs.getInt("MaxBuyInterval");
+			}
 			
 			rs.close();
 			stat.close();
@@ -67,6 +69,27 @@ public class ShopItems {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * @param id2
+	 * @param id3
+	 * @param amountAvail
+	 * @param b
+	 * @param buyPrice2
+	 * @param sellPrice2
+	 */
+	public ShopItems(int id2, int id3, int amountAvail, boolean b, int buyPrice2, int sellPrice2) {
+		shopID = id2;
+		itemID = id3;
+		currentStock = amountAvail;
+		infinite = b;
+		buyPrice = buyPrice2;
+		sellPrice = sellPrice2;
+		
+		newEntry = true;
+		
+		update();
 	}
 	
 	/**
@@ -407,12 +430,11 @@ public class ShopItems {
 		try {
 			if (newEntry) {
 				PreparedStatement prep =
-						EconomyProperties
-								.getConn()
-								.prepareStatement(
-										"insert into ShopItems (ShopID, ItemID, CurrentStock, MinimumStock, MaximumStock, "
-												+ "IsInfinite, IsDynamicPrice, DynamicPriceFactor, BuyPrice, SellPrice, BuyMultiplier, SellMultiplier, MaxSellAmount, "
-												+ "MaxBuyAmount, MaxSellInterval, MaxBuyInterval) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+						EconomyProperties.getConn().prepareStatement(
+								"insert into ShopItems (ShopID, ItemID, CurrentStock, MinimumStock, MaximumStock, "
+										+ "IsInfinite, IsDynamicPrice, DynamicPriceFactor, BuyPrice, SellPrice, BuyMultiplier, "
+										+ "SellMultiplier, MaxSellAmount, MaxBuyAmount, MaxSellInterval, MaxBuyInterval) values "
+										+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 				
 				prep.setInt(1, shopID);
 				prep.setInt(2, itemID);
@@ -434,6 +456,8 @@ public class ShopItems {
 				prep.execute();
 				
 				prep.close();
+				
+				newEntry = false;
 			}
 			else {
 				PreparedStatement prep =
@@ -441,9 +465,9 @@ public class ShopItems {
 								.getConn()
 								.prepareStatement(
 										"update ShopItems set ShopID = ?, ItemID = ?, CurrentStock = ?, MinimumStock = ?, MaximumStock = ?, "
-												+ "IsInfinite = ?, IsDynamicPrice = ?, DynamicPriceFactor = ?, BuyPrice = ?, SellPrice = ?, BuyMultiplier = ?, "
-												+ "SellMultiplier = ?, MaxSellAmount = ?, MaxBuyAmount = ?, MaxSellInterval = ?, MaxBuyInterval = ? "
-												+ "where ID = " + ID + ";");
+												+ "IsInfinite = ?, IsDynamicPrice = ?, DynamicPriceFactor = ?, BuyPrice = ?, SellPrice = ?, "
+												+ "BuyMultiplier = ?, SellMultiplier = ?, MaxSellAmount = ?, MaxBuyAmount = ?, MaxSellInterval = ?, "
+												+ "MaxBuyInterval = ? where ID = " + ID + ";");
 				
 				prep.setInt(1, shopID);
 				prep.setInt(2, itemID);

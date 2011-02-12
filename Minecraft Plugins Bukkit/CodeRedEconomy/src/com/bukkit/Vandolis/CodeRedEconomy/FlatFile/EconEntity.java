@@ -459,7 +459,7 @@ public abstract class EconEntity {
 	 * Goes through the list of {@link Transaction} and removes any that have timed out.
 	 */
 	private void removeTimeouts() {
-		long time = DataManager.getServer().getTime();
+		long time = EconomyProperties.getTime();
 		
 		for (Transaction iter : transactions) {
 			if (time - iter.getTime() >= EconomyProperties.getMaxBuySellTime()) {

@@ -1,0 +1,5 @@
+name: DepositAll
+description: Deposit all of your inventory to a chest
+author: Vandolis
+main: com.bukkit.Vandolis.DepositAll.DepositAll
+version: 0.1.0
