@@ -62,7 +62,7 @@ public class PriceList {
 		
 		if (EconomyProperties.isDebug()) {
 			System.out.println("ShopID: " + shop.getID());
-			System.out.println("Getting shop took " + timeShop + " miliseconds.");
+			System.out.println("Getting shop took " + timeShop + " milliseconds.");
 		}
 		
 		String[] page = new String[pageLength];
@@ -98,7 +98,7 @@ public class PriceList {
 				singleEnd = EconomyProperties.getDate();
 				if (EconomyProperties.isDebug()) {
 					System.out.println("Loaded line: " + page[pos] + " time taken: " + (singleEnd.getTime() - singleStart.getTime())
-							+ " miliseconds.");
+							+ " milliseconds.");
 				}
 				pos++;
 				if (pos == pageLength) {
@@ -113,7 +113,7 @@ public class PriceList {
 			timeShopItems = (int) (timeEnd.getTime() - timeStart.getTime());
 			
 			if (EconomyProperties.isDebug()) {
-				System.out.println("Populating shopIitems took " + timeShopItems + " miliseconds.");
+				System.out.println("Populating shopIitems took " + timeShopItems + " milliseconds.");
 			}
 			
 			rs.close();
@@ -125,9 +125,9 @@ public class PriceList {
 				DecimalFormat two = new DecimalFormat("#.##");
 				System.out.println("Total time spent: " + totalTime + " milliseconds.");
 				percent = (timeShop / totalTime) * 100;
-				System.out.println("Getting shop: " + two.format(percent) + "% at " + timeShop + " miliseconds");
+				System.out.println("Getting shop: " + two.format(percent) + "% at " + timeShop + " milliseconds");
 				percent = (timeShopItems / totalTime) * 100;
-				System.out.println("Populating ShopItems: " + two.format(percent) + "% at " + timeShopItems + " miliseconds");
+				System.out.println("Populating ShopItems: " + two.format(percent) + "% at " + timeShopItems + " milliseconds");
 			}
 			
 			if (page[0] != null) {
