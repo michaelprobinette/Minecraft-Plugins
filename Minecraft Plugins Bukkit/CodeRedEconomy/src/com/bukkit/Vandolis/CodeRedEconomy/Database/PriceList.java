@@ -41,7 +41,6 @@ public class PriceList {
 		Date timeStart, timeEnd;
 		int timeShop = 0;
 		int timeShopItems = 0;
-		int timePages = 0;
 		
 		timeStart = EconomyProperties.getDate();
 		
@@ -73,12 +72,41 @@ public class PriceList {
 			
 			Statement stat = EconomyProperties.getConn().createStatement();
 			
-			ResultSet rs = stat.executeQuery("select ShopItems.ID from ShopItems where ShopID = " + shop.getID() + ";");
+			ResultSet rs =
+					stat.executeQuery("select ShopItems.*,Items.Name from ShopItems,Items where ShopID = " + shop.getID()
+							+ " AND Items.ID = ShopItems.ItemID;");
 			
-			ArrayList<ShopItems> shopItems = new ArrayList<ShopItems>();
-			
+			Date singleStart, singleEnd;
 			while (rs.next()) {
-				shopItems.add(new ShopItems(rs.getInt("ID")));
+				ShopItems iter =
+						new ShopItems(rs.getInt("ID"), rs.getInt("ShopID"), rs.getInt("ItemID"), rs.getInt("CurrentStock"),
+								rs.getInt("MinimumStock"), rs.getInt("MaximumStock"), rs.getBoolean("IsInfinite"),
+								rs.getBoolean("IsDynamicPrice"), rs.getDouble("DynamicPriceFactor"), rs.getDouble("BuyPrice"),
+								rs.getDouble("SellPrice"), rs.getFloat("BuyMultiplier"), rs.getFloat("SellMultiplier"),
+								rs.getInt("MaxSellAmount"), rs.getInt("MaxBuyAmount"), rs.getInt("MaxSellInterval"),
+								rs.getInt("MaxBuyInterval"));
+				int pos = 0;
+				singleStart = EconomyProperties.getDate();
+				if (iter.isInfinite() || shop.isAllItemsInfinite() || (iter.getCurrentStock() == EconomyProperties.getInfValue())) {
+					page[pos] = rs.getString("Name") + " §a" + (int) iter.getBuyPrice() + " §c" + (int) iter.getSellPrice() + " §eInfinite";
+				}
+				else {
+					page[pos] =
+							rs.getString("Name") + " §a" + (int) iter.getBuyPrice() + " §c" + (int) iter.getSellPrice() + " §e"
+									+ iter.getCurrentStock();
+				}
+				singleEnd = EconomyProperties.getDate();
+				if (EconomyProperties.isDebug()) {
+					System.out.println("Loaded line: " + page[pos] + " time taken: " + (singleEnd.getTime() - singleStart.getTime())
+							+ " miliseconds.");
+				}
+				pos++;
+				if (pos == pageLength) {
+					pages.add(page);
+					
+					page = new String[pageLength];
+					pos = 0;
+				}
 			}
 			
 			timeEnd = EconomyProperties.getDate();
@@ -91,55 +119,15 @@ public class PriceList {
 			rs.close();
 			stat.close();
 			
-			int pos = 0;
-			
-			timeStart = EconomyProperties.getDate();
-			
-			Date singleStart, singleEnd;
-			for (ShopItems iter : shopItems) {
-				singleStart = EconomyProperties.getDate();
-				
-				Items item = new Items(iter.getItemID());
-				
-				if (iter.isInfinite() || shop.isAllItemsInfinite() || (iter.getCurrentStock() == EconomyProperties.getInfValue())) {
-					page[pos] = item.getName() + " §a" + (int) iter.getBuyPrice() + " §c" + (int) iter.getSellPrice() + " §eInfinite";
-				}
-				else {
-					page[pos] =
-							item.getName() + " §a" + (int) iter.getBuyPrice() + " §c" + (int) iter.getSellPrice() + " §e"
-									+ iter.getCurrentStock();
-				}
-				singleEnd = EconomyProperties.getDate();
-				if (EconomyProperties.isDebug()) {
-					System.out.println("Loaded line: " + page[pos] + " time taken: " + (singleEnd.getTime() - singleStart.getTime())
-							+ " miliseconds.");
-				}
-				
-				pos++;
-				
-				if (pos == pageLength) {
-					pages.add(page);
-					
-					page = new String[pageLength];
-					pos = 0;
-				}
-			}
-			
-			timeEnd = EconomyProperties.getDate();
-			timePages = (int) (timeEnd.getTime() - timeStart.getTime());
-			
 			if (EconomyProperties.isDebug()) {
-				System.out.println("Populating pages took " + timePages + " miliseconds.");
-				double totalTime = timePages + timeShop + timeShopItems;
+				double totalTime = timeShop + timeShopItems;
 				double percent;
 				DecimalFormat two = new DecimalFormat("#.##");
-				System.out.println("Total time spent: " + totalTime + " miliseconds.");
+				System.out.println("Total time spent: " + totalTime + " milliseconds.");
 				percent = (timeShop / totalTime) * 100;
 				System.out.println("Getting shop: " + two.format(percent) + "% at " + timeShop + " miliseconds");
 				percent = (timeShopItems / totalTime) * 100;
 				System.out.println("Populating ShopItems: " + two.format(percent) + "% at " + timeShopItems + " miliseconds");
-				percent = (timePages / totalTime) * 100;
-				System.out.println("Populating Pages: " + two.format(percent) + "% at " + timePages + " miliseconds");
 			}
 			
 			if (page[0] != null) {
