@@ -53,7 +53,7 @@ public class PriceList {
 		
 		if (EconomyProperties.isDebug()) {
 			System.out.println("ShopID: " + shopID);
-			System.out.println("Getting shop took " + timeShop + " miliseconds.");
+			System.out.println("Getting shop took " + timeShop + " milliseconds.");
 		}
 		
 		String[] page = new String[pageLength];
