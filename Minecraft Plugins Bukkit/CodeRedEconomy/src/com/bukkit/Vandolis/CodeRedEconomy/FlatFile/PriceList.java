@@ -153,8 +153,15 @@ public class PriceList {
 	public static void priceSingleItem(User user, String itemName, Shop shop) {
 		for (ShopItem iter : DataManager.getItemList()) {
 			if (iter.getName().equalsIgnoreCase(itemName)) {
-				user.sendMessage("   " + iter.getName() + ": §a" + iter.getBuyPrice() + " §c" + iter.getSellPrice() + " §e"
-						+ shop.getAvailableCount(itemName));
+				int amount = shop.getAvailableCount(itemName);
+				
+				if ((amount != EconomyProperties.getInfValue())) {
+					user.sendMessage(iter.getName() + ": §a" + iter.getBuyPrice() + " §c" + iter.getSellPrice() + " §e" + amount);
+				}
+				else if (amount == EconomyProperties.getInfValue()) {
+					user.sendMessage(iter.getName() + ": §a" + iter.getBuyPrice() + " §c" + iter.getSellPrice() + " §eInfinite");
+				}
+				
 				break;
 			}
 		}

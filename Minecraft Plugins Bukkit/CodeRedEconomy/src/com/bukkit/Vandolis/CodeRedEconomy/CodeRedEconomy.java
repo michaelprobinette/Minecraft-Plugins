@@ -98,6 +98,13 @@ public class CodeRedEconomy extends JavaPlugin {
 		
 		PluginDescriptionFile pdfFile = getDescription();
 		System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
+		
+		/*
+		 * Remove this for release
+		 */
+		if (EconomyProperties.isDebug()) {
+			com.bukkit.Vandolis.CodeRedEconomy.Database.PriceList.populate("The Shop");
+		}
 	}
 	
 	/**

@@ -3,9 +3,11 @@
  */
 package com.bukkit.Vandolis.CodeRedEconomy.Database;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import org.bukkit.entity.Player;
@@ -20,7 +22,29 @@ public class PriceList {
 	private static String				currentShop	= "";
 	private static int					pageLength	= EconomyProperties.getPageLength();
 	
-	private static void populate(String shopName) {
+	/**
+	 * @return the currentShop
+	 */
+	public static String getCurrentShop() {
+		return currentShop;
+	}
+	
+	/**
+	 * @param currentShop
+	 *            the currentShop to set
+	 */
+	public static void setCurrentShop(String currentShop) {
+		PriceList.currentShop = currentShop;
+	}
+	
+	public static void populate(String shopName) {
+		Date timeStart, timeEnd;
+		int timeShop = 0;
+		int timeShopItems = 0;
+		int timePages = 0;
+		
+		timeStart = EconomyProperties.getDate();
+		
 		currentShop = shopName;
 		
 		int shopID = Shops.getId(shopName);
@@ -34,20 +58,22 @@ public class PriceList {
 			shop = new Shops(shopID);
 		}
 		
+		timeEnd = EconomyProperties.getDate();
+		timeShop = (int) (timeEnd.getTime() - timeStart.getTime());
+		
 		if (EconomyProperties.isDebug()) {
 			System.out.println("ShopID: " + shop.getID());
+			System.out.println("Getting shop took " + timeShop + " miliseconds.");
 		}
 		
 		String[] page = new String[pageLength];
 		
 		try {
+			timeStart = EconomyProperties.getDate();
+			
 			Statement stat = EconomyProperties.getConn().createStatement();
 			
 			ResultSet rs = stat.executeQuery("select ShopItems.ID from ShopItems where ShopID = " + shop.getID() + ";");
-			
-			//			ResultSet rs =
-			//					stat.executeQuery("select ShopItems.ItemID, ShopItems.CurrentStock, ShopItems.IsInfinite, ShopItems.BuyPrice, ShopItems.SellPrice"
-			//							+ " from ShopItems where ShopID = " + shop.getID() + ";");
 			
 			ArrayList<ShopItems> shopItems = new ArrayList<ShopItems>();
 			
@@ -55,12 +81,24 @@ public class PriceList {
 				shopItems.add(new ShopItems(rs.getInt("ID")));
 			}
 			
+			timeEnd = EconomyProperties.getDate();
+			timeShopItems = (int) (timeEnd.getTime() - timeStart.getTime());
+			
+			if (EconomyProperties.isDebug()) {
+				System.out.println("Populating shopIitems took " + timeShopItems + " miliseconds.");
+			}
+			
 			rs.close();
 			stat.close();
 			
 			int pos = 0;
 			
+			timeStart = EconomyProperties.getDate();
+			
+			Date singleStart, singleEnd;
 			for (ShopItems iter : shopItems) {
+				singleStart = EconomyProperties.getDate();
+				
 				Items item = new Items(iter.getItemID());
 				
 				if (iter.isInfinite() || shop.isAllItemsInfinite() || (iter.getCurrentStock() == EconomyProperties.getInfValue())) {
@@ -71,9 +109,10 @@ public class PriceList {
 							item.getName() + " §a" + (int) iter.getBuyPrice() + " §c" + (int) iter.getSellPrice() + " §e"
 									+ iter.getCurrentStock();
 				}
-				
+				singleEnd = EconomyProperties.getDate();
 				if (EconomyProperties.isDebug()) {
-					System.out.println("Loaded line: " + page[pos]);
+					System.out.println("Loaded line: " + page[pos] + " time taken: " + (singleEnd.getTime() - singleStart.getTime())
+							+ " miliseconds.");
 				}
 				
 				pos++;
@@ -84,6 +123,23 @@ public class PriceList {
 					page = new String[pageLength];
 					pos = 0;
 				}
+			}
+			
+			timeEnd = EconomyProperties.getDate();
+			timePages = (int) (timeEnd.getTime() - timeStart.getTime());
+			
+			if (EconomyProperties.isDebug()) {
+				System.out.println("Populating pages took " + timePages + " miliseconds.");
+				double totalTime = timePages + timeShop + timeShopItems;
+				double percent;
+				DecimalFormat two = new DecimalFormat("#.##");
+				System.out.println("Total time spent: " + totalTime + " miliseconds.");
+				percent = (timeShop / totalTime) * 100;
+				System.out.println("Getting shop: " + two.format(percent) + " at " + timeShop + " miliseconds");
+				percent = (timeShopItems / totalTime) * 100;
+				System.out.println("Populating ShopItems: " + two.format(percent) + " at " + timeShopItems + " miliseconds");
+				percent = (timePages / totalTime) * 100;
+				System.out.println("Populating Pages: " + two.format(percent) + " at " + timePages + " miliseconds");
 			}
 			
 			if (page[0] != null) {
@@ -139,7 +195,8 @@ public class PriceList {
 							+ " from ShopItems where ShopID = " + shop.getID() + " and ItemID = " + item.getID() + ";");
 			
 			if (rs.next()) {
-				if (rs.getBoolean("IsInfinite") || shop.isAllItemsInfinite()) {
+				if (rs.getBoolean("IsInfinite") || shop.isAllItemsInfinite()
+						|| (rs.getInt("CurrentStock") == EconomyProperties.getInfValue())) {
 					player.sendMessage(EconomyProperties.getPluginMessage() + item.getName() + " §a" + (int) rs.getDouble("BuyPrice")
 							+ " §c" + (int) rs.getDouble("SellPrice") + " §eInfinite");
 				}

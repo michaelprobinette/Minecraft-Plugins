@@ -1,3 +1,23 @@
 name: SignDispenser
+description: Create signs that give items on right click.
 main: bukkit.Vandolis.SignDispenser
 version: 0.2.1
+author: Vandolis
+
+permissions:
+  signdispenser:
+    description: SignDispenser permissions
+    type: map
+    map:
+      create:
+        description: If true, the user can create a SignDispenser
+        type: boolean
+        default: false
+      destroy:
+        description: If true, the user can destroy a SignDispenser
+        type: boolean
+        default: false
+      use:
+        description: If true, the user can use a SignDispenser
+        type: boolean
+        default: false

@@ -381,7 +381,11 @@ public class ShopItems {
 			int id = 0;
 			
 			if (rs.next()) {
-				rs.getInt("ID");
+				id = rs.getInt("ID");
+			}
+			
+			if (EconomyProperties.isDebug()) {
+				System.out.println("Returning shopItemID: " + id);
 			}
 			
 			rs.close();

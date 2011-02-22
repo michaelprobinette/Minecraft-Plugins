@@ -98,7 +98,7 @@ public class Shops {
 	public static int getId(String shopName) {
 		try {
 			Statement stat = EconomyProperties.getConn().createStatement();
-			PreparedStatement prep = EconomyProperties.getConn().prepareStatement("select Shops.ID from Shops where Name = ?;");
+			PreparedStatement prep = EconomyProperties.getConn().prepareStatement("select Shops.ID from Shops where Name like ?;");
 			prep.setString(1, shopName);
 			ResultSet rs = prep.executeQuery();
 			
@@ -106,10 +106,10 @@ public class Shops {
 			
 			if (rs.next()) {
 				ID = rs.getInt("ID");
-				
-				if (EconomyProperties.isDebug()) {
-					System.out.println("Set ID to: " + ID);
-				}
+			}
+			
+			if (EconomyProperties.isDebug()) {
+				System.out.println("Returning shopID: " + ID);
 			}
 			
 			rs.close();

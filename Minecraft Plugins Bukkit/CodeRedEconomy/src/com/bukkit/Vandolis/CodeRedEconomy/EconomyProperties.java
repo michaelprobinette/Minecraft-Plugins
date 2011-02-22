@@ -10,7 +10,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * @author Mike
+ * @author Vandolis
  */
 public class EconomyProperties {
 	private static File				DIR					= null;
@@ -164,7 +164,7 @@ public class EconomyProperties {
 					useSQL = props.getBoolean("usesqlite");
 				}
 				else {
-					props.setBoolean("usesqlite", useSQL);
+					//					props.setBoolean("usesqlite", useSQL);
 				}
 				
 				if (props.containsKey("autopay")) {

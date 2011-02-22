@@ -316,6 +316,19 @@ public class CommandInterpreter {
 	private static void econSQLDB(Player player, String[] split) {
 		DataManager.load(plugin);
 		
+		/*
+		 * Items, drop table data to prevent copies
+		 */
+		try {
+			Statement drop = EconomyProperties.getConn().createStatement();
+			drop.executeUpdate("delete from Items;");
+			drop.executeUpdate("delete from ShopItems;");
+			drop.close();
+		}
+		catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		for (ShopItem iter : DataManager.getItemList()) {
 			int itemId = Items.getId(iter.getName());
 			
@@ -373,7 +386,7 @@ public class CommandInterpreter {
 				//						stack.getAmountAvail() == EconomyProperties.getInfValue(), stack.getBuyPrice(), stack.getSellPrice()));
 			}
 		}
-		
+		com.bukkit.Vandolis.CodeRedEconomy.Database.PriceList.setCurrentShop("");
 		DataManager.destroy();
 	}
 	
@@ -509,7 +522,7 @@ public class CommandInterpreter {
 			catch (Exception e) {
 				String itemName = "";
 				for (int i = 1; i < split.length; i++) {
-					itemName += split[i];
+					itemName += " " + split[i];
 				}
 				itemName = itemName.trim();
 				PriceList.priceSingleItem(DataManager.getUser(player), itemName, DataManager.getShop(playerShops.get(player.getName())));
@@ -616,10 +629,12 @@ public class CommandInterpreter {
 	
 	private static void buyDB(Player player, String[] split) {
 		String itemName = "";
+		String shopName = "";
+		
 		int amount = 0;
 		
 		for (String iter : split) {
-			if (!iter.equalsIgnoreCase(split[1])) {
+			if (!iter.equalsIgnoreCase(split[0])) {
 				try {
 					amount = Integer.valueOf(iter);
 				}
@@ -631,7 +646,14 @@ public class CommandInterpreter {
 		
 		itemName = itemName.trim();
 		
-		int shopId = Shops.getId(playerShops.get(player.getName()));
+		shopName = playerShops.get(player.getName());
+		
+		if (EconomyProperties.isDebug()) {
+			System.out.println("Shop Name: " + shopName);
+			System.out.println("Item Name: " + itemName);
+		}
+		
+		int shopId = Shops.getId(shopName);
 		int itemId = Items.getId(itemName);
 		
 		int shopItemID = ShopItems.getShopItemId(shopId, itemId);

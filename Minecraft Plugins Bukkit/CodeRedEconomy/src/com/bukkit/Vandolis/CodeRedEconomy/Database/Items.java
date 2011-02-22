@@ -129,8 +129,9 @@ public class Items {
 	public static int getId(String itemName) {
 		try {
 			Statement stat = EconomyProperties.getConn().createStatement();
-			
-			ResultSet rs = stat.executeQuery("select Items.ID from Items where Name = '" + itemName + "';");
+			PreparedStatement prep = EconomyProperties.getConn().prepareStatement("select Items.ID from Items where Name like ?;");
+			prep.setString(1, itemName);
+			ResultSet rs = prep.executeQuery();
 			
 			int id = 0;
 			
