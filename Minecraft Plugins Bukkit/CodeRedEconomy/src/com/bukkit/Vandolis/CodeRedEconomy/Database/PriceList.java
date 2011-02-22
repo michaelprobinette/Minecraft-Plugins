@@ -48,21 +48,12 @@ public class PriceList {
 		
 		int shopID = Shops.getId(shopName);
 		
-		Shops shop = null;
-		
-		if (shopID == 0) {
-			shop = new Shops("The Shop");
-		}
-		else {
-			shop = new Shops(shopID);
-		}
-		
 		timeEnd = EconomyProperties.getDate();
 		timeShop = (int) (timeEnd.getTime() - timeStart.getTime());
 		
 		if (EconomyProperties.isDebug()) {
-			System.out.println("ShopID: " + shop.getID());
-			System.out.println("Getting shop took " + timeShop + " milliseconds.");
+			System.out.println("ShopID: " + shopID);
+			System.out.println("Getting shop took " + timeShop + " miliseconds.");
 		}
 		
 		String[] page = new String[pageLength];
@@ -73,27 +64,23 @@ public class PriceList {
 			Statement stat = EconomyProperties.getConn().createStatement();
 			
 			ResultSet rs =
-					stat.executeQuery("select ShopItems.*,Items.Name from ShopItems,Items where ShopID = " + shop.getID()
-							+ " AND Items.ID = ShopItems.ItemID;");
+					stat.executeQuery("select ShopItems.IsInfinite, Shops.AllItemsInfinite, Items.Name, ShopItems.BuyPrice, ShopItems.SellPrice, ShopItems.CurrentStock"
+							+ " from ShopItems,Items,Shops where ShopItems.ShopID = "
+							+ shopID
+							+ " AND Items.ID = ShopItems.ItemID AND Shops.ID = ShopItems.ShopID;");
 			
 			Date singleStart, singleEnd;
 			while (rs.next()) {
-				ShopItems iter =
-						new ShopItems(rs.getInt("ID"), rs.getInt("ShopID"), rs.getInt("ItemID"), rs.getInt("CurrentStock"),
-								rs.getInt("MinimumStock"), rs.getInt("MaximumStock"), rs.getBoolean("IsInfinite"),
-								rs.getBoolean("IsDynamicPrice"), rs.getDouble("DynamicPriceFactor"), rs.getDouble("BuyPrice"),
-								rs.getDouble("SellPrice"), rs.getFloat("BuyMultiplier"), rs.getFloat("SellMultiplier"),
-								rs.getInt("MaxSellAmount"), rs.getInt("MaxBuyAmount"), rs.getInt("MaxSellInterval"),
-								rs.getInt("MaxBuyInterval"));
 				int pos = 0;
 				singleStart = EconomyProperties.getDate();
-				if (iter.isInfinite() || shop.isAllItemsInfinite() || (iter.getCurrentStock() == EconomyProperties.getInfValue())) {
-					page[pos] = rs.getString("Name") + " §a" + (int) iter.getBuyPrice() + " §c" + (int) iter.getSellPrice() + " §eInfinite";
+				if (rs.getBoolean("IsInfinite") || rs.getBoolean("AllItemsInfinite")
+						|| (rs.getInt("CurrentStock") == EconomyProperties.getInfValue())) {
+					page[pos] = rs.getString("Name") + " §a" + rs.getInt("BuyPrice") + " §c" + rs.getInt("SellPrice") + " §eInfinite";
 				}
 				else {
 					page[pos] =
-							rs.getString("Name") + " §a" + (int) iter.getBuyPrice() + " §c" + (int) iter.getSellPrice() + " §e"
-									+ iter.getCurrentStock();
+							rs.getString("Name") + " §a" + rs.getInt("BuyPrice") + " §c" + rs.getInt("SellPrice") + " §e"
+									+ rs.getInt("CurrentStock");
 				}
 				singleEnd = EconomyProperties.getDate();
 				if (EconomyProperties.isDebug()) {
