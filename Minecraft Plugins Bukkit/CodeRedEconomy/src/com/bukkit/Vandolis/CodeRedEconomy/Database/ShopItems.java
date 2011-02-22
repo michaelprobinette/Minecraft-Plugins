@@ -71,6 +71,30 @@ public class ShopItems {
 		}
 	}
 	
+	public ShopItems(int _ID, int _shopID, int _itemID, int _currentStock, int _minimumStock, int _maximumStock, boolean _infinite, boolean _dynamicPrice,
+			double _dynamicPriceFactor, double _buyPrice, double _sellPrice, float _buyMultiplier, float _sellMultiplier, int _maxSellAmount, int _maxBuyAmount,
+			int _maxSellInterval, int _maxBuyInterval) {
+
+				ID = _ID;
+				shopID = _shopID;
+				itemID = _itemID;
+				currentStock = _currentStock;
+				minimumStock = _minimumStock;
+				maximumStock = _maximumStock;
+				infinite = _infinite;
+				dynamicPrice = _dynamicPrice;
+				dynamicPriceFactor = _dynamicPriceFactor;
+				buyPrice = _buyPrice;
+				sellPrice = _sellPrice;
+				buyMultiplier = _buyMultiplier;
+				sellMultiplier = _sellMultiplier;
+				maxSellAmount = _maxSellAmount;
+				maxBuyAmount = _maxBuyAmount;
+				maxSellInterval = _maxSellInterval;
+				maxBuyInterval = _maxBuyInterval;
+			
+	}
+	
 	/**
 	 * @param id2
 	 * @param id3
