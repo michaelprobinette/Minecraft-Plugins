@@ -135,11 +135,11 @@ public class PriceList {
 				DecimalFormat two = new DecimalFormat("#.##");
 				System.out.println("Total time spent: " + totalTime + " miliseconds.");
 				percent = (timeShop / totalTime) * 100;
-				System.out.println("Getting shop: " + two.format(percent) + " at " + timeShop + " miliseconds");
+				System.out.println("Getting shop: " + two.format(percent) + "% at " + timeShop + " miliseconds");
 				percent = (timeShopItems / totalTime) * 100;
-				System.out.println("Populating ShopItems: " + two.format(percent) + " at " + timeShopItems + " miliseconds");
+				System.out.println("Populating ShopItems: " + two.format(percent) + "% at " + timeShopItems + " miliseconds");
 				percent = (timePages / totalTime) * 100;
-				System.out.println("Populating Pages: " + two.format(percent) + " at " + timePages + " miliseconds");
+				System.out.println("Populating Pages: " + two.format(percent) + "% at " + timePages + " miliseconds");
 			}
 			
 			if (page[0] != null) {
