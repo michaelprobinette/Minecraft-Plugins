@@ -1,0 +1,30 @@
+name: CodeRedLite
+description: An Economy plugin designed for the Redstype server.
+author: Vandolis
+main: com.Vandolis.CodeRedLite.CodeRedLite
+version: 0.0.2
+commands:
+  buy:
+    description: Attempts to buy the given item.
+    usage: /buy stone 64 OR /buy 64 stone
+  sell:
+    description: Attempts to sell the given item.
+    usage: /sell stone 64 OR /sell 64 stone
+  pricelist:
+    description: Lists a page of prices from the store.
+    usage: /prices [page #]
+  price:
+    description: Attempts to find a buy and sell value for the given item.
+    usage: /price stone
+  balance:
+    description: Shows a player their current balance.
+    usage: /balance
+  pay:
+    description: Pays the given player
+    usage: /pay <Player> <Amount>
+  quote:
+    description: Returns a money quote for buy or sell
+    usage: /quote <buy|sell> <item name> <amount>
+  debug:
+    description: Debug command, toggles debug state.
+    usage: /debug
