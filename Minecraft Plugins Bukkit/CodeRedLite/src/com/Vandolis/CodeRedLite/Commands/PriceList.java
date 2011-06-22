@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.Vandolis.CodeRedLite.Commands;
 
@@ -17,7 +17,8 @@ import com.Vandolis.CodeRedLite.EconItemStack;
 /**
  * @author Vandolis
  */
-public class PriceList implements CommandExecutor {
+public class PriceList implements CommandExecutor
+{
 	private CodeRedLite			plugin			= null;
 	private final int			MAX_PER_PAGE	= 8;
 	private ArrayList<String>	raw				= new ArrayList<String>();
@@ -25,18 +26,23 @@ public class PriceList implements CommandExecutor {
 	/**
 	 * @param codeRedLite
 	 */
-	public PriceList(CodeRedLite codeRedLite) {
+	public PriceList(CodeRedLite codeRedLite)
+	{
 		plugin = codeRedLite;
 	}
 	
-	public void sort() {
+	public void sort()
+	{
 		raw = new ArrayList<String>();
 		
-		for (EconItemStack iter : plugin.getShop().getInventory()) {
-			if (iter.isSubtyped()) {
+		for (EconItemStack iter : plugin.getShop().getInventory())
+		{
+			if (iter.isSubtyped())
+			{
 				raw.add(iter.getCompactName() + ":" + iter.getDurability());
 			}
-			else {
+			else
+			{
 				raw.add(iter.getCompactName());
 			}
 		}
@@ -48,33 +54,42 @@ public class PriceList implements CommandExecutor {
 	 * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] split)
+	{
 		sort();
 		
 		int pageNumber = 0;
 		
-		if (split.length == 1) {
-			try {
+		if (split.length == 1)
+		{
+			try
+			{
 				pageNumber = Integer.parseInt(split[0]);
 			}
-			catch (Exception e) {
+			catch (Exception e)
+			{
+				sender.sendMessage(plugin.getPluginMessage() + "An error occured.");
 			}
 		}
 		
 		ArrayList<String> processed = new ArrayList<String>();
 		
-		for (String iter : raw) {
-			boolean subtyped = false;
+		for (String iter : raw)
+		{
+			boolean subtyped = iter.contains(":");
 			short subtype = 0;
 			String itemName = "";
 			
-			if ((subtyped = iter.contains(":")) == true) {
+			if (subtyped)
+			{
 				String[] args = iter.split(":");
 				itemName = args[0];
-				if (args.length == 2) {
+				if (args.length == 2)
+				{
 					subtype = Short.parseShort(args[1]);
 				}
-				else {
+				else
+				{
 					sender.sendMessage(plugin.getPluginMessage() + "Invalid subtype.");
 					return true;
 				}
@@ -82,28 +97,34 @@ public class PriceList implements CommandExecutor {
 			
 			EconItemStack item = null;
 			
-			if (subtyped) {
+			if (subtyped)
+			{
 				item = plugin.getShop().getItem(itemName, subtype);
 			}
-			else {
+			else
+			{
 				item = plugin.getShop().getItem(iter);
 			}
 			
 			String str = "";
 			
-			if (subtyped) {
+			if (subtyped)
+			{
 				str = "   " + itemName + ":" + subtype;
 			}
-			else {
+			else
+			{
 				str = "   " + iter;
 			}
 			
 			processed.add(str);
 			
-			if (item.isInfinite() || (item.getAmount() == -1)) {
+			if (item.isInfinite() || (item.getAmount() == -1))
+			{
 				str = "        Buy: " + item.getPriceBuy() + "   Sell: " + item.getPriceSell() + "   Stock: Infinite";
 			}
-			else {
+			else
+			{
 				str = "        Buy: " + item.getPriceBuy() + "   Sell: " + item.getPriceSell() + "   Stock: " + item.getAmount();
 			}
 			
@@ -115,11 +136,13 @@ public class PriceList implements CommandExecutor {
 		int count = 0;
 		ArrayList<String> page = new ArrayList<String>();
 		
-		while (processed.isEmpty() == false) {
+		while (!processed.isEmpty())
+		{
 			page.add(processed.get(0));
 			//plugin.getLog().info("Added: " + processed.get(0));
 			processed.remove(0);
-			if (page.size() == MAX_PER_PAGE) {
+			if (page.size() == MAX_PER_PAGE)
+			{
 				//plugin.getLog().info("Adding page to map");
 				map.put(count, page);
 				count++;
@@ -127,7 +150,8 @@ public class PriceList implements CommandExecutor {
 			}
 		}
 		
-		if (page.isEmpty() == false) {
+		if (!page.isEmpty())
+		{
 			map.put(count, page);
 		}
 		
@@ -136,7 +160,8 @@ public class PriceList implements CommandExecutor {
 		
 		page = map.get(pageNumber);
 		
-		for (String iter : page) {
+		for (String iter : page)
+		{
 			sender.sendMessage(plugin.getPluginMessage() + iter);
 		}
 		

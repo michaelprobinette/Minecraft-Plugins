@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.Vandolis.CodeRedLite.Commands;
 
@@ -13,13 +13,15 @@ import com.Vandolis.CodeRedLite.EconItemStack;
 /**
  * @author Vandolis
  */
-public class Quote implements CommandExecutor {
+public class Quote implements CommandExecutor
+{
 	private CodeRedLite	plugin	= null;
 	
 	/**
 	 * @param codeRedLite
 	 */
-	public Quote(CodeRedLite codeRedLite) {
+	public Quote(CodeRedLite codeRedLite)
+	{
 		plugin = codeRedLite;
 	}
 	
@@ -27,25 +29,33 @@ public class Quote implements CommandExecutor {
 	 * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
-		if (split.length >= 3) {
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] split)
+	{
+		if (split.length >= 3)
+		{
 			boolean buy = false;
 			String itemName = "";
 			int amount = 1;
 			
-			if (split[0].equalsIgnoreCase("buy")) {
+			if (split[0].equalsIgnoreCase("buy"))
+			{
 				buy = true;
 			}
-			else {
+			else
+			{
 				buy = false;
 			}
 			
-			for (String iter : split) {
-				if (iter.equalsIgnoreCase(split[0]) == false) {
-					try {
+			for (String iter : split)
+			{
+				if (!iter.equalsIgnoreCase(split[0]))
+				{
+					try
+					{
 						amount = Integer.parseInt(iter);
 					}
-					catch (Exception e) {
+					catch (Exception e)
+					{
 						itemName += iter;
 					}
 				}
@@ -57,19 +67,23 @@ public class Quote implements CommandExecutor {
 			boolean subtyped = false;
 			short subtype = 0;
 			
-			if (itemName.equalsIgnoreCase("wool")) {
+			if (itemName.equalsIgnoreCase("wool"))
+			{
 				subtyped = true;
 				subtype = 0;
 			}
 			
-			if (itemName.contains(":") == true) {
+			if (itemName.contains(":"))
+			{
 				subtyped = itemName.contains(":");
 				String[] args = itemName.split(":");
 				itemName = args[0];
-				if (args.length == 2) {
+				if (args.length == 2)
+				{
 					subtype = Short.parseShort(args[1]);
 				}
-				else {
+				else
+				{
 					sender.sendMessage(plugin.getPluginMessage() + "Invalid subtype.");
 					return true;
 				}
@@ -77,43 +91,55 @@ public class Quote implements CommandExecutor {
 			
 			EconItemStack roughItem = null;
 			
-			if (subtyped) {
+			if (subtyped)
+			{
 				roughItem = plugin.getShop().getItem(itemName, subtype);
 			}
-			else {
+			else
+			{
 				roughItem = plugin.getShop().getItem(itemName);
 			}
 			
-			if ((roughItem == null) && !plugin.getProperties().isEnforceItemWhitelist()) {
+			if ((roughItem == null) && !plugin.getProperties().isEnforceItemWhitelist())
+			{
 				sender.sendMessage(plugin.getPluginMessage() + "Invalid item name.");
 				return true;
 			}
-			else if (roughItem == null) {
+			else if (roughItem == null)
+			{
 				// Check whitelist
-				for (EconItemStack iter : plugin.getRawItems()) {
-					if (iter.getCompactName().equalsIgnoreCase(itemName)) {
-						if (subtyped) {
-							if (iter.getDurability() == subtype) {
+				for (EconItemStack iter : plugin.getRawItems())
+				{
+					if (iter.getCompactName().equalsIgnoreCase(itemName))
+					{
+						if (subtyped)
+						{
+							if (iter.getDurability() == subtype)
+							{
 								roughItem = iter;
 							}
 						}
-						else {
+						else
+						{
 							roughItem = iter;
 						}
 					}
 				}
 			}
 			
-			if (roughItem == null) {
+			if (roughItem == null)
+			{
 				sender.sendMessage(plugin.getPluginMessage() + plugin.getShop().getName() + " will not buy that item.");
 				return true;
 			}
 			
-			if (buy) {
+			if (buy)
+			{
 				sender.sendMessage(plugin.getPluginMessage() + "The current price to buy that many " + roughItem.getName() + " is "
 						+ roughItem.quoteBuy(amount));
 			}
-			else {
+			else
+			{
 				sender.sendMessage(plugin.getPluginMessage() + "The current price to sell that many " + roughItem.getName() + " is "
 						+ roughItem.quoteSell(amount));
 			}

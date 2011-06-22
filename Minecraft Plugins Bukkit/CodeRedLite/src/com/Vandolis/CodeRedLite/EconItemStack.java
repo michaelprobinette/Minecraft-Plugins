@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.Vandolis.CodeRedLite;
 
@@ -8,7 +8,8 @@ import org.bukkit.inventory.ItemStack;
 /**
  * @author Vandolis
  */
-public class EconItemStack extends ItemStack {
+public class EconItemStack extends ItemStack
+{
 	private int			priceBuy	= 0;
 	private int			priceSell	= 0;
 	private int			totalBuy	= 0;
@@ -23,10 +24,12 @@ public class EconItemStack extends ItemStack {
 	private int			basePrice	= 250;
 	private CodeRedLite	plugin		= null;
 	
-	public EconItemStack(EconItemStack item, int amount, CodeRedLite codeRed) {
+	public EconItemStack(EconItemStack item, int amount, CodeRedLite codeRed)
+	{
 		super(item.getType());
 		
-		if (item.isSubtyped) {
+		if (item.isSubtyped)
+		{
 			setDurability(item.getDurability());
 		}
 		
@@ -44,51 +47,55 @@ public class EconItemStack extends ItemStack {
 		changeAmount(amount);
 	}
 	
-	public EconItemStack(int itemsID, String name, int itemID, boolean isSubtyped, short subtype, int buyPrice, int sellPrice,
-			int baseValue, float slope, CodeRedLite codeRed) {
+	public EconItemStack(int itemsID, String itemName, int itemID, boolean subtyped, short subtype, int buyPrice, int sellPrice,
+			int baseValue, float dynamicSlope, CodeRedLite codeRed)
+	{
 		super(itemID);
 		
-		this.isSubtyped = isSubtyped;
+		isSubtyped = subtyped;
 		
-		if (isSubtyped) {
+		if (subtyped)
+		{
 			super.setDurability(subtype);
 		}
 		
-		this.name = name;
-		compactName = name.replaceAll(" ", "");
+		name = itemName;
+		compactName = itemName.replaceAll(" ", "");
 		priceBuy = buyPrice;
 		priceSell = sellPrice;
 		this.itemsID = itemsID;
 		
 		basePrice = baseValue;
-		this.slope = slope;
+		slope = dynamicSlope;
 		
 		plugin = codeRed;
 		
 		changeAmount(0);
 	}
 	
-	public EconItemStack(int sqlID, int itemID, boolean isSubtyped, short subtype, String name, int currentStock, boolean isInfinite,
-			int buyPrice, int sellPrice, int maxBuy, int maxSell, int itemsID, int baseValue, float slope, CodeRedLite codeRed) {
+	public EconItemStack(int sqlId, int itemID, boolean subtyped, short subtype, String itemName, int currentStock, boolean infinite,
+			int buyPrice, int sellPrice, int maxBuy, int maxSell, int itemsId, int baseValue, float dyanmicSlope, CodeRedLite codeRed)
+	{
 		super(itemID);
 		
-		this.isSubtyped = isSubtyped;
+		isSubtyped = subtyped;
 		
-		if (isSubtyped) {
+		if (subtyped)
+		{
 			super.setDurability(subtype);
 		}
 		
-		this.name = name;
-		compactName = name.replaceAll(" ", "");
+		name = itemName;
+		compactName = itemName.replaceAll(" ", "");
 		
-		this.isInfinite = isInfinite;
+		isInfinite = infinite;
 		priceBuy = buyPrice;
 		priceSell = sellPrice;
-		this.itemsID = itemsID;
-		this.sqlID = sqlID;
+		itemsID = itemsId;
+		sqlID = sqlId;
 		
 		basePrice = baseValue;
-		this.slope = slope;
+		this.slope = dyanmicSlope;
 		
 		plugin = codeRed;
 		
@@ -98,64 +105,73 @@ public class EconItemStack extends ItemStack {
 	/**
 	 * @return the basePrice
 	 */
-	public int getBasePrice() {
+	public int getBasePrice()
+	{
 		return basePrice;
 	}
 	
 	/**
-	 * @param basePrice
+	 * @param newBase
 	 *            the basePrice to set
 	 */
-	public void setBasePrice(int basePrice) {
-		this.basePrice = basePrice;
+	public void setBasePrice(int newBase)
+	{
+		this.basePrice = newBase;
 	}
 	
 	/**
 	 * @return the isSubtyped
 	 */
-	public boolean isSubtyped() {
+	public boolean isSubtyped()
+	{
 		return isSubtyped;
 	}
 	
 	/**
 	 * @return the compactName
 	 */
-	public String getCompactName() {
+	public String getCompactName()
+	{
 		return compactName;
 	}
 	
 	/**
 	 * @return the sqlID
 	 */
-	public int getSqlID() {
+	public int getSqlID()
+	{
 		return sqlID;
 	}
 	
 	/**
 	 * @return the name
 	 */
-	public String getName() {
+	public String getName()
+	{
 		return name;
 	}
 	
 	/**
 	 * @return the isInfinite
 	 */
-	public boolean isInfinite() {
+	public boolean isInfinite()
+	{
 		return isInfinite;
 	}
 	
 	/**
 	 * @return the itemsID
 	 */
-	public int getItemsID() {
+	public int getItemsID()
+	{
 		return itemsID;
 	}
 	
 	/**
 	 * @return the priceBuy
 	 */
-	public int getPriceBuy() {
+	public int getPriceBuy()
+	{
 		return priceBuy;
 	}
 	
@@ -165,14 +181,15 @@ public class EconItemStack extends ItemStack {
 	 */
 	//	public void setPriceBuy(int priceBuy) {
 	//		this.priceBuy = priceBuy;
-	//		
+	//
 	//		//totalBuy = getAmount() * priceBuy;
 	//	}
 	
 	/**
 	 * @return the priceSell
 	 */
-	public int getPriceSell() {
+	public int getPriceSell()
+	{
 		return priceSell;
 	}
 	
@@ -182,95 +199,112 @@ public class EconItemStack extends ItemStack {
 	 */
 	//	public void setPriceSell(int priceSell) {
 	//		this.priceSell = priceSell;
-	//		
+	//
 	//		//totalSell = getAmount() * priceSell;
 	//	}
 	
 	/**
 	 * @return the totalBuy
 	 */
-	public int getTotalBuy() {
+	public int getTotalBuy()
+	{
 		return totalBuy;
 	}
 	
 	/**
 	 * @return the totalSell
 	 */
-	public int getTotalSell() {
+	public int getTotalSell()
+	{
 		return totalSell;
 	}
 	
-	public void changeAmount(int amount) {
+	public void changeAmount(int amount)
+	{
 		setAmount(amount);
 		
-		if (plugin.getProperties().isDynamicPrices()) {
+		if (plugin.getProperties().isDynamicPrices())
+		{
 			priceSell = Math.round(basePrice / ((amount * slope) + 1));
 			priceBuy = Math.round(basePrice / (amount * slope));
 		}
-		else {
+		else
+		{
 			totalBuy = getAmount() * priceBuy;
 			totalSell = getAmount() * priceSell;
 		}
 	}
 	
-	public int quoteBuy(int amount) {
+	public int quoteBuy(int amount)
+	{
 		int runningTotal = 0;
 		
-		for (int x = 0; x < amount; x++) {
+		for (int x = 0; x < amount; x++)
+		{
 			runningTotal += Math.round((basePrice / ((getAmount() - x) * slope)));
 		}
 		
-		if (plugin.getProperties().isDynamicPrices()) {
+		if (plugin.getProperties().isDynamicPrices())
+		{
 			return runningTotal;
 		}
-		else {
+		else
+		{
 			return priceBuy * getAmount();
 		}
 	}
 	
-	public int quoteSell(int amount) {
+	public int quoteSell(int amount)
+	{
 		int runningTotal = 0;
 		
-		for (int x = 0; x < amount; x++) {
+		for (int x = 0; x < amount; x++)
+		{
 			runningTotal += Math.round((basePrice / (((getAmount() + x) * slope) + 1)));
 		}
 		
-		if (plugin.getProperties().isDynamicPrices()) {
+		if (plugin.getProperties().isDynamicPrices())
+		{
 			return runningTotal;
 		}
-		else {
+		else
+		{
 			return priceSell * getAmount();
 		}
 	}
 	
 	/**
-	 * @param totalBuy
+	 * @param newTotal
 	 *            the totalBuy to set
 	 */
-	public void setTotalBuy(int totalBuy) {
-		this.totalBuy = totalBuy;
+	public void setTotalBuy(int newTotal)
+	{
+		this.totalBuy = newTotal;
 	}
 	
 	/**
-	 * @param totalSell
+	 * @param newTotal
 	 *            the totalSell to set
 	 */
-	public void setTotalSell(int totalSell) {
-		this.totalSell = totalSell;
+	public void setTotalSell(int newTotal)
+	{
+		this.totalSell = newTotal;
 	}
 	
 	/**
 	 * @return the slope
 	 */
-	public float getSlope() {
+	public float getSlope()
+	{
 		return slope;
 	}
 	
 	/**
-	 * @param slope
+	 * @param newSlope
 	 *            the slope to set
 	 */
-	public void setSlope(float slope) {
-		this.slope = slope;
+	public void setSlope(float newSlope)
+	{
+		this.slope = newSlope;
 	}
 }

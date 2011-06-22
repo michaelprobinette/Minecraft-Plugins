@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.Vandolis.CodeRedLite.Runnable;
 
@@ -8,13 +8,15 @@ import com.Vandolis.CodeRedLite.CodeRedLite;
 /**
  * @author Vandolis
  */
-public class AutoRestock implements Runnable {
+public class AutoRestock implements Runnable
+{
 	private CodeRedLite	plugin	= null;
 	
 	/**
 	 * @param codeRedLite
 	 */
-	public AutoRestock(CodeRedLite codeRedLite) {
+	public AutoRestock(CodeRedLite codeRedLite)
+	{
 		plugin = codeRedLite;
 	}
 	
@@ -22,7 +24,8 @@ public class AutoRestock implements Runnable {
 	 * @see java.lang.Runnable#run()
 	 */
 	@Override
-	public void run() {
+	public void run()
+	{
 		// TODO Auto-generated method stub
 		
 	}

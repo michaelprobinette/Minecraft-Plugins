@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.Vandolis.CodeRedLite.Commands;
 
@@ -14,13 +14,15 @@ import com.Vandolis.CodeRedLite.EconPlayer;
 /**
  * @author Vandolis
  */
-public class Pay implements CommandExecutor {
+public class Pay implements CommandExecutor
+{
 	private CodeRedLite	plugin	= null;
 	
 	/**
 	 * @param codeRedLite
 	 */
-	public Pay(CodeRedLite codeRedLite) {
+	public Pay(CodeRedLite codeRedLite)
+	{
 		plugin = codeRedLite;
 	}
 	
@@ -28,41 +30,50 @@ public class Pay implements CommandExecutor {
 	 * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] split)
+	{
 		EconPlayer econPlayer = plugin.getEconPlayer((Player) sender);
 		
 		int amount = 0;
 		EconPlayer target = null;
 		
-		if (split.length != 2) {
+		if (split.length != 2)
+		{
 			sender.sendMessage(plugin.getPluginMessage() + "Invalid parameters.");
 			return true;
 		}
 		
-		for (String iter : split) {
-			try {
+		for (String iter : split)
+		{
+			try
+			{
 				amount = Integer.parseInt(iter);
 			}
-			catch (Exception e) {
+			catch (Exception e)
+			{
 				target = plugin.getEconPlayer(iter);
 			}
 		}
 		
-		if (target == null) {
+		if (target == null)
+		{
 			sender.sendMessage(plugin.getPluginMessage() + "The target must be online to pay them.");
 			return true;
 		}
 		
-		if (amount <= 0) {
+		if (amount <= 0)
+		{
 			sender.sendMessage(plugin.getPluginMessage() + "Invalid amount.");
 			return true;
 		}
 		
-		if ((amount > econPlayer.getBalance()) && (econPlayer.getBalance() != -1)) {
+		if ((amount > econPlayer.getBalance()) && (econPlayer.getBalance() != -1))
+		{
 			amount = econPlayer.getBalance();
 		}
 		
-		if (amount <= 0) {
+		if (amount <= 0)
+		{
 			sender.sendMessage(plugin.getPluginMessage() + "You do not have any " + plugin.getProperties().getMoneyName());
 			return true;
 		}

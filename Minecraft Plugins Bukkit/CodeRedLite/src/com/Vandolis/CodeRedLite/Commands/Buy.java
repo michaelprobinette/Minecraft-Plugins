@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.Vandolis.CodeRedLite.Commands;
 
@@ -19,13 +19,15 @@ import com.Vandolis.CodeRedLite.EconPlayer;
 /**
  * @author Vandolis
  */
-public class Buy implements CommandExecutor {
+public class Buy implements CommandExecutor
+{
 	private CodeRedLite	plugin	= null;
 	
 	/**
 	 * @param codeRedLite
 	 */
-	public Buy(CodeRedLite codeRedLite) {
+	public Buy(CodeRedLite codeRedLite)
+	{
 		plugin = codeRedLite;
 	}
 	
@@ -33,20 +35,24 @@ public class Buy implements CommandExecutor {
 	 * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] split)
+	{
 		EconPlayer econPlayer = plugin.getEconPlayer((Player) sender);
 		
 		String itemName = "";
 		int amount = 1;
 		
-		for (String iter : split) {
+		for (String iter : split)
+		{
 			/*
 			 * Try and convert into the amount, if that fails it must be part of the name.
 			 */
-			try {
+			try
+			{
 				amount = Integer.valueOf(iter);
 			}
-			catch (NumberFormatException e) {
+			catch (NumberFormatException e)
+			{
 				/*
 				 * Not a number, add to name.
 				 */
@@ -57,27 +63,32 @@ public class Buy implements CommandExecutor {
 		itemName = itemName.trim();
 		itemName = itemName.toLowerCase();
 		
-		if (amount <= 0) {
+		if (amount <= 0)
+		{
 			sender.sendMessage(plugin.getPluginMessage() + "Invalid amount.");
 			return true;
 		}
 		
-		boolean subtyped = false;
+		boolean subtyped = itemName.contains(":");
 		short subtype = 0;
 		
-		if ((subtyped = itemName.contains(":")) == true) {
+		if (subtyped)
+		{
 			String[] args = itemName.split(":");
 			itemName = args[0];
-			if (args.length == 2) {
+			if (args.length == 2)
+			{
 				subtype = Short.parseShort(args[1]);
 			}
-			else {
+			else
+			{
 				sender.sendMessage(plugin.getPluginMessage() + "Invalid subtype.");
 				return true;
 			}
 		}
 		
-		if (itemName.contains("max")) {
+		if (itemName.contains("max"))
+		{
 			itemName = itemName.replace("max", "");
 			amount = 100000000;
 		}
@@ -86,26 +97,32 @@ public class Buy implements CommandExecutor {
 		
 		EconItemStack roughItem = null;
 		
-		if (subtyped) {
+		if (subtyped)
+		{
 			roughItem = plugin.getShop().getItem(itemName, subtype);
 		}
-		else {
+		else
+		{
 			roughItem = plugin.getShop().getItem(itemName);
 		}
 		
-		if (roughItem == null) {
+		if (roughItem == null)
+		{
 			sender.sendMessage(plugin.getPluginMessage() + "Invalid item name.");
 			return true;
 		}
 		
 		// Check amount
-		if ((roughItem.isInfinite() == false) && (roughItem.getAmount() != -1)) {
-			if (roughItem.getAmount() < amount) {
+		if ((!roughItem.isInfinite()) && (roughItem.getAmount() != -1))
+		{
+			if (roughItem.getAmount() < amount)
+			{
 				amount = roughItem.getAmount();
 			}
 		}
 		
-		if (amount == 0) {
+		if (amount == 0)
+		{
 			sender.sendMessage(plugin.getPluginMessage() + plugin.getShop().getName() + " does not have enough of that item.");
 			return true;
 		}
@@ -116,12 +133,15 @@ public class Buy implements CommandExecutor {
 		item.setTotalSell(roughItem.quoteSell(amount));
 		
 		// Resize to amount the player can afford
-		if (econPlayer.getBalance() < item.getTotalBuy()) {
+		if (econPlayer.getBalance() < item.getTotalBuy())
+		{
 			int count = econPlayer.getBalance() / item.getPriceBuy();
 			
-			for (int x = 0; x < count; x++) {
+			for (int x = 0; x < count; x++)
+			{
 				item.changeAmount(x);
-				if (item.getTotalBuy() > econPlayer.getBalance()) {
+				if (item.getTotalBuy() > econPlayer.getBalance())
+				{
 					item.changeAmount(x - 1);
 					
 					item.setTotalBuy(roughItem.quoteBuy(x - 1));
@@ -133,38 +153,47 @@ public class Buy implements CommandExecutor {
 			//item = new EconItemStack(roughItem, count);
 		}
 		
-		if (item.getAmount() <= 0) {
+		if (item.getAmount() <= 0)
+		{
 			sender.sendMessage(plugin.getPluginMessage() + "You cannot afford to buy any!");
 			return true;
 		}
 		
 		// Check inventory space
 		int available = 0; // The amount the player can hold
-		for (ItemStack iter : econPlayer.getPlayer().getInventory().getContents()) {
-			if (iter == null) {
+		for (ItemStack iter : econPlayer.getPlayer().getInventory().getContents())
+		{
+			if (iter == null)
+			{
 				// Empty slot
 				available += 64;
 			}
-			else if (item.isSubtyped()) {
-				if ((iter.getTypeId() == item.getTypeId()) && (iter.getDurability() == item.getDurability())) {
+			else if (item.isSubtyped())
+			{
+				if ((iter.getTypeId() == item.getTypeId()) && (iter.getDurability() == item.getDurability()))
+				{
 					// Same item type check how much more the stack can hold
 					available += (64 - iter.getAmount());
 				}
 			}
-			else {
-				if (iter.getTypeId() == item.getTypeId()) {
+			else
+			{
+				if (iter.getTypeId() == item.getTypeId())
+				{
 					available += (64 - iter.getAmount());
 				}
 			}
 		}
 		
-		if (available < item.getAmount()) {
+		if (available < item.getAmount())
+		{
 			item.changeAmount(available);
 			item.setTotalBuy(roughItem.quoteBuy(available));
 			item.setTotalSell(roughItem.quoteSell(available));
 		}
 		
-		if (item.getAmount() <= 0) {
+		if (item.getAmount() <= 0)
+		{
 			sender.sendMessage(plugin.getPluginMessage() + "You do not have enough space.");
 			return true;
 		}
@@ -185,10 +214,12 @@ public class Buy implements CommandExecutor {
 		econPlayer.update();
 		plugin.getShop().updateItem(item);
 		
-		try {
+		try
+		{
 			plugin.getSQL().logBuy(econPlayer, item);
 		}
-		catch (SQLException e) {
+		catch (SQLException e)
+		{
 			plugin.getLog().log(Level.WARNING, "CodeRedLite could not update a new buy. " + e.getLocalizedMessage());
 		}
 		

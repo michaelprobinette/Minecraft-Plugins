@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.Vandolis.CodeRedLite.Commands;
 
@@ -12,7 +12,8 @@ import com.Vandolis.CodeRedLite.CodeRedLite;
 /**
  * @author Vandolis
  */
-public class Debug implements CommandExecutor {
+public class Debug implements CommandExecutor
+{
 	private CodeRedLite	plugin		= null;
 	private int			basePrice	= 250;
 	private float		slope		= 1.0f;
@@ -20,7 +21,8 @@ public class Debug implements CommandExecutor {
 	/**
 	 * @param codeRedLite
 	 */
-	public Debug(CodeRedLite codeRedLite) {
+	public Debug(CodeRedLite codeRedLite)
+	{
 		plugin = codeRedLite;
 	}
 	
@@ -28,16 +30,19 @@ public class Debug implements CommandExecutor {
 	 * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] split) {
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] split)
+	{
 		int price = Integer.parseInt(split[0]);
 		int amount = Integer.parseInt(split[1]);
 		int totalBuy = 0;
 		
 		totalBuy = recursiveBuy(price, amount);
-		if (amount == 0) {
+		if (amount == 0)
+		{
 			price = 0;
 		}
-		else {
+		else
+		{
 			price = (int) (price / (amount * 1.0f));
 		}
 		
@@ -47,53 +52,62 @@ public class Debug implements CommandExecutor {
 		return true;
 	}
 	
-	public int recursiveBuy(int price, int amount) {
-		float slope = 1.0f;
+	public int recursiveBuy(int price, int amount)
+	{
+		float staticSlope = 1.0f;
 		int newBuyPrice = 0;
 		
-		if (amount == 0) {
+		if (amount == 0)
+		{
 			return 0;
 		}
 		
-		newBuyPrice = (int) (price / (amount * slope));
+		newBuyPrice = (int) (price / (amount * staticSlope));
 		
 		return newBuyPrice + recursiveBuy(price, amount - 1);
 	}
 	
-	public int recursiveSell(int price, int amount) {
-		float slope = 1.0f;
+	public int recursiveSell(int price, int amount)
+	{
+		float staticSlope = 1.0f;
 		int newSellPrice = 0;
 		
-		if (amount == 0) {
+		if (amount == 0)
+		{
 			return 0;
 		}
 		
-		newSellPrice = (int) (price / ((amount * slope) + 1));
+		newSellPrice = (int) (price / ((amount * staticSlope) + 1));
 		
 		return newSellPrice + recursiveSell(price, amount - 1);
 	}
 	
-	public int quoteBuy(int amount) {
+	public int quoteBuy(int amount)
+	{
 		int runningTotal = 0;
 		
-		for (int x = 0; x < amount; x++) {
+		for (int x = 0; x < amount; x++)
+		{
 			runningTotal += Math.round((basePrice / ((getAmount() - x) * slope)));
 		}
 		
 		return runningTotal;
 	}
 	
-	public int quoteSell(int amount) {
+	public int quoteSell(int amount)
+	{
 		int runningTotal = 0;
 		
-		for (int x = 0; x < amount; x++) {
+		for (int x = 0; x < amount; x++)
+		{
 			runningTotal += Math.round((basePrice / (((getAmount() + x) * slope) + 1)));
 		}
 		
 		return runningTotal;
 	}
 	
-	public int getAmount() {
+	public int getAmount()
+	{
 		return 4;
 	}
 }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.Vandolis.CodeRedLite;
 
@@ -11,25 +11,30 @@ import org.bukkit.event.player.PlayerQuitEvent;
 /**
  * @author Vandolis
  */
-public class EconPlayerListener extends PlayerListener {
+public class EconPlayerListener extends PlayerListener
+{
 	private CodeRedLite	plugin	= null;
 	
 	/**
 	 * @param codeRedEcon
 	 */
-	public EconPlayerListener(CodeRedLite codeRedEcon) {
+	public EconPlayerListener(CodeRedLite codeRedEcon)
+	{
 		plugin = codeRedEcon;
 	}
 	
-	public void onPlayerJoin(PlayerJoinEvent event) {
+	public void onPlayerJoin(PlayerJoinEvent event)
+	{
 		plugin.loadPlayer(event.getPlayer());
 	}
 	
-	public void onPlayerQuit(PlayerQuitEvent event) {
+	public void onPlayerQuit(PlayerQuitEvent event)
+	{
 		plugin.unloadPlayer(event.getPlayer());
 	}
 	
-	public void onPlayerKick(PlayerKickEvent event) {
+	public void onPlayerKick(PlayerKickEvent event)
+	{
 		plugin.unloadPlayer(event.getPlayer());
 	}
 }

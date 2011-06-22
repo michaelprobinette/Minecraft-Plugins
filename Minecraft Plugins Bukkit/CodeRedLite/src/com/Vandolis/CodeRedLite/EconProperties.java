@@ -1,19 +1,19 @@
 /**
- * 
+ *
  */
 package com.Vandolis.CodeRedLite;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import org.bukkit.util.config.Configuration;
 
 /**
  * @author Vandolis
  */
-public class EconProperties {
+public class EconProperties
+{
 	// Player
-	private boolean		autoPay					= true;
+	private boolean		autoPay					= false;
 	private int			autoPayTime				= 10;			// Minutes
 	private int			autoPayAmount			= 20;
 	
@@ -26,6 +26,9 @@ public class EconProperties {
 																
 	// Items
 	private boolean		isDynamicPrices			= false;
+	private boolean		individualBasePrices	= false;
+	private float		slope					= 1.0f;
+	private int			baseValue				= 250;
 	
 	// General
 	private boolean		autoSave				= true;
@@ -37,219 +40,216 @@ public class EconProperties {
 	private CodeRedLite	plugin					= null;
 	private File		file					= null;
 	
-	public EconProperties(CodeRedLite codeRed) {
+	public EconProperties(CodeRedLite codeRed)
+	{
 		plugin = codeRed;
-		file = new File(plugin.getDataFolder().getPath() + File.separator + "config.yml");
-		configCheck();
+		file = new File(plugin.getDataFolder().getPath() + File.separator + "settings1.yml");
+		
+		loadSettings();
+		//		configCheck();
 	}
 	
-	public void configCheck() {
+	/**
+	 *
+	 */
+	private void loadSettings()
+	{
 		plugin.getDataFolder().mkdir();
 		
-		if (file.exists() == false) {
-			try {
+		if (!file.exists())
+		{
+			try
+			{
 				file.createNewFile();
-				addDefaults();
+				writeDefaults();
 			}
-			catch (Exception ex) {
+			catch (Exception ex)
+			{
 				ex.printStackTrace();
 			}
 		}
-		else {
-			loadkeys();
+		else
+		{
+			readSettings();
 		}
 	}
 	
-	private void write(String root, Object x) {
-		Configuration config = load();
-		config.setProperty(root, x);
+	/**
+	 *
+	 */
+	private void readSettings()
+	{
+		Configuration config = new Configuration(file);
+		config.load();
+		
+		// General
+		pluginMessage = config.getString("settings.general.MessagePrefix");
+		moneyName = config.getString("settings.general.MoneyName");
+		
+		// Items
+		enfoceItemWhitelist = config.getBoolean("settings.items.UseItemWhitelist", enfoceItemWhitelist);
+		isDynamicPrices = config.getBoolean("settings.items.UseDynamicPricing", isDynamicPrices);
+		individualBasePrices = config.getBoolean("settings.items.UseIndividualPriceBase", individualBasePrices);
+		baseValue = config.getInt("settings.items.BaseValue", baseValue);
+		slope = (float) config.getDouble("settings.items.PriceSlope", slope);
+		
+		// Shops
+		shopsHaveInfiniteItems = config.getBoolean("settings.shops.InfiniteItems", shopsHaveInfiniteItems);
+		shopsHaveInfiniteMoney = config.getBoolean("settings.shops.InfiniteMoney", shopsHaveInfiniteMoney);
+		
+		plugin.getLog().info("CodeRedLite has finished loading settings");
+	}
+	
+	/**
+	 *
+	 */
+	private void writeDefaults()
+	{
+		plugin.getLog().info("CodeRedLite did not detect a settings file. Writing defaults...");
+		
+		Configuration config = new Configuration(file);
+		config.load();
+		
+		// General
+		config.setProperty("settings.general.MessagePrefix", pluginMessage);
+		config.setProperty("settings.general.MoneyName", moneyName);
+		
+		// Items
+		config.setProperty("settings.items.UseItemWhitelist", enfoceItemWhitelist);
+		config.setProperty("settings.items.UseDynamicPricing", isDynamicPrices);
+		config.setProperty("settings.items.UseIndividualBasePrice", individualBasePrices);
+		config.setProperty("settings.items.PriceBase", baseValue);
+		config.setProperty("settings.items.PriceSlope", slope);
+		
+		// Shops
+		config.setProperty("settings.shops.InfiniteItems", shopsHaveInfiniteItems);
+		config.setProperty("settings.shops.InfiniteMoney", shopsHaveInfiniteMoney);
+		
 		config.save();
-	}
-	
-	private boolean readBoolean(String root) {
-		Configuration config = load();
-		return config.getBoolean(root, true);
-	}
-	
-	private double readDouble(String root) {
-		Configuration config = load();
-		return config.getDouble(root, 0);
-	}
-	
-	private ArrayList<String> readStringList(String root) {
-		Configuration config = load();
-		return (ArrayList<String>) config.getKeys(root);
-	}
-	
-	private String readString(String root) {
-		Configuration config = load();
-		return config.getString(root);
-	}
-	
-	private int readInt(String root) {
-		Configuration config = load();
-		return config.getInt(root, 0);
-	}
-	
-	private Configuration load() {
-		try {
-			Configuration config = new Configuration(file);
-			config.load();
-			return config;
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	private void addDefaults() {
-		plugin.log.info("Generating Config File...");
-		write("AutoPay", autoPay);
-		write("AutoPayTime", autoPayTime);
-		write("AutoPayAmount", autoPayAmount);
-		write("AutoRestock", autoRestock);
-		write("AutoRestockTime", autoRestockTime);
-		write("MoneyName", moneyName);
-		write("PluginMessage", plugin.getPluginMessage());
-		write("AutoSave", autoSave);
-		write("UseItemWhitelist", enfoceItemWhitelist);
-		write("UseDynamicPrices", isDynamicPrices);
-		write("ShopsHaveInfiniteItems", shopsHaveInfiniteItems);
-		write("ShopsHaveInfiniteMoney", shopsHaveInfiniteMoney);
-		loadkeys();
 	}
 	
 	/**
 	 * @return the enfoceItemWhitelist
 	 */
-	public boolean isEnfoceItemWhitelist() {
+	public boolean isEnfoceItemWhitelist()
+	{
 		return enfoceItemWhitelist;
 	}
 	
 	/**
 	 * @return the plugin
 	 */
-	public CodeRedLite getPlugin() {
+	public CodeRedLite getPlugin()
+	{
 		return plugin;
 	}
 	
 	/**
 	 * @return the isDynamicPrices
 	 */
-	public boolean isDynamicPrices() {
+	public boolean isDynamicPrices()
+	{
 		return isDynamicPrices;
-	}
-	
-	private void loadkeys() {
-		plugin.log.info("Loading Config File...");
-		
-		// Player
-		autoPay = readBoolean("AutoPay");
-		autoPayTime = readInt("AutoPayTime");
-		autoPayAmount = readInt("AutoPayAmount");
-		
-		// Shop
-		autoRestock = readBoolean("AutoRestock");
-		autoRestockTime = readInt("AutoRestockTime");
-		enfoceItemWhitelist = readBoolean("UseItemWhitelist");
-		shopsHaveInfiniteItems = readBoolean("ShopsHaveInfiniteItems");
-		shopsHaveInfiniteMoney = readBoolean("ShopsHaveInfiniteMoney");
-		
-		// Item
-		isDynamicPrices = readBoolean("UseDynamicPrices");
-		
-		// General
-		moneyName = readString("MoneyName");
-		pluginMessage = readString("PluginMessage");
-		autoSave = readBoolean("AutoSave");
 	}
 	
 	/**
 	 * @return the autoRestock
 	 */
-	public boolean isAutoRestock() {
+	public boolean isAutoRestock()
+	{
 		return autoRestock;
 	}
 	
 	/**
 	 * @return the autoRestockTime
 	 */
-	public int getAutoRestockTime() {
+	public int getAutoRestockTime()
+	{
 		return autoRestockTime;
 	}
 	
 	/**
 	 * @return the autoPay
 	 */
-	public boolean isAutoPay() {
+	public boolean isAutoPay()
+	{
 		return autoPay;
 	}
 	
 	/**
 	 * @return the autoSave
 	 */
-	public boolean isAutoSave() {
+	public boolean isAutoSave()
+	{
 		return autoSave;
 	}
 	
 	/**
 	 * @return autoPayTime
 	 */
-	public int getAutoPayTime() {
+	public int getAutoPayTime()
+	{
 		return autoPayTime;
 	}
 	
 	/**
 	 * @return autoPayAmount
 	 */
-	public int getAutoPayAmount() {
+	public int getAutoPayAmount()
+	{
 		return autoPayAmount;
 	}
 	
 	/**
 	 * @return the shopsHaveInfiniteItems
 	 */
-	public boolean isShopsHaveInfiniteItems() {
+	public boolean isShopsHaveInfiniteItems()
+	{
 		return shopsHaveInfiniteItems;
 	}
 	
 	/**
 	 * @return the shopsHaveInfiniteMoney
 	 */
-	public boolean isShopsHaveInfiniteMoney() {
+	public boolean isShopsHaveInfiniteMoney()
+	{
 		return shopsHaveInfiniteMoney;
 	}
 	
 	/**
 	 * @return restockTime
 	 */
-	public int getRestockTime() {
+	public int getRestockTime()
+	{
 		return autoRestockTime;
 	}
 	
 	/**
 	 * @return autoSavetime
 	 */
-	public int getAutoSaveTime() {
+	public int getAutoSaveTime()
+	{
 		return autoSaveTime;
 	}
 	
 	/**
 	 * @return moneyName
 	 */
-	public String getMoneyName() {
+	public String getMoneyName()
+	{
 		return moneyName;
 	}
 	
 	/**
 	 * @return the pluginMessage
 	 */
-	public String getPluginMessage() {
+	public String getPluginMessage()
+	{
 		return pluginMessage;
 	}
 	
-	public boolean isEnforceItemWhitelist() {
+	public boolean isEnforceItemWhitelist()
+	{
 		return enfoceItemWhitelist;
 	}
 	

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.Vandolis.CodeRedLite;
 
@@ -16,33 +16,39 @@ import org.bukkit.entity.Player;
 /**
  * @author Vandolis
  */
-public class SQLDatabase {
-	private String		DATA	= null;
-	private Connection	CONN	= null;
-	private CodeRedLite	plugin	= null;
+public class SQLDatabase
+{
+	private String		dataLocation	= null;
+	private Connection	conn			= null;
+	private CodeRedLite	plugin			= null;
 	
-	protected SQLDatabase(CodeRedLite codeRedLite) {
+	protected SQLDatabase(CodeRedLite codeRedLite)
+	{
 		plugin = codeRedLite;
 		
-		DATA = "jdbc:sqlite:" + plugin.getDataFolder() + "/CodeRedLite.sqlite";
+		dataLocation = "jdbc:sqlite:" + plugin.getDataFolder() + "/CodeRedLite.sqlite";
 		
-		try {
+		try
+		{
 			Class.forName("org.sqlite.JDBC");
-			CONN = DriverManager.getConnection(DATA);
+			conn = DriverManager.getConnection(dataLocation);
 		}
-		catch (Exception e) {
-			plugin.log.log(Level.SEVERE, "CodeRedLite could not connect to the database. " + e.getLocalizedMessage());
+		catch (Exception e)
+		{
+			plugin.getLog().log(Level.SEVERE, "CodeRedLite could not connect to the database. " + e.getLocalizedMessage());
 		}
 	}
 	
-	protected EconPlayer getEconPlayer(Player player) throws SQLException {
-		PreparedStatement prep = CONN.prepareStatement("SELECT ID, Balance, LastShopTransaction FROM Players WHERE Name = ?");
+	protected EconPlayer getEconPlayer(Player player) throws SQLException
+	{
+		PreparedStatement prep = conn.prepareStatement("SELECT ID, Balance, LastShopTransaction FROM Players WHERE Name = ?");
 		prep.setString(1, player.getName());
 		ResultSet rs = prep.executeQuery();
 		
 		EconPlayer econPlayer = new EconPlayer(player);
 		
-		if (rs.next()) {
+		if (rs.next())
+		{
 			econPlayer.setSQLID(rs.getInt("ID"));
 			econPlayer.setBalance(rs.getInt("Balance"));
 			econPlayer.setLastShopTransaction(rs.getInt("LastShopTransaction"));
@@ -57,10 +63,12 @@ public class SQLDatabase {
 	/**
 	 * @param econPlayer
 	 */
-	public void update(EconPlayer econPlayer) throws SQLException {
-		if (econPlayer.getSQLID() == 0) {
+	public void update(EconPlayer econPlayer) throws SQLException
+	{
+		if (econPlayer.getSQLID() == 0)
+		{
 			// New player
-			PreparedStatement prep = CONN.prepareStatement("INSERT INTO Players (Name,Balance,LastShopTransaction) VALUES (?,?,?);");
+			PreparedStatement prep = conn.prepareStatement("INSERT INTO Players (Name,Balance,LastShopTransaction) VALUES (?,?,?);");
 			prep.setString(1, econPlayer.getPlayer().getName());
 			prep.setInt(2, econPlayer.getBalance());
 			prep.setInt(3, econPlayer.getLastShopTransaction());
@@ -69,9 +77,10 @@ public class SQLDatabase {
 			
 			prep.close();
 		}
-		else {
+		else
+		{
 			// Old player
-			PreparedStatement prep = CONN.prepareStatement("UPDATE Players SET Balance = ?, LastShopTransaction = ? WHERE ID = ?;");
+			PreparedStatement prep = conn.prepareStatement("UPDATE Players SET Balance = ?, LastShopTransaction = ? WHERE ID = ?;");
 			prep.setInt(1, econPlayer.getBalance());
 			prep.setInt(2, econPlayer.getLastShopTransaction());
 			prep.setInt(3, econPlayer.getSQLID());
@@ -82,15 +91,17 @@ public class SQLDatabase {
 		}
 	}
 	
-	public EconShop getEconShop(String name) throws SQLException {
+	public EconShop getEconShop(String name) throws SQLException
+	{
 		EconShop econShop = new EconShop(name, plugin);
 		
 		PreparedStatement prep =
-				CONN.prepareStatement("SELECT ID, Balance, AllItemsInfinite, CanRestock, AllowBuying, AllowSelling, UseMoney FROM Shops WHERE Name = ?;");
+				conn.prepareStatement("SELECT ID, Balance, AllItemsInfinite, CanRestock, AllowBuying, AllowSelling, UseMoney FROM Shops WHERE Name = ?;");
 		prep.setString(1, name);
 		ResultSet rs = prep.executeQuery();
 		
-		if (rs.next()) {
+		if (rs.next())
+		{
 			econShop.setSQLID(rs.getInt("ID"));
 			econShop.setBalance(rs.getInt("Balance"));
 			econShop.setAllItemsInfinite(rs.getBoolean("AllItemsInfinite"));
@@ -107,7 +118,7 @@ public class SQLDatabase {
 		
 		// Items
 		prep =
-				CONN.prepareStatement("SELECT Items.ItemID, Items.IsSubtyped, Items.Subtype, Items.Name, ShopItems.CurrentStock, "
+				conn.prepareStatement("SELECT Items.ItemID, Items.IsSubtyped, Items.Subtype, Items.Name, ShopItems.CurrentStock, "
 						+ "ShopItems.IsInfinite, ShopItems.BuyPrice, ShopItems.SellPrice, ShopItems.MaxSellAmount, ShopItems.MaxBuyAmount, "
 						+ "ShopItems.ItemID AS ItemsID, ShopItems.ID, Items.BaseValue, Items.Slope " + "FROM Items,ShopItems "
 						+ "WHERE ShopItems.ShopID = ? AND Items.ID = ShopItems.ItemID;");
@@ -119,7 +130,8 @@ public class SQLDatabase {
 		
 		//plugin.LOG.info("Stored Results");
 		
-		while (rs.next()) {
+		while (rs.next())
+		{
 			econShop.getInventory().add(
 					new EconItemStack(rs.getInt("ID"), rs.getInt("ItemID"), rs.getBoolean("IsSubtyped"), rs.getShort("Subtype"), rs
 							.getString("Name"), rs.getInt("CurrentStock"), rs.getBoolean("IsInfinite"), rs.getInt("BuyPrice"), rs
@@ -135,18 +147,21 @@ public class SQLDatabase {
 		return econShop;
 	}
 	
-	public void update(EconShop econShop) throws SQLException {
-		if (econShop.getSqlID() != 0) {
-			PreparedStatement prep = CONN.prepareStatement("UPDATE Shops SET Balance = ? WHERE ID = ?;");
+	public void update(EconShop econShop) throws SQLException
+	{
+		if (econShop.getSqlID() != 0)
+		{
+			PreparedStatement prep = conn.prepareStatement("UPDATE Shops SET Balance = ? WHERE ID = ?;");
 			prep.setInt(1, econShop.getBalance());
 			prep.setInt(2, econShop.getSqlID());
 			prep.executeUpdate();
 			
 			prep.close();
 		}
-		else {
+		else
+		{
 			PreparedStatement prep =
-					CONN.prepareStatement("INSERT INTO Shops (Name, Balance, AllItemsInfinite, CanRestock, AllowBuying, AllowSelling, UseMoney) "
+					conn.prepareStatement("INSERT INTO Shops (Name, Balance, AllItemsInfinite, CanRestock, AllowBuying, AllowSelling, UseMoney) "
 							+ "VALUES (?,?,?,?,?,?,?);");
 			prep.setString(1, econShop.getName());
 			prep.setInt(2, econShop.getBalance());
@@ -159,24 +174,26 @@ public class SQLDatabase {
 			
 			prep.close();
 			
-			prep = CONN.prepareStatement("SELECT ID FROM Shops WHERE Name = ?;");
+			prep = conn.prepareStatement("SELECT ID FROM Shops WHERE Name = ?;");
 			prep.setString(1, econShop.getName());
 			ResultSet rs = prep.executeQuery();
-			if (rs.next()) {
+			if (rs.next())
+			{
 				econShop.setSQLID(rs.getInt("ID"));
 			}
 			rs.close();
 		}
 		
 		// Items
-		PreparedStatement prepI = CONN.prepareStatement("DELETE FROM ShopItems WHERE ShopID = ?;");
+		PreparedStatement prepI = conn.prepareStatement("DELETE FROM ShopItems WHERE ShopID = ?;");
 		prepI.setInt(1, econShop.getSqlID());
 		prepI.executeUpdate();
 		
 		prepI =
-				CONN.prepareStatement("INSERT INTO ShopItems (ShopID,ItemID,CurrentStock,IsInfinite,BuyPrice,SellPrice) VALUES (?,?,?,?,?,?);");
+				conn.prepareStatement("INSERT INTO ShopItems (ShopID,ItemID,CurrentStock,IsInfinite,BuyPrice,SellPrice) VALUES (?,?,?,?,?,?);");
 		
-		for (EconItemStack iter : econShop.getInventory()) {
+		for (EconItemStack iter : econShop.getInventory())
+		{
 			prepI.setInt(1, econShop.getSqlID());
 			prepI.setInt(2, iter.getItemsID());
 			prepI.setInt(3, iter.getAmount());
@@ -191,8 +208,9 @@ public class SQLDatabase {
 		prepI.close();
 	}
 	
-	public void update(int shopID, EconItemStack shopItem) throws SQLException {
-		PreparedStatement prep = CONN.prepareStatement("UPDATE ShopItems SET CurrentStock = ? WHERE ShopID = ? AND ItemID = ?;");
+	public void update(int shopID, EconItemStack shopItem) throws SQLException
+	{
+		PreparedStatement prep = conn.prepareStatement("UPDATE ShopItems SET CurrentStock = ? WHERE ShopID = ? AND ItemID = ?;");
 		prep.setInt(1, shopItem.getAmount());
 		prep.setInt(2, shopID);
 		prep.setInt(3, shopItem.getItemsID());
@@ -205,11 +223,13 @@ public class SQLDatabase {
 	/**
 	 * @param rawItems
 	 */
-	public void populateRawItems(ArrayList<EconItemStack> rawItems) throws SQLException {
-		PreparedStatement prep = CONN.prepareStatement("SELECT * FROM Items;");
+	public void populateRawItems(ArrayList<EconItemStack> rawItems) throws SQLException
+	{
+		PreparedStatement prep = conn.prepareStatement("SELECT * FROM Items;");
 		ResultSet rs = prep.executeQuery();
 		
-		while (rs.next()) {
+		while (rs.next())
+		{
 			rawItems.add(new EconItemStack(rs.getInt("ID"), rs.getString("Name"), rs.getInt("ItemID"), rs.getBoolean("IsSubtyped"), rs
 					.getShort("Subtype"), rs.getInt("BuyPrice"), rs.getInt("SellPrice"), rs.getInt("BaseValue"), rs.getFloat("Slope"),
 					plugin));
@@ -223,9 +243,10 @@ public class SQLDatabase {
 	 * @param econPlayer
 	 * @param item
 	 */
-	public void logBuy(EconPlayer econPlayer, EconItemStack item) throws SQLException {
+	public void logBuy(EconPlayer econPlayer, EconItemStack item) throws SQLException
+	{
 		PreparedStatement prep =
-				CONN.prepareStatement("INSERT INTO ShopTransactions (PlayerID,ShopItemID,ItemAmount,MoneyAmount,PlayerBought) "
+				conn.prepareStatement("INSERT INTO ShopTransactions (PlayerID,ShopItemID,ItemAmount,MoneyAmount,PlayerBought) "
 						+ "VALUES (?,?,?,?,?);");
 		prep.setInt(1, econPlayer.getSQLID());
 		prep.setInt(2, item.getSqlID());
@@ -242,9 +263,10 @@ public class SQLDatabase {
 	 * @param econPlayer
 	 * @param item
 	 */
-	public void logSell(EconPlayer econPlayer, EconItemStack item) throws SQLException {
+	public void logSell(EconPlayer econPlayer, EconItemStack item) throws SQLException
+	{
 		PreparedStatement prep =
-				CONN.prepareStatement("INSERT INTO ShopTransactions (PlayerID,ShopItemID,ItemAmount,MoneyAmount,PlayerBought) "
+				conn.prepareStatement("INSERT INTO ShopTransactions (PlayerID,ShopItemID,ItemAmount,MoneyAmount,PlayerBought) "
 						+ "VALUES (?,?,?,?,?);");
 		prep.setInt(1, econPlayer.getSQLID());
 		prep.setInt(2, item.getSqlID());

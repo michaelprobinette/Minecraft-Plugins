@@ -1,7 +1,8 @@
-/**
- * 
- */
 package com.Vandolis.CodeRedLite;
+
+/**
+ *
+ */
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -28,50 +29,55 @@ import com.Vandolis.CodeRedLite.Runnable.AutoRestock;
 import com.Vandolis.CodeRedLite.Runnable.AutoSave;
 
 /**
- * Econ plugin for Bukkit
+ * Econ plugin for Bukkit.
  * 
  * @author Vandolis
  */
-public class CodeRedLite extends JavaPlugin {
+public class CodeRedLite extends JavaPlugin
+{
 	private final EconPlayerListener	playerListener	= new EconPlayerListener(this);
 	private final EconBlockListener		blockListener	= new EconBlockListener(this);
-	protected Logger					log				= null;
-	protected ArrayList<EconPlayer>		PLAYERS			= null;
-	protected SQLDatabase				database		= null;
-	protected EconProperties			properties		= null;
-	protected EconShop					shop			= null;
+	private Logger						log				= null;
+	private ArrayList<EconPlayer>		loadedPlayers	= null;
+	private SQLDatabase					database		= null;
+	private EconProperties				properties		= null;
+	private EconShop					shop			= null;
 	private String						pluginMessage	= "";								//"[§cCodeRedLite§f] ";
 	private ArrayList<EconItemStack>	rawItems		= new ArrayList<EconItemStack>();
 	
-	public void onDisable() {
-		for (EconPlayer iter : PLAYERS) {
+	public void onDisable()
+	{
+		for (EconPlayer iter : loadedPlayers)
+		{
 			iter.unload();
 		}
 		
 		shop.update();
 		
 		log = null;
-		PLAYERS = null;
+		loadedPlayers = null;
 		database = null;
 		properties = null;
 		shop = null;
 	}
 	
-	public void onEnable() {
-		// TODO: Place any custom enable code here including the registration of any events
+	public void onEnable()
+	{
 		log = getServer().getLogger();
-		PLAYERS = new ArrayList<EconPlayer>();
+		loadedPlayers = new ArrayList<EconPlayer>();
 		database = new SQLDatabase(this);
 		properties = new EconProperties(this);
 		pluginMessage = properties.getPluginMessage();
-		try {
+		try
+		{
 			shop = database.getEconShop("The Shop");
 			shop.setAllItemsInfinite(properties.isShopsHaveInfiniteItems());
 			shop.setUseMoney(!properties.isShopsHaveInfiniteMoney());
 			log.info("The Shop has loaded " + shop.getInventory().size() + " items.");
 			database.populateRawItems(rawItems);
 		}
-		catch (SQLException e) {
+		catch (SQLException e)
+		{
 			log.log(Level.SEVERE, "Could not load the shop. " + e.getLocalizedMessage());
 		}
 		
@@ -93,19 +99,22 @@ public class CodeRedLite extends JavaPlugin {
 		getCommand("quote").setExecutor(new Quote(this));
 		
 		// Schedule the autopay
-		if (properties.isAutoPay() == true) {
+		if (properties.isAutoPay())
+		{
 			getServer().getScheduler().scheduleSyncRepeatingTask(this, new AutoPay(this), 1200 * properties.getAutoPayTime(),
 					1200 * properties.getAutoPayTime());
 		}
 		
 		// Schedule autosave
-		if (properties.isAutoSave() == true) {
+		if (properties.isAutoSave())
+		{
 			getServer().getScheduler().scheduleSyncRepeatingTask(this, new AutoSave(this), 1200 * properties.getAutoSaveTime(),
 					1200 * properties.getAutoSaveTime());
 		}
 		
 		// Schedule shop restocking if needed
-		if ((properties.isShopsHaveInfiniteItems() == false) && (properties.isAutoRestock() == true)) {
+		if ((!properties.isShopsHaveInfiniteItems()) && (properties.isAutoRestock()))
+		{
 			getServer().getScheduler().scheduleSyncRepeatingTask(this, new AutoRestock(this), 0, 1200 * properties.getRestockTime());
 		}
 		
@@ -120,13 +129,16 @@ public class CodeRedLite extends JavaPlugin {
 	/**
 	 * @param player
 	 */
-	public void loadPlayer(Player player) {
-		try {
-			PLAYERS.add(database.getEconPlayer(player));
+	public void loadPlayer(Player player)
+	{
+		try
+		{
+			loadedPlayers.add(database.getEconPlayer(player));
 			
 			log.info("Loaded player: " + player.getName());
 		}
-		catch (Exception e) {
+		catch (Exception e)
+		{
 			log.log(Level.WARNING, "CodeRedLite could not load " + player.getName() + " " + e.getLocalizedMessage());
 		}
 	}
@@ -134,63 +146,76 @@ public class CodeRedLite extends JavaPlugin {
 	/**
 	 * @param player
 	 */
-	public void unloadPlayer(Player player) {
-		for (EconPlayer iter : PLAYERS) {
-			if (iter.getPlayer() == player) {
+	public void unloadPlayer(Player player)
+	{
+		for (EconPlayer iter : loadedPlayers)
+		{
+			if (iter.getPlayer() == player)
+			{
 				iter.update();
-				PLAYERS.remove(iter);
+				loadedPlayers.remove(iter);
 				log.info("Unloaded player: " + player.getName());
 				break;
 			}
 		}
 	}
 	
-	public ArrayList<EconPlayer> getPlayers() {
-		return PLAYERS;
+	public ArrayList<EconPlayer> getPlayers()
+	{
+		return loadedPlayers;
 	}
 	
 	/**
 	 * @return properties
 	 */
-	public EconProperties getProperties() {
+	public EconProperties getProperties()
+	{
 		return properties;
 	}
 	
-	public SQLDatabase getSQL() {
+	public SQLDatabase getSQL()
+	{
 		return database;
 	}
 	
 	/**
 	 * @return the lOG
 	 */
-	public Logger getLog() {
+	public Logger getLog()
+	{
 		return log;
 	}
 	
 	/**
 	 * @return the pLAYERS
 	 */
-	public ArrayList<EconPlayer> getPLAYERS() {
-		return PLAYERS;
+	public ArrayList<EconPlayer> getLoadedPlayers()
+	{
+		return loadedPlayers;
 	}
 	
 	/**
 	 * @return the shop
 	 */
-	public EconShop getShop() {
+	public EconShop getShop()
+	{
 		return shop;
 	}
 	
 	/**
 	 * @return the pluginMessage
 	 */
-	public String getPluginMessage() {
+	public String getPluginMessage()
+	{
 		return pluginMessage;
 	}
 	
-	public EconPlayer getEconPlayer(Player player) {
-		for (EconPlayer iter : PLAYERS) {
-			if (iter.getPlayer() == player) {
+	public EconPlayer getEconPlayer(Player player)
+	{
+		for (EconPlayer iter : loadedPlayers)
+		{
+			if (iter.getPlayer() == player)
+			{
 				return iter;
 			}
 		}
@@ -201,17 +226,10 @@ public class CodeRedLite extends JavaPlugin {
 	}
 	
 	/**
-	 * @param database
-	 *            the database to set
-	 */
-	public void setDatabase(SQLDatabase database) {
-		this.database = database;
-	}
-	
-	/**
 	 * @return the rawItems
 	 */
-	public ArrayList<EconItemStack> getRawItems() {
+	public ArrayList<EconItemStack> getRawItems()
+	{
 		return rawItems;
 	}
 	
@@ -219,16 +237,20 @@ public class CodeRedLite extends JavaPlugin {
 	 * @param iter
 	 * @return
 	 */
-	public EconPlayer getEconPlayer(String name) {
-		for (EconPlayer iter : PLAYERS) {
-			if (iter.getPlayer().getName().equalsIgnoreCase(name)) {
+	public EconPlayer getEconPlayer(String name)
+	{
+		for (EconPlayer iter : loadedPlayers)
+		{
+			if (iter.getPlayer().getName().equalsIgnoreCase(name))
+			{
 				return iter;
 			}
 		}
 		
 		Player player = getServer().getPlayer(name);
 		
-		if (player == null) {
+		if (player == null)
+		{
 			return null;
 		}
 		
