@@ -39,6 +39,7 @@ public class Buy implements CommandExecutor
 	{
 		EconPlayer econPlayer = plugin.getEconPlayer((Player) sender);
 		
+		StringBuffer buf = new StringBuffer();
 		String itemName = "";
 		int amount = 1;
 		
@@ -56,11 +57,12 @@ public class Buy implements CommandExecutor
 				/*
 				 * Not a number, add to name.
 				 */
-				itemName += iter;
+				//itemName += iter;
+				buf.append(iter);
 			}
 		}
 		
-		itemName = itemName.trim();
+		itemName = buf.toString().trim();
 		itemName = itemName.toLowerCase();
 		
 		if (amount <= 0)

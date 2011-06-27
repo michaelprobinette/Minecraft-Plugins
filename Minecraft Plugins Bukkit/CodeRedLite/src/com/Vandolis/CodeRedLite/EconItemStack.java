@@ -95,7 +95,7 @@ public class EconItemStack extends ItemStack
 		sqlID = sqlId;
 		
 		basePrice = baseValue;
-		this.slope = dyanmicSlope;
+		slope = dyanmicSlope;
 		
 		plugin = codeRed;
 		
@@ -116,7 +116,7 @@ public class EconItemStack extends ItemStack
 	 */
 	public void setBasePrice(int newBase)
 	{
-		this.basePrice = newBase;
+		basePrice = newBase;
 	}
 	
 	/**
@@ -223,10 +223,15 @@ public class EconItemStack extends ItemStack
 	{
 		setAmount(amount);
 		
+		updatePrice();
+	}
+	
+	public void updatePrice()
+	{
 		if (plugin.getProperties().isDynamicPrices())
 		{
-			priceSell = Math.round(basePrice / ((amount * slope) + 1));
-			priceBuy = Math.round(basePrice / (amount * slope));
+			priceSell = Math.round(basePrice / ((getAmount() * slope) + 1));
+			priceBuy = Math.round(basePrice / (getAmount() * slope));
 		}
 		else
 		{
@@ -279,7 +284,7 @@ public class EconItemStack extends ItemStack
 	 */
 	public void setTotalBuy(int newTotal)
 	{
-		this.totalBuy = newTotal;
+		totalBuy = newTotal;
 	}
 	
 	/**
@@ -288,7 +293,7 @@ public class EconItemStack extends ItemStack
 	 */
 	public void setTotalSell(int newTotal)
 	{
-		this.totalSell = newTotal;
+		totalSell = newTotal;
 	}
 	
 	/**
@@ -305,6 +310,6 @@ public class EconItemStack extends ItemStack
 	 */
 	public void setSlope(float newSlope)
 	{
-		this.slope = newSlope;
+		slope = newSlope;
 	}
 }

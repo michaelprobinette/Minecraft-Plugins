@@ -36,7 +36,7 @@ import com.Vandolis.CodeRedLite.Runnable.AutoSave;
 public class CodeRedLite extends JavaPlugin
 {
 	private final EconPlayerListener	playerListener	= new EconPlayerListener(this);
-	private final EconBlockListener		blockListener	= new EconBlockListener(this);
+	//private final EconBlockListener		blockListener	= new EconBlockListener(this);
 	private Logger						log				= null;
 	private ArrayList<EconPlayer>		loadedPlayers	= null;
 	private SQLDatabase					database		= null;
@@ -44,6 +44,7 @@ public class CodeRedLite extends JavaPlugin
 	private EconShop					shop			= null;
 	private String						pluginMessage	= "";								//"[§cCodeRedLite§f] ";
 	private ArrayList<EconItemStack>	rawItems		= new ArrayList<EconItemStack>();
+	private ArrayList<Player>			debugees		= new ArrayList<Player>();
 	
 	public void onDisable()
 	{
@@ -59,6 +60,7 @@ public class CodeRedLite extends JavaPlugin
 		database = null;
 		properties = null;
 		shop = null;
+		debugees = null;
 	}
 	
 	public void onEnable()
@@ -71,8 +73,7 @@ public class CodeRedLite extends JavaPlugin
 		try
 		{
 			shop = database.getEconShop("The Shop");
-			shop.setAllItemsInfinite(properties.isShopsHaveInfiniteItems());
-			shop.setUseMoney(!properties.isShopsHaveInfiniteMoney());
+			
 			log.info("The Shop has loaded " + shop.getInventory().size() + " items.");
 			database.populateRawItems(rawItems);
 		}
@@ -81,12 +82,26 @@ public class CodeRedLite extends JavaPlugin
 			log.log(Level.SEVERE, "Could not load the shop. " + e.getLocalizedMessage());
 		}
 		
+		// Load based on properties
+		shop.setAllItemsInfinite(properties.isShopsHaveInfiniteItems());
+		shop.setUseMoney(!properties.isShopsHaveInfiniteMoney());
+		pluginMessage = properties.getPluginMessage();
+		if (!properties.isIndividualDynamicPricing())
+		{
+			for (EconItemStack iter : shop.getInventory())
+			{
+				iter.setBasePrice(properties.getBaseValue());
+				iter.setSlope(properties.getSlope());
+				iter.updatePrice();
+			}
+		}
+		
 		// Register our events
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal, this);
 		pm.registerEvent(Event.Type.PLAYER_KICK, playerListener, Priority.Normal, this);
-		pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
+		//pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
 		
 		// Register our commands
 		getCommand("buy").setExecutor(new Buy(this));
@@ -134,6 +149,15 @@ public class CodeRedLite extends JavaPlugin
 		try
 		{
 			loadedPlayers.add(database.getEconPlayer(player));
+			for (String iter : properties.getDebugees())
+			{
+				if (player.getName().equalsIgnoreCase(iter))
+				{
+					log.info("CodeRedLite added debugee " + player.getName());
+					player.sendMessage(pluginMessage + "You have been added as a debugee.");
+					debugees.add(player);
+				}
+			}
 			
 			log.info("Loaded player: " + player.getName());
 		}
@@ -154,6 +178,7 @@ public class CodeRedLite extends JavaPlugin
 			{
 				iter.update();
 				loadedPlayers.remove(iter);
+				debugees.remove(player);
 				log.info("Unloaded player: " + player.getName());
 				break;
 			}
@@ -235,7 +260,7 @@ public class CodeRedLite extends JavaPlugin
 	
 	/**
 	 * @param iter
-	 * @return
+	 * @return loaded EconPlayer
 	 */
 	public EconPlayer getEconPlayer(String name)
 	{
@@ -257,5 +282,22 @@ public class CodeRedLite extends JavaPlugin
 		loadPlayer(player);
 		
 		return getEconPlayer(player); // Hurrah recursion
+	}
+	
+	public boolean isDebugging(final Player player)
+	{
+		if (debugees.contains(player))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	public void setDebugging(final Player player)
+	{
+		debugees.add(player);
 	}
 }

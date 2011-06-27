@@ -174,9 +174,10 @@ public class SQLDatabase
 			
 			prep.close();
 			
-			prep = conn.prepareStatement("SELECT ID FROM Shops WHERE Name = ?;");
-			prep.setString(1, econShop.getName());
-			ResultSet rs = prep.executeQuery();
+			PreparedStatement prepID = conn.prepareStatement("SELECT ID FROM Shops WHERE Name = ?;");
+			//prep = conn.prepareStatement("SELECT ID FROM Shops WHERE Name = ?;");
+			prepID.setString(1, econShop.getName());
+			ResultSet rs = prepID.executeQuery();
 			if (rs.next())
 			{
 				econShop.setSQLID(rs.getInt("ID"));

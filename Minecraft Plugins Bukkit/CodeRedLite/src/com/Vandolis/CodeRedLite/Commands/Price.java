@@ -6,6 +6,7 @@ package com.Vandolis.CodeRedLite.Commands;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import com.Vandolis.CodeRedLite.CodeRedLite;
 import com.Vandolis.CodeRedLite.EconItemStack;
@@ -31,14 +32,16 @@ public class Price implements CommandExecutor
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] split)
 	{
+		StringBuffer buf = new StringBuffer();
 		String itemName = "";
 		
 		for (String iter : split)
 		{
-			itemName += iter + " ";
+			buf.append(iter + " ");
+			//itemName += iter + " ";
 		}
 		
-		itemName = itemName.trim();
+		itemName = buf.toString().trim();
 		
 		boolean subtyped = itemName.contains(":");
 		short subtype = 0;
@@ -79,13 +82,29 @@ public class Price implements CommandExecutor
 		}
 		if (item.isInfinite() || (item.getAmount() == -1))
 		{
-			sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + item.getPriceBuy() + "    Sell: " + item.getPriceSell()
-					+ "    Stock: Infinite");
+			if (plugin.isDebugging((Player) sender) && plugin.getProperties().isDynamicPrices())
+			{
+				sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + item.getPriceBuy() + "    Sell: " + item.getPriceSell()
+						+ "    Stock: Infinite    Base: " + item.getBasePrice() + "    Slope: " + item.getSlope());
+			}
+			else
+			{
+				sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + item.getPriceBuy() + "    Sell: " + item.getPriceSell()
+						+ "    Stock: Infinite");
+			}
 		}
 		else
 		{
-			sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + item.getPriceBuy() + "    Sell: " + item.getPriceSell()
-					+ "    Stock: " + item.getAmount());
+			if (plugin.isDebugging((Player) sender) && plugin.getProperties().isDynamicPrices())
+			{
+				sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + item.getPriceBuy() + "    Sell: " + item.getPriceSell()
+						+ "    Stock: " + item.getAmount() + "    Base: " + item.getBasePrice() + "    Slope: " + item.getSlope());
+			}
+			else
+			{
+				sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + item.getPriceBuy() + "    Sell: " + item.getPriceSell()
+						+ "    Stock: " + item.getAmount());
+			}
 		}
 		
 		return true;

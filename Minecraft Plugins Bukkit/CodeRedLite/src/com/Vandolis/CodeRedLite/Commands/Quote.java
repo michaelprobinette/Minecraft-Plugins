@@ -34,6 +34,7 @@ public class Quote implements CommandExecutor
 		if (split.length >= 3)
 		{
 			boolean buy = false;
+			StringBuffer buf = new StringBuffer();
 			String itemName = "";
 			int amount = 1;
 			
@@ -56,12 +57,13 @@ public class Quote implements CommandExecutor
 					}
 					catch (Exception e)
 					{
-						itemName += iter;
+						//itemName += iter;
+						buf.append(iter);
 					}
 				}
 			}
 			
-			itemName = itemName.trim();
+			itemName = buf.toString().trim();
 			itemName = itemName.toLowerCase();
 			
 			boolean subtyped = false;

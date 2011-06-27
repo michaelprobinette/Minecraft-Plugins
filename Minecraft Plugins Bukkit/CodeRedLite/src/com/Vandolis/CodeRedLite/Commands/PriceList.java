@@ -10,6 +10,7 @@ import java.util.HashMap;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import com.Vandolis.CodeRedLite.CodeRedLite;
 import com.Vandolis.CodeRedLite.EconItemStack;
@@ -20,7 +21,7 @@ import com.Vandolis.CodeRedLite.EconItemStack;
 public class PriceList implements CommandExecutor
 {
 	private CodeRedLite			plugin			= null;
-	private final int			MAX_PER_PAGE	= 8;
+	private static final int	MAX_PER_PAGE	= 8;
 	private ArrayList<String>	raw				= new ArrayList<String>();
 	
 	/**
@@ -121,11 +122,29 @@ public class PriceList implements CommandExecutor
 			
 			if (item.isInfinite() || (item.getAmount() == -1))
 			{
-				str = "        Buy: " + item.getPriceBuy() + "   Sell: " + item.getPriceSell() + "   Stock: Infinite";
+				if (plugin.isDebugging((Player) sender) && plugin.getProperties().isDynamicPrices())
+				{
+					str =
+							"        Buy: " + item.getPriceBuy() + "   Sell: " + item.getPriceSell() + "   Stock: Infinite    Base: "
+									+ item.getBasePrice() + "    Slope: " + item.getSlope();
+				}
+				else
+				{
+					str = "        Buy: " + item.getPriceBuy() + "   Sell: " + item.getPriceSell() + "   Stock: Infinite";
+				}
 			}
 			else
 			{
-				str = "        Buy: " + item.getPriceBuy() + "   Sell: " + item.getPriceSell() + "   Stock: " + item.getAmount();
+				if (plugin.isDebugging((Player) sender) && plugin.getProperties().isDynamicPrices())
+				{
+					str =
+							"        Buy: " + item.getPriceBuy() + "   Sell: " + item.getPriceSell() + "   Stock: " + item.getAmount()
+									+ "    Base: " + item.getBasePrice() + "    Slope: " + item.getSlope();
+				}
+				else
+				{
+					str = "        Buy: " + item.getPriceBuy() + "   Sell: " + item.getPriceSell() + "   Stock: " + item.getAmount();
+				}
 			}
 			
 			processed.add(str);

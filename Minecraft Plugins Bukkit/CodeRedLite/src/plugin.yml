@@ -3,6 +3,7 @@ description: An Economy plugin designed for the Redstype server.
 author: Vandolis
 main: com.Vandolis.CodeRedLite.CodeRedLite
 version: 0.0.2
+
 commands:
   buy:
     description: Attempts to buy the given item.
@@ -28,3 +29,21 @@ commands:
   debug:
     description: Debug command, toggles debug state.
     usage: /debug
+
+permissions:
+  coderedlite:
+    description: CodeRedLite Permissions
+    type: map
+    map:
+      buy:
+        description: Allows the player to buy from the econ.
+        type: boolean
+        default: true
+      sell:
+        description: Allows the player to sell to the econ.
+        type: boolean
+        default: true
+      admin:
+        description: Allows the player to have access to admin commands.
+        type: boolean
+        default: false
