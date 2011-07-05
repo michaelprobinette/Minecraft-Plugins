@@ -13,6 +13,11 @@ public class AutoSave implements Runnable
 {
 	private CodeRedLite	plugin	= null;
 	
+	/**
+	 * Default ctor, sets the plugin to the given instance
+	 * 
+	 * @param codeRed
+	 */
 	public AutoSave(CodeRedLite codeRed)
 	{
 		plugin = codeRed;
@@ -26,11 +31,11 @@ public class AutoSave implements Runnable
 	{
 		plugin.getLog().info("CodeRedLite is saving data...");
 		
-		for (EconPlayer econPlayer : plugin.getPlayers())
+		for (EconPlayer econPlayer : plugin.getLoadedPlayers())
 		{
 			econPlayer.update();
 		}
 		
-		plugin.getShop().update();
+		plugin.getShop().softUpdate();
 	}
 }

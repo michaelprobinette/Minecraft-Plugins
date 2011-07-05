@@ -34,14 +34,29 @@ public class Price implements CommandExecutor
 	{
 		StringBuffer buf = new StringBuffer();
 		String itemName = "";
+		int amount = 0;
 		
 		for (String iter : split)
 		{
-			buf.append(iter + " ");
+			try
+			{
+				amount = Integer.parseInt(iter);
+			}
+			catch (Exception e)
+			{
+				buf.append(iter + " ");
+			}
 			//itemName += iter + " ";
 		}
 		
 		itemName = buf.toString().trim();
+		
+		// If they are specifing an amount, give the quote instead
+		if (amount != 0)
+		{
+			((Player) sender).performCommand("quote " + amount + " " + itemName);
+			return true;
+		}
 		
 		boolean subtyped = itemName.contains(":");
 		short subtype = 0;

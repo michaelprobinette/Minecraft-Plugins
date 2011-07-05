@@ -29,6 +29,9 @@ commands:
   debug:
     description: Debug command, toggles debug state.
     usage: /debug
+  econ:
+    description: Base command for all econ commands including admin commands.
+    usage: /econ <command>
 
 permissions:
   coderedlite:

@@ -13,21 +13,32 @@ import org.bukkit.entity.Player;
  */
 public class EconPlayer
 {
-	private int					sqlID				= 0;
-	private int					balance				= 0;
-	private int					lastShopTransaction	= 0;
-	private Player				player				= null;
-	private static CodeRedLite	plugin				= null;
+	private int			sqlID				= 0;
+	private int			balance				= 0;
+	private int			lastShopTransaction	= 0;
+	private Player		player				= null;
+	private CodeRedLite	plugin				= null;
 	
-	public EconPlayer(Player player)
+	/**
+	 * Default ctor, makes an EconPlayer with the given player
+	 * 
+	 * @param player
+	 */
+	public EconPlayer(Player player, CodeRedLite instance)
 	{
 		this.player = player;
+		plugin = instance;
 	}
 	
-	protected static void setPlugin(CodeRedLite codeRed)
-	{
-		plugin = codeRed;
-	}
+	/**
+	 * Sets the
+	 * 
+	 * @param codeRed
+	 */
+	//	protected static void setPlugin(CodeRedLite codeRed)
+	//	{
+	//		plugin = codeRed;
+	//	}
 	
 	/**
 	 * @param int1
@@ -87,8 +98,10 @@ public class EconPlayer
 		}
 		catch (SQLException e)
 		{
-			plugin.getLog().log(Level.WARNING,
-					"CodeRedLite could not save " + player.getName() + "\'s player data. SQL Error: " + e.getErrorCode());
+			plugin.getLog().log(
+				Level.WARNING,
+					"CodeRedLite could not save " + player.getName() + "\'s player data. SQL Error: "
+						+ e.getErrorCode());
 		}
 	}
 	

@@ -6,6 +6,7 @@ package com.Vandolis.CodeRedLite.Commands;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import com.Vandolis.CodeRedLite.CodeRedLite;
 import com.Vandolis.CodeRedLite.EconItemStack;
@@ -33,19 +34,9 @@ public class Quote implements CommandExecutor
 	{
 		if (split.length >= 3)
 		{
-			boolean buy = false;
 			StringBuffer buf = new StringBuffer();
 			String itemName = "";
 			int amount = 1;
-			
-			if (split[0].equalsIgnoreCase("buy"))
-			{
-				buy = true;
-			}
-			else
-			{
-				buy = false;
-			}
 			
 			for (String iter : split)
 			{
@@ -135,15 +126,49 @@ public class Quote implements CommandExecutor
 				return true;
 			}
 			
-			if (buy)
+			if (roughItem.isSubtyped())
 			{
-				sender.sendMessage(plugin.getPluginMessage() + "The current price to buy that many " + roughItem.getName() + " is "
-						+ roughItem.quoteBuy(amount));
+				sender.sendMessage(plugin.getPluginMessage() + "Price results for " + amount + " "
+					+ roughItem.getName() + ":" + subtype);
 			}
 			else
 			{
-				sender.sendMessage(plugin.getPluginMessage() + "The current price to sell that many " + roughItem.getName() + " is "
-						+ roughItem.quoteSell(amount));
+				sender.sendMessage(plugin.getPluginMessage() + "Price results for " + amount + " "
+					+ roughItem.getName());
+			}
+			if (roughItem.isInfinite() || (roughItem.getAmount() == -1))
+			{
+				if (plugin.isDebugging((Player) sender) && plugin.getProperties().isDynamicPrices())
+				{
+					sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + roughItem.quoteBuy(amount)
+						+ "    Sell: "
+							+ roughItem.quoteSell(amount) + "    Stock: Infinite    Base: " + roughItem.getBasePrice()
+						+ "    Slope: "
+							+ roughItem.getSlope());
+				}
+				else
+				{
+					sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + roughItem.quoteBuy(amount)
+						+ "    Sell: "
+							+ roughItem.quoteSell(amount) + "    Stock: Infinite");
+				}
+			}
+			else
+			{
+				if (plugin.isDebugging((Player) sender) && plugin.getProperties().isDynamicPrices())
+				{
+					sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + roughItem.quoteBuy(amount)
+						+ "    Sell: "
+							+ roughItem.quoteSell(amount) + "    Stock: " + roughItem.getAmount() + "    Base: "
+						+ roughItem.getBasePrice()
+							+ "    Slope: " + roughItem.getSlope());
+				}
+				else
+				{
+					sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + roughItem.quoteBuy(amount)
+						+ "    Sell: "
+							+ roughItem.quoteSell(amount) + "    Stock: " + roughItem.getAmount());
+				}
 			}
 		}
 		

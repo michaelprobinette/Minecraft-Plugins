@@ -41,14 +41,16 @@ public class EconItemStack extends ItemStack
 		priceSell = item.getPriceSell();
 		itemsID = item.getItemsID();
 		sqlID = item.getSqlID();
+		basePrice = item.getBasePrice();
+		slope = item.getSlope();
 		
 		plugin = codeRed;
 		
 		changeAmount(amount);
 	}
 	
-	public EconItemStack(int itemsID, String itemName, int itemID, boolean subtyped, short subtype, int buyPrice, int sellPrice,
-			int baseValue, float dynamicSlope, CodeRedLite codeRed)
+	public EconItemStack(int itemsID, String itemName, int itemID, boolean subtyped, short subtype, int buyPrice,
+		int sellPrice, int baseValue, float dynamicSlope, CodeRedLite codeRed)
 	{
 		super(itemID);
 		
@@ -73,8 +75,9 @@ public class EconItemStack extends ItemStack
 		changeAmount(0);
 	}
 	
-	public EconItemStack(int sqlId, int itemID, boolean subtyped, short subtype, String itemName, int currentStock, boolean infinite,
-			int buyPrice, int sellPrice, int maxBuy, int maxSell, int itemsId, int baseValue, float dyanmicSlope, CodeRedLite codeRed)
+	public EconItemStack(int sqlId, int itemID, boolean subtyped, short subtype, String itemName, int currentStock,
+		boolean infinite, int buyPrice, int sellPrice, int maxBuy, int maxSell, int itemsId, int baseValue,
+		float dyanmicSlope, CodeRedLite codeRed)
 	{
 		super(itemID);
 		
@@ -311,5 +314,14 @@ public class EconItemStack extends ItemStack
 	public void setSlope(float newSlope)
 	{
 		slope = newSlope;
+	}
+	
+	/**
+	 * @param sqlID
+	 *            the sqlID to set
+	 */
+	public void setSqlID(int sqlID)
+	{
+		this.sqlID = sqlID;
 	}
 }

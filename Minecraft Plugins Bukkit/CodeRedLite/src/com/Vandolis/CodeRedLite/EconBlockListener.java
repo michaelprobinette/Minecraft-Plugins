@@ -16,7 +16,7 @@ public class EconBlockListener extends BlockListener
 	 */
 	public EconBlockListener(CodeRedLite codeRedEcon)
 	{
-		// TODO Auto-generated constructor stub
+		// TODO: Break values for blocks!
 	}
 	
 }

@@ -27,9 +27,10 @@ public class AutoPay implements Runnable
 		int payAmount = plugin.getProperties().getAutoPayAmount();
 		String moneyName = plugin.getProperties().getMoneyName();
 		
-		for (EconPlayer econPlayer : plugin.getPlayers())
+		for (EconPlayer econPlayer : plugin.getLoadedPlayers())
 		{
-			econPlayer.getPlayer().sendMessage(plugin.getPluginMessage() + "You were auto paid " + payAmount + " " + moneyName);
+			econPlayer.getPlayer().sendMessage(
+				plugin.getPluginMessage() + "You were auto paid " + payAmount + " " + moneyName);
 			econPlayer.addMoney(payAmount);
 		}
 	}

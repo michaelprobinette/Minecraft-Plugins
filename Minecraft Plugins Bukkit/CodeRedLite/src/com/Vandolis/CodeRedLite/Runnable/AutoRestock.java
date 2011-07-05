@@ -26,8 +26,7 @@ public class AutoRestock implements Runnable
 	@Override
 	public void run()
 	{
-		// TODO Auto-generated method stub
-		
+		// TODO: Shop restocking of non infinite items
 	}
 	
 }
