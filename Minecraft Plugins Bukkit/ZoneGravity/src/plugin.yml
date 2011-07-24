@@ -1,0 +1,23 @@
+name: ZoneGravity
+description: Modifies gravity based on the players zone.
+author: Vandolis
+main: com.vandolis.zonegravity.ZoneGravity
+version: 0.0.1
+
+commands:
+  zg:
+    description: Base command for ZoneGravity
+    usage: /zg [help,set,remove,gravity,rename]
+  zgmake:
+    description: Base command used to make a zone
+    usage: /zgmake [point,grav,cancel]
+
+permissions:
+  zonegravity:
+    description: ZoneGravity Permissions
+    type: map
+    map:
+      admin:
+        description: Allows the player use ZoneGravity
+        type: boolean
+        default: false
