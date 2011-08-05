@@ -1,0 +1,13 @@
+name: MineRift
+description: A plugin that will randomly open rift events in the world.
+author: Vandolis
+main: com.vandolis.MineRift.MineRift
+version: 0.0.1
+
+commands:
+  chunk:
+    description: Chunk command
+    usage: /chunk
+  rift:
+    description: Base command for minerift
+    usage: /rift

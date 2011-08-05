@@ -280,7 +280,7 @@ public class Sell implements CommandExecutor
 					int pos = econPlayer.getPlayer().getInventory().first(iter); // Get the slot position
 					
 					// Check if there is more needed
-					if (count - iter.getAmount() > 0)
+					if (count - iter.getAmount() >= 0)
 					{
 						// Set the slot at position to empty space, used the whole stack
 						econPlayer.getPlayer().getInventory().setItem(pos, null);

@@ -23,6 +23,7 @@ public class Buy implements CommandExecutor
 {
 	private CodeRedLite	plugin				= null;
 	private final int	LEGAL_MIN_AMOUNT	= 1;
+	private final int	MAX_STACK_SIZE		= 64;
 	
 	/**
 	 * @param codeRedLite
@@ -219,6 +220,8 @@ public class Buy implements CommandExecutor
 		// Check inventory space
 		available = 0; // The amount the player can hold
 		
+		plugin.getLog().info("Item max stack size: ");
+		
 		// Loop through the players inventory
 		for (ItemStack iter : econPlayer.getPlayer().getInventory().getContents())
 		{
@@ -226,12 +229,12 @@ public class Buy implements CommandExecutor
 			if (iter == null)
 			{
 				// Empty slot
-				available += item.getMaxStackSize();
+				available += MAX_STACK_SIZE;
 			}
 			else if ((iter.getTypeId() == item.getTypeId()) && (iter.getDurability() == item.getDurability()))
 			{
 				// Same item type check how much more the stack can hold
-				available += (item.getMaxStackSize() - iter.getAmount());
+				available += (MAX_STACK_SIZE - iter.getAmount());
 			}
 		}
 		

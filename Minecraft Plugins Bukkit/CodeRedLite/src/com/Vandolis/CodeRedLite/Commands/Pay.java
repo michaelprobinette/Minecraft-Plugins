@@ -74,24 +74,28 @@ public class Pay implements CommandExecutor
 		
 		if (amount <= 0)
 		{
-			sender.sendMessage(plugin.getPluginMessage() + "You do not have any " + plugin.getProperties().getMoneyName());
+			sender.sendMessage(plugin.getPluginMessage() + "You do not have any "
+				+ plugin.getProperties().getMoneyName());
 			return true;
 		}
 		
 		// Good to go
 		econPlayer.removeMoney(amount);
-		target.addMoney(amount);
 		
-		sender.sendMessage(plugin.getPluginMessage() + "You have paid " + target.getPlayer().getName() + " " + amount + " "
+		sender.sendMessage(plugin.getPluginMessage() + "You have paid " + target.getPlayer().getName() + " " + amount
+			+ " "
 				+ plugin.getProperties().getMoneyName());
 		sender.sendMessage(plugin.getPluginMessage() + "Your new balance is: " + econPlayer.getBalance() + " "
 				+ plugin.getProperties().getMoneyName());
+		
+		target.addMoney(amount);
 		
 		target.getPlayer().sendMessage(
 				plugin.getPluginMessage() + econPlayer.getPlayer().getName() + " has paid you " + amount + " "
 						+ plugin.getProperties().getMoneyName());
 		target.getPlayer().sendMessage(
-				plugin.getPluginMessage() + "Your new balance is: " + target.getBalance() + " " + plugin.getProperties().getMoneyName());
+				plugin.getPluginMessage() + "Your new balance is: " + target.getBalance() + " "
+					+ plugin.getProperties().getMoneyName());
 		
 		econPlayer.update();
 		target.update();
