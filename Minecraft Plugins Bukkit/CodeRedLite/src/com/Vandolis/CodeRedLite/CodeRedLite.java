@@ -19,6 +19,7 @@ package com.Vandolis.CodeRedLite;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,14 +56,37 @@ public class CodeRedLite extends JavaPlugin
   private final EconPlayerListener playerListener = new EconPlayerListener(this);
   //private final EconBlockListener		blockListener	= new EconBlockListener(this);
   private Logger                   log            = null;
-  private ArrayList<EconPlayer>    loadedPlayers  = null;
+  private List<EconPlayer>         loadedPlayers  = null;
   private final SQLDatabase        database       = new SQLDatabase(this);
   private EconProperties           properties     = null;
   private EconShop                 shop           = null;
   private String                   pluginMessage  = "";                            //"[§cCodeRedLite§f] ";
-  private ArrayList<EconItemStack> rawItems       = new ArrayList<EconItemStack>();
-  private ArrayList<Player>        debugees       = new ArrayList<Player>();
+  private List<EconItemStack>      rawItems       = new ArrayList<EconItemStack>();
+  private List<Player>             debugees       = new ArrayList<Player>();
+  private List<String>             itemNames      = new ArrayList<String>();
   private PermissionHandler        permissionHandler;
+  
+  public static void main(String[] args)
+  {
+    List<String> list = new ArrayList<String>();
+    list.add("Cobble Stone");
+    list.add("Piston");
+    list.add("Cactus");
+    list.add("Wood");
+    list.add("Wooden Stairs");
+    list.add("Glass");
+    list.add("Sand");
+    list.add("Lapis");
+    list.add("Diamond Pickaxe");
+    list.add("Diamond Shovel");
+    list.add("Diamond Axe");
+    
+    List<String> results = StringComp.findMatches(list, "CobbleStone");
+    for (String iter : results)
+    {
+      System.out.println(iter);
+    }
+  }
   
   /*
    * (non-Javadoc)
@@ -109,12 +133,22 @@ public class CodeRedLite extends JavaPlugin
     
     properties = new EconProperties(this);
     pluginMessage = properties.getPluginMessage();
+    if (pluginMessage == null)
+    {
+      pluginMessage = "";
+    }
     try
     {
       shop = database.getEconShop("The Shop");
       
       log.info("The Shop has loaded " + shop.getInventory().size() + " items.");
       database.populateRawItems(rawItems);
+      itemNames.clear();
+      for (EconItemStack iter : rawItems)
+      {
+        itemNames.add(iter.getCompactName());
+        shop.addItemNoUpdate(iter);
+      }
     }
     catch (SQLException e)
     {
@@ -164,7 +198,7 @@ public class CodeRedLite extends JavaPlugin
     {
       getServer().getScheduler().scheduleSyncRepeatingTask(this, new AutoPay(this),
         1200 * properties.getAutoPayTime(),
-          1200 * properties.getAutoPayTime());
+        1200 * properties.getAutoPayTime());
     }
     
     // Schedule autosave
@@ -172,7 +206,7 @@ public class CodeRedLite extends JavaPlugin
     {
       getServer().getScheduler().scheduleSyncRepeatingTask(this, new AutoSave(this),
         1200 * properties.getAutoSaveTime(),
-          1200 * properties.getAutoSaveTime());
+        1200 * properties.getAutoSaveTime());
     }
     
     // Schedule shop restocking if needed
@@ -308,7 +342,7 @@ public class CodeRedLite extends JavaPlugin
   /**
    * @return loadedPlayers
    */
-  public ArrayList<EconPlayer> getLoadedPlayers()
+  public List<EconPlayer> getLoadedPlayers()
   {
     return loadedPlayers;
   }
@@ -355,7 +389,7 @@ public class CodeRedLite extends JavaPlugin
   /**
    * @return the rawItems
    */
-  public ArrayList<EconItemStack> getRawItems()
+  public List<EconItemStack> getRawItems()
   {
     return rawItems;
   }
@@ -481,5 +515,10 @@ public class CodeRedLite extends JavaPlugin
   public PermissionHandler getPermissionHandler()
   {
     return permissionHandler;
+  }
+  
+  public String matchName(String str)
+  {
+    return StringComp.smartPick(StringComp.findMatches(itemNames, str), str);
   }
 }

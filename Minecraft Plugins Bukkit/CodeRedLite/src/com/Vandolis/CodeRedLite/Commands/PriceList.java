@@ -37,22 +37,17 @@ public class PriceList implements CommandExecutor
   {
     shopRaw = new ArrayList<String>();
     
-    for (EconItemStack iter : plugin.getShop().getInventory())
+    for (EconItemStack iter : plugin.getShop().getInv())
     {
-      if (iter.isSubtyped())
-      {
-        shopRaw.add(iter.getCompactName() + ":" + iter.getDurability());
-      }
-      else
-      {
-        shopRaw.add(iter.getCompactName());
-      }
+      shopRaw.add(iter.getCompactName());
     }
     
     Collections.sort(shopRaw);
   }
   
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command,
    * java.lang.String, java.lang.String[])
    */
@@ -79,19 +74,15 @@ public class PriceList implements CommandExecutor
     
     ArrayList<String> processed = new ArrayList<String>();
     
-    if (econPlayer.isContrib())
-    {
-      
-    }
     for (String iter : shopRaw)
     {
       short subtype = 0;
       String itemName = "";
       
+      itemName = iter;
       if (iter.contains(":"))
       {
         String[] args = iter.split(":");
-        itemName = args[0];
         if (args.length == 2)
         {
           subtype = Short.parseShort(args[1]);
@@ -102,16 +93,12 @@ public class PriceList implements CommandExecutor
           return true;
         }
       }
-      else
-      {
-        itemName = iter;
-      }
       
       EconItemStack item = null;
       
       //plugin.getLog().info("Item: " + itemName + " " + subtype);
-      
-      item = plugin.getShop().getItem(itemName, subtype);
+      item = plugin.getShop().getDirectItem(itemName);
+      //            item = plugin.getShop().getItem(itemName, subtype);
       
       String str = "";
       
@@ -188,15 +175,21 @@ public class PriceList implements CommandExecutor
       pageNumber = 1;
     }
     
-    sender.sendMessage(plugin.getPluginMessage() + "PriceList for " + plugin.getShop().getName() + " (Page "
-      + pageNumber + " of "
-        + map.size() + ")");
-    
     page = map.get(pageNumber - 1);
-    
-    for (String iter : page)
+    if (page == null)
     {
-      sender.sendMessage(plugin.getPluginMessage() + iter);
+      sender.sendMessage(plugin.getPluginMessage() + "There are no items for sale!");
+    }
+    else
+    {
+      sender.sendMessage(plugin.getPluginMessage() + "PriceList for " + plugin.getShop().getName() + " (Page "
+        + pageNumber + " of "
+        + map.size() + ")");
+      
+      for (String iter : page)
+      {
+        sender.sendMessage(plugin.getPluginMessage() + iter);
+      }
     }
     
     return true;

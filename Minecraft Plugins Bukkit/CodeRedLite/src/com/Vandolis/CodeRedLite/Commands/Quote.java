@@ -3,6 +3,8 @@
  */
 package com.Vandolis.CodeRedLite.Commands;
 
+import java.util.List;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,13 +28,16 @@ public class Quote implements CommandExecutor
     plugin = codeRedLite;
   }
   
-  /* (non-Javadoc)
-   * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String,
+   * java.lang.String[])
    */
   @Override
   public boolean onCommand(CommandSender sender, Command command, String label, String[] split)
   {
-    if (split.length >= 3)
+    if (split.length >= 2)
     {
       StringBuffer buf = new StringBuffer();
       String itemName = "";
@@ -40,17 +45,14 @@ public class Quote implements CommandExecutor
       
       for (String iter : split)
       {
-        if (!iter.equalsIgnoreCase(split[0]))
+        try
         {
-          try
-          {
-            amount = Integer.parseInt(iter);
-          }
-          catch (Exception e)
-          {
-            //itemName += iter;
-            buf.append(iter);
-          }
+          amount = Integer.parseInt(iter);
+        }
+        catch (Exception e)
+        {
+          //itemName += iter;
+          buf.append(iter);
         }
       }
       
@@ -76,7 +78,21 @@ public class Quote implements CommandExecutor
       
       EconItemStack roughItem = null;
       
-      roughItem = plugin.getShop().getItem(itemName, subtype);
+      List<EconItemStack> tmp = plugin.getShop().getItemsManual(itemName, subtype);
+      if (tmp.size() > 1)
+      {
+        StringBuilder builder = new StringBuilder();
+        for (EconItemStack iter : tmp)
+        {
+          builder.append(iter.getName() + ":" + iter.getDurability() + " ");
+        }
+        sender.sendMessage(plugin.getPluginMessage() + "Multiple Matches: " + builder.toString());
+      }
+      else
+      {
+        roughItem = (tmp.size() == 1) ? tmp.get(0) : null;
+      }
+      //      roughItem = plugin.getShop().getItem(itemName, subtype);
       
       if ((roughItem == null) && !plugin.getProperties().isEnforceItemWhitelist())
       {
@@ -120,32 +136,36 @@ public class Quote implements CommandExecutor
         {
           sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + roughItem.quoteBuy(amount)
             + "    Sell: "
-              + roughItem.quoteSell(amount) + "    Stock: Infinite    Base: " + roughItem.getBasePrice()
+            + roughItem.quoteSell(amount) + "    Stock: Infinite    Base: " + roughItem.getBasePrice()
             + "    Slope: "
-              + roughItem.getSlope());
+            + roughItem.getSlope());
         }
         else
         {
           sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + roughItem.quoteBuy(amount)
             + "    Sell: "
-              + roughItem.quoteSell(amount) + "    Stock: Infinite");
+            + roughItem.quoteSell(amount) + "    Stock: Infinite");
         }
       }
       else
       {
+        if (amount > roughItem.getAmount())
+        {
+          amount = roughItem.getAmount();
+        }
         if (plugin.isDebugging((Player) sender) && plugin.getProperties().isDynamicPrices())
         {
           sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + roughItem.quoteBuy(amount)
             + "    Sell: "
-              + roughItem.quoteSell(amount) + "    Stock: " + roughItem.getAmount() + "    Base: "
+            + roughItem.quoteSell(amount) + "    Stock: " + roughItem.getAmount() + "    Base: "
             + roughItem.getBasePrice()
-              + "    Slope: " + roughItem.getSlope());
+            + "    Slope: " + roughItem.getSlope());
         }
         else
         {
           sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + roughItem.quoteBuy(amount)
             + "    Sell: "
-              + roughItem.quoteSell(amount) + "    Stock: " + roughItem.getAmount());
+            + roughItem.quoteSell(amount) + "    Stock: " + roughItem.getAmount());
         }
       }
     }

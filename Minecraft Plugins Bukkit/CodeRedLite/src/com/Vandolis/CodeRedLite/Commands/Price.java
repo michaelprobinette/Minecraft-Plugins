@@ -3,6 +3,8 @@
  */
 package com.Vandolis.CodeRedLite.Commands;
 
+import java.util.List;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,7 +28,9 @@ public class Price implements CommandExecutor
     plugin = codeRedLite;
   }
   
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.bukkit.command.CommandExecutor#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command,
    * java.lang.String, java.lang.String[])
    */
@@ -55,6 +59,7 @@ public class Price implements CommandExecutor
     // If they are specifing an amount, give the quote instead
     if (amount != 0)
     {
+      //      System.out.println("Going from price to quote");
       ((Player) sender).performCommand("quote " + amount + " " + itemName);
       return true;
     }
@@ -77,8 +82,22 @@ public class Price implements CommandExecutor
     }
     
     EconItemStack item = null;
+    List<EconItemStack> tmp = plugin.getShop().getItemsManual(itemName, subtype);
+    if (tmp.size() > 1)
+    {
+      StringBuilder builder = new StringBuilder();
+      for (EconItemStack iter : tmp)
+      {
+        builder.append(iter.getName() + ":" + iter.getDurability() + " ");
+      }
+      sender.sendMessage(plugin.getPluginMessage() + "Multiple Matches: " + builder.toString());
+    }
+    else
+    {
+      item = (tmp.size() == 1) ? tmp.get(0) : null;
+    }
     
-    item = plugin.getShop().getItem(itemName, subtype);
+    //    item = plugin.getShop().getItem(itemName, subtype);
     
     if (item == null)
     {
@@ -101,28 +120,30 @@ public class Price implements CommandExecutor
       {
         sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + item.getPriceBuy() + "    Sell: "
           + item.getPriceSell()
-            + "    Stock: Infinite    Base: " + item.getBasePrice() + "    Slope: " + item.getSlope());
+          + "    Stock: Infinite    Base: " + item.getBasePrice() + "    Slope: " + item.getSlope());
       }
       else
       {
         sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + item.getPriceBuy() + "    Sell: "
           + item.getPriceSell()
-            + "    Stock: Infinite");
+          + "    Stock: Infinite");
       }
     }
     else
     {
       if (plugin.isDebugging((Player) sender) && plugin.getProperties().isDynamicPrices())
       {
-        sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + item.getPriceBuy() + "    Sell: "
+        sender.sendMessage(plugin.getPluginMessage() + "    Buy: "
+          + (item.getAmount() == 0 ? "N/A" : item.getPriceBuy()) + "    Sell: "
           + item.getPriceSell()
-            + "    Stock: " + item.getAmount() + "    Base: " + item.getBasePrice() + "    Slope: " + item.getSlope());
+          + "    Stock: " + item.getAmount() + "    Base: " + item.getBasePrice() + "    Slope: " + item.getSlope());
       }
       else
       {
-        sender.sendMessage(plugin.getPluginMessage() + "    Buy: " + item.getPriceBuy() + "    Sell: "
+        sender.sendMessage(plugin.getPluginMessage() + "    Buy: "
+          + (item.getAmount() == 0 ? "N/A" : item.getPriceBuy()) + "    Sell: "
           + item.getPriceSell()
-            + "    Stock: " + item.getAmount());
+          + "    Stock: " + item.getAmount());
       }
     }
     

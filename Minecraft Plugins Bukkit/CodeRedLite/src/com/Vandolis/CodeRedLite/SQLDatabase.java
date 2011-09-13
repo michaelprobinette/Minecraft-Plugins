@@ -21,8 +21,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
@@ -106,7 +106,7 @@ public class SQLDatabase
     {
       plugin.getLog().log(Level.SEVERE, e.getLocalizedMessage());
       plugin.getLog().log(Level.SEVERE,
-          "CodeRedLite could not load the driver. Please check that it is in ./lib/");
+        "CodeRedLite could not load the driver. Please check that it is in ./lib/");
       
       return false; // Failed to open the connection
     }
@@ -213,7 +213,7 @@ public class SQLDatabase
       /*
        * Add the player to the table
        */
-
+      
       // Setup query
       query = "INSERT INTO Players (Name,Balance,LastShopTransaction) VALUES (?,?,?);";
       
@@ -231,7 +231,7 @@ public class SQLDatabase
       /*
        * Get the players id for use later
        */
-
+      
       // Setup the new query
       query = "SELECT ID FROM Players WHERE Name = ?;";
       
@@ -292,8 +292,8 @@ public class SQLDatabase
     
     // Setup the query
     query =
-        "SELECT ID, Balance, AllItemsInfinite, CanRestock, AllowBuying, AllowSelling, UseMoney FROM Shops " +
-          "WHERE Name = ?;";
+      "SELECT ID, Balance, AllItemsInfinite, CanRestock, AllowBuying, AllowSelling, UseMoney FROM Shops " +
+        "WHERE Name = ?;";
     
     // Prepare it
     prep = prepare(query);
@@ -322,10 +322,10 @@ public class SQLDatabase
     
     // Setup query for inventory
     query =
-        "SELECT Items.ItemID, Items.IsSubtyped, Items.Subtype, Items.Name, ShopItems.CurrentStock, " +
-          "ShopItems.IsInfinite, ShopItems.BuyPrice, ShopItems.SellPrice, ShopItems.MaxSellAmount, " +
-          "ShopItems.MaxBuyAmount, ShopItems.ItemID AS ItemsID, ShopItems.ID, Items.BaseValue, Items.Slope " +
-          "FROM Items,ShopItems WHERE ShopItems.ShopID = ? AND Items.ID = ShopItems.ItemID;";
+      "SELECT Items.ItemID, Items.IsSubtyped, Items.Subtype, Items.Name, ShopItems.CurrentStock, " +
+        "ShopItems.IsInfinite, ShopItems.BuyPrice, ShopItems.SellPrice, ShopItems.MaxSellAmount, " +
+        "ShopItems.MaxBuyAmount, ShopItems.ItemID AS ItemsID, ShopItems.ID, Items.BaseValue, Items.Slope " +
+        "FROM Items,ShopItems WHERE ShopItems.ShopID = ? AND Items.ID = ShopItems.ItemID;";
     
     // Prepare it
     prep = prepare(query);
@@ -339,13 +339,20 @@ public class SQLDatabase
     // Loop through all of the returned items and add them to the shops inventory
     while (rs.next())
     {
-      econShop.getInventory().add(
-          new EconItemStack(rs.getInt("ID"), rs.getInt("ItemID"), rs.getBoolean("IsSubtyped"),
-            rs.getShort("Subtype"),
-            rs.getString("Name"), rs.getInt("CurrentStock"), rs.getBoolean("IsInfinite"),
-            rs.getInt("BuyPrice"), rs.getInt("SellPrice"), rs.getInt("MaxSellAmount"),
-            rs.getInt("MaxBuyAmount"), rs.getInt("ItemsID"), rs.getInt("BaseValue"),
-            rs.getFloat("Slope"), plugin));
+      econShop.addItemNoUpdate(
+        new EconItemStack(rs.getInt("ID"), rs.getInt("ItemID"), rs.getBoolean("IsSubtyped"),
+          rs.getShort("Subtype"),
+          rs.getString("Name"), rs.getInt("CurrentStock"), rs.getBoolean("IsInfinite"),
+          rs.getInt("BuyPrice"), rs.getInt("SellPrice"), rs.getInt("MaxSellAmount"),
+          rs.getInt("MaxBuyAmount"), rs.getInt("ItemsID"), rs.getInt("BaseValue"),
+          rs.getFloat("Slope"), plugin));
+      //      econShop.getInventory().add(
+      //        new EconItemStack(rs.getInt("ID"), rs.getInt("ItemID"), rs.getBoolean("IsSubtyped"),
+      //          rs.getShort("Subtype"),
+      //          rs.getString("Name"), rs.getInt("CurrentStock"), rs.getBoolean("IsInfinite"),
+      //          rs.getInt("BuyPrice"), rs.getInt("SellPrice"), rs.getInt("MaxSellAmount"),
+      //          rs.getInt("MaxBuyAmount"), rs.getInt("ItemsID"), rs.getInt("BaseValue"),
+      //          rs.getFloat("Slope"), plugin));
       
       //plugin.LOG.info("Loaded item: " + rs.getString("Name"));
     }
@@ -394,11 +401,11 @@ public class SQLDatabase
       /*
        * Add the shop to the table
        */
-
+      
       // Setup the query
       query =
-          "INSERT INTO Shops (Name, Balance, AllItemsInfinite, CanRestock, AllowBuying, AllowSelling, " +
-              "UseMoney) VALUES (?,?,?,?,?,?,?);";
+        "INSERT INTO Shops (Name, Balance, AllItemsInfinite, CanRestock, AllowBuying, AllowSelling, " +
+          "UseMoney) VALUES (?,?,?,?,?,?,?);";
       
       // Prepare it
       prep = prepare(query);
@@ -418,7 +425,7 @@ public class SQLDatabase
       /*
        * Get and store their id for later use
        */
-
+      
       // Setup new query
       query = "SELECT ID FROM Shops WHERE Name = ?;";
       
@@ -445,7 +452,7 @@ public class SQLDatabase
     /*
      * Delete all of the shops current items from the table, this is a hard save
      */
-
+    
     // Setup delete query
     query = "DELETE FROM ShopItems WHERE ShopID = ?;";
     
@@ -461,11 +468,11 @@ public class SQLDatabase
     /*
      * Add the new items to the table
      */
-
+    
     // Setup the add query
     query =
-        "INSERT INTO ShopItems (ShopID,ItemID,CurrentStock,IsInfinite,BuyPrice,SellPrice) " +
-            "VALUES (?,?,?,?,?,?);";
+      "INSERT INTO ShopItems (ShopID,ItemID,CurrentStock,IsInfinite,BuyPrice,SellPrice) " +
+        "VALUES (?,?,?,?,?,?);";
     
     // Prepare it
     prep = prepare(query);
@@ -509,7 +516,7 @@ public class SQLDatabase
     /*
      * Attempt to update the existing entry
      */
-
+    
     // Setup the query
     query = "UPDATE ShopItems SET CurrentStock = ? WHERE ID = ?;";
     
@@ -526,17 +533,17 @@ public class SQLDatabase
     /*
      * Check for 0 affected rows, as this means there is no entry. If it is then add the new entry
      */
-
+    
     if (rowsAffected == 0)
     {
       /*
        * Add a new entry
        */
-
+      
       // Setup the query
       query =
-          "INSERT INTO ShopItems (ShopID,ItemID,CurrentStock,IsInfinite,BuyPrice,SellPrice) " +
-              "VALUES (?,?,?,?,?,?);";
+        "INSERT INTO ShopItems (ShopID,ItemID,CurrentStock,IsInfinite,BuyPrice,SellPrice) " +
+          "VALUES (?,?,?,?,?,?);";
       
       // Prepare it
       prep = prepare(query);
@@ -555,7 +562,7 @@ public class SQLDatabase
       /*
        * Get and store their id for later use
        */
-
+      
       // Setup the query
       query = "SELECT ID FROM ShopItems WHERE ShopID = ? AND ItemID = ?;";
       
@@ -614,11 +621,11 @@ public class SQLDatabase
       /*
        * Add the shop to the table
        */
-
+      
       // Setup the query
       query =
-          "INSERT INTO Shops (Name, Balance, AllItemsInfinite, CanRestock, AllowBuying, AllowSelling, " +
-              "UseMoney) VALUES (?,?,?,?,?,?,?);";
+        "INSERT INTO Shops (Name, Balance, AllItemsInfinite, CanRestock, AllowBuying, AllowSelling, " +
+          "UseMoney) VALUES (?,?,?,?,?,?,?);";
       
       // Prepare it
       prep = prepare(query);
@@ -638,7 +645,7 @@ public class SQLDatabase
       /*
        * Get and store their id for later use
        */
-
+      
       // Setup new query
       query = "SELECT ID FROM Shops WHERE Name = ?;";
       
@@ -665,7 +672,7 @@ public class SQLDatabase
     /*
      * Items
      */
-
+    
     // Setup the query
     query = "UPDATE ShopItems SET CurrentStock = ? WHERE ID = ?;";
     
@@ -689,7 +696,7 @@ public class SQLDatabase
     /*
      * Add any items not currently in the table
      */
-
+    
     // Setup the query to add new items
     query =
       "INSERT INTO ShopItems (ShopID,ItemID,CurrentStock,IsInfinite,BuyPrice,SellPrice) VALUES (?,?,?,?,?,?);";
@@ -721,7 +728,7 @@ public class SQLDatabase
     /*
      * Assign the new ID numbers
      */
-
+    
     // Setup ID select query
     query = "SELECT ID,ItemID FROM ShopItems WHERE ShopID = ?;";
     
@@ -838,7 +845,7 @@ public class SQLDatabase
    * 
    * @param rawItems
    */
-  public void populateRawItems(ArrayList<EconItemStack> rawItems) throws SQLException
+  public void populateRawItems(List<EconItemStack> rawItems) throws SQLException
   {
     // Declare variables
     String query = null;
@@ -882,10 +889,10 @@ public class SQLDatabase
     /*
      * Insert buy into the table
      */
-
+    
     // Setup query
     query = "INSERT INTO ShopTransactions (PlayerID,ShopItemID,ItemAmount,MoneyAmount,PlayerBought) " +
-          "VALUES (?,?,?,?,?);";
+      "VALUES (?,?,?,?,?);";
     
     // Prepare it
     prep = prepare(query);
@@ -903,7 +910,7 @@ public class SQLDatabase
     /*
      * Update the players last shop transaction
      */
-
+    
     // Setup query
     query = "UPDATE Players SET LastShopTransaction = (SELECT MAX(ID) FROM ShopTransactions) WHERE Players.ID = ?;";
     
@@ -935,7 +942,7 @@ public class SQLDatabase
     
     // Setup query
     query = "INSERT INTO ShopTransactions (PlayerID,ShopItemID,ItemAmount,MoneyAmount,PlayerBought) "
-            + "VALUES (?,?,?,?,?);";
+      + "VALUES (?,?,?,?,?);";
     
     // Prepare it
     prep = prepare(query);
@@ -953,7 +960,7 @@ public class SQLDatabase
     /*
      * Update the players last shop transaction
      */
-
+    
     // Setup query
     query = "UPDATE Players SET LastShopTransaction = (SELECT MAX(ID) FROM ShopTransactions) WHERE Players.ID = ?;";
     

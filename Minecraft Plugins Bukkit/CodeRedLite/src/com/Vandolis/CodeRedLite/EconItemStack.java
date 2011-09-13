@@ -48,6 +48,7 @@ public class EconItemStack extends ItemStack
     
     name = item.getName();
     compactName = item.getCompactName();
+    compactName += ":" + getDurability();
     
     isSubtyped = item.isSubtyped;
     priceBuy = item.getPriceBuy();
@@ -76,6 +77,7 @@ public class EconItemStack extends ItemStack
     
     name = itemName;
     compactName = itemName.replaceAll(" ", "");
+    compactName += ":" + subtype;
     priceBuy = buyPrice;
     priceSell = sellPrice;
     this.itemsID = itemsID;
@@ -103,6 +105,7 @@ public class EconItemStack extends ItemStack
     
     name = itemName;
     compactName = itemName.replaceAll(" ", "");
+    compactName += ":" + subtype;
     
     isInfinite = infinite;
     priceBuy = buyPrice;
@@ -239,6 +242,11 @@ public class EconItemStack extends ItemStack
   
   public void changeAmount(int amount)
   {
+    if ((getAmount() == -1) || isInfinite)
+    {
+      return;
+    }
+    
     setAmount(amount);
     
     updatePrice();
@@ -348,5 +356,17 @@ public class EconItemStack extends ItemStack
   private int calculateSell(int amount)
   {
     return Math.round(basePrice / ((amount * slope) + 1));
+  }
+  
+  public boolean equals(Object o)
+  {
+    if (!(o instanceof EconItemStack))
+    {
+      return false;
+    }
+    
+    EconItemStack tmp = (EconItemStack) o;
+    
+    return ((tmp.itemsID == itemsID) && tmp.name.equals(name) && (tmp.getDurability() == getDurability()));
   }
 }

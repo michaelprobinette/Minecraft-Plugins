@@ -18,6 +18,9 @@ package com.Vandolis.CodeRedLite;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -25,20 +28,21 @@ import java.util.logging.Level;
  */
 public class EconShop
 {
-  private ArrayList<EconItemStack> inventory        = new ArrayList<EconItemStack>();
-  private int                      balance          = 0;
-  private int                      sqlID            = 0;
-  private String                   name             = "";
-  private boolean                  allItemsInfinite = true;
-  private boolean                  canRestock       = true;
+  private ArrayList<EconItemStack>         inventory        = new ArrayList<EconItemStack>();
+  private Hashtable<String, EconItemStack> _inv             = new Hashtable<String, EconItemStack>();
+  private int                              balance          = 0;
+  private int                              sqlID            = 0;
+  private String                           name             = "";
+  private boolean                          allItemsInfinite = true;
+  private boolean                          canRestock       = true;
   
-  private boolean                  allowBuying      = true;
-  private boolean                  allowSelling     = true;
-  private boolean                  isUseMoney       = false;
-  private CodeRedLite              plugin           = null;
+  private boolean                          allowBuying      = true;
+  private boolean                          allowSelling     = true;
+  private boolean                          isUseMoney       = false;
+  private CodeRedLite                      plugin           = null;
   
   /**
-   * Default ctor. Makes an EconShop with the given name and instance
+   * 1-arg ctor. Makes an EconShop with the given name and instance
    * 
    * @param name
    * @param codeRed
@@ -72,9 +76,22 @@ public class EconShop
     return null; // Not found, return null
   }
   
+  public List<EconItemStack> getInv()
+  {
+    List<EconItemStack> list = new ArrayList<EconItemStack>();
+    Set<String> keys = _inv.keySet();
+    for (String key : keys)
+    {
+      list.add(_inv.get(key));
+    }
+    return list;
+  }
+  
   /**
    * @return the inventory
+   * @deprecated
    */
+  @Deprecated
   public ArrayList<EconItemStack> getInventory()
   {
     return inventory;
@@ -257,87 +274,95 @@ public class EconShop
    */
   public void removeItem(EconItemStack item)
   {
+    int before = 0;
     plugin.getLog().info("Infinite status: " + isAllItemsInfinite());
-    
-    // Check for infinite items
-    if (!isAllItemsInfinite())
+    EconItemStack stack = _inv.get(item.getName());
+    before = stack.getAmount();
+    stack.changeAmount(item.getAmount());
+    if (before != stack.getAmount())
     {
-      // Non infinite items
-      
-      plugin.getLog().info("Inventory is: " + inventory.size());
-      
-      // Search for the item in the inventory
-      for (EconItemStack iter : inventory)
-      {
-        // Check for id
-        if (iter.getTypeId() == item.getTypeId())
-        {
-          // Id found
-          
-          plugin.getLog().info("TypeID found");
-          
-          // Check if item is subtyped
-          if (iter.isSubtyped())
-          {
-            // Item is subtyped
-            
-            // Check the subtype
-            if (iter.getDurability() == item.getDurability())
-            {
-              // Correct subtype
-              
-              // Check item infinite amounts
-              if (iter.isInfinite() || (iter.getAmount() == -1))
-              {
-                // Item has infinite amounts
-                
-                plugin.getLog().info("S Remove item is infinte.");
-              }
-              else
-              {
-                // Non infinite amounts
-                
-                plugin.getLog().info(
-                  "S Removing item, setting new amount to:" + (iter.getAmount() - item.getAmount()));
-                
-                // Change the amount of the item
-                iter.changeAmount(iter.getAmount() - item.getAmount());
-              }
-              
-              // Update and write to sql
-              softUpdateItem(iter);
-              break; // Done
-            }
-          }
-          else
-          {
-            // Not subtyped
-            
-            // Check item infinite amounts
-            if (iter.isInfinite() || (iter.getAmount() == -1))
-            {
-              // Item has infinite amounts
-              
-              plugin.getLog().info("Remove item is infinte.");
-            }
-            else
-            {
-              // Non infinite amounts
-              
-              plugin.getLog().info(
-                "Removing item, setting new amount to:" + (iter.getAmount() - item.getAmount()));
-              
-              // Change the amount of the item
-              iter.changeAmount(iter.getAmount() - item.getAmount());
-            }
-            
-            // Update and write to sql
-            softUpdateItem(iter);
-            break; // Done
-          }
-        }
-      }
+      softUpdateItem(stack);
     }
+    
+    //    // Check for infinite items
+    //    if (!isAllItemsInfinite())
+    //    {
+    //      // Non infinite items
+    //      
+    //      plugin.getLog().info("Inventory is: " + inventory.size());
+    //      
+    //      // Search for the item in the inventory
+    //      for (EconItemStack iter : inventory)
+    //      {
+    //        // Check for id
+    //        if (iter.getTypeId() == item.getTypeId())
+    //        {
+    //          // Id found
+    //          
+    //          plugin.getLog().info("TypeID found");
+    //          
+    //          // Check if item is subtyped
+    //          if (iter.isSubtyped())
+    //          {
+    //            // Item is subtyped
+    //            
+    //            // Check the subtype
+    //            if (iter.getDurability() == item.getDurability())
+    //            {
+    //              // Correct subtype
+    //              
+    //              // Check item infinite amounts
+    //              if (iter.isInfinite() || (iter.getAmount() == -1))
+    //              {
+    //                // Item has infinite amounts
+    //                
+    //                plugin.getLog().info("S Remove item is infinte.");
+    //              }
+    //              else
+    //              {
+    //                // Non infinite amounts
+    //                
+    //                plugin.getLog().info(
+    //                  "S Removing item, setting new amount to:" + (iter.getAmount() - item.getAmount()));
+    //                
+    //                // Change the amount of the item
+    //                iter.changeAmount(iter.getAmount() - item.getAmount());
+    //              }
+    //              
+    //              // Update and write to sql
+    //              softUpdateItem(iter);
+    //              break; // Done
+    //            }
+    //          }
+    //          else
+    //          {
+    //            // Not subtyped
+    //            
+    //            // Check item infinite amounts
+    //            if (iter.isInfinite() || (iter.getAmount() == -1))
+    //            {
+    //              // Item has infinite amounts
+    //              
+    //              plugin.getLog().info("Remove item is infinte.");
+    //            }
+    //            else
+    //            {
+    //              // Non infinite amounts
+    //              
+    //              plugin.getLog().info(
+    //                "Removing item, setting new amount to:" + (iter.getAmount() - item.getAmount()));
+    //              
+    //              // Change the amount of the item
+    //              iter.changeAmount(iter.getAmount() - item.getAmount());
+    //            }
+    //            
+    //            // Update and write to sql
+    //            softUpdateItem(iter);
+    //            break; // Done
+    //          }
+    //        }
+    //      }
+    //    }
   }
   
   /**
@@ -391,7 +416,9 @@ public class EconShop
    * @param itemName
    * @param subtype
    * @return EconItemStack in the inventory
+   * @deprecated
    */
+  @Deprecated
   public EconItemStack getItem(String compactName, short subtype)
   {
     // Search through the inventory
@@ -412,76 +439,222 @@ public class EconShop
   }
   
   /**
-   * Adds the item to the shops inventory
+   * Returns a list of matching {@link EconItemStack} in the shops inventory.
+   * 
+   * @param compactName
+   * @param subtype
+   * @return List containing possible matches
+   * @deprecated
+   */
+  @Deprecated
+  public List<EconItemStack> getItems(String compactName, short subtype)
+  {
+    return getItemsSmart(compactName + ":" + subtype);
+  }
+  
+  /**
+   * Searches through the shops inventory to find a matching item with the given name and subtype. Greedy and will
+   * almost always return an item.
+   * 
+   * @param compactName
+   * @param subtype
+   * @return List of {@link EconItemStack} containing matches.
+   */
+  public List<EconItemStack> getItemsManual(String compactName, short subtype)
+  {
+    List<String> matches = getMatchingItemNames(compactName);
+    List<EconItemStack> list = new ArrayList<EconItemStack>();
+    //    System.out.println("Pass 1: " + matches.toString());
+    
+    matches = StringComp.findMatches(matches, compactName + " :" + subtype);
+    //    System.out.println("Pass 2: " + matches.toString());
+    String tmp = StringComp.smartPick(matches, compactName);
+    
+    if (tmp != null)
+    {
+      list.add(_inv.get(tmp));
+    }
+    else if (matches.size() == 1)
+    {
+      list.add(_inv.get(matches.get(0)));
+    }
+    //    if (list.size() != 0)
+    //    {
+    //      System.out.println("Looked for \"" + compactName + "\" and found \"" + list.get(0).getCompactName() + "\"");
+    //    }
+    
+    return list;
+  }
+  
+  /**
+   * Attempts to fully automate searching based on the given String. Does not return the best results. Use getItemsManual.
+   * 
+   * @param compactName
+   * @return List containing any matching items
+   * @deprecated
+   */
+  @Deprecated
+  public List<EconItemStack> getItemsSmart(String compactName)
+  {
+    List<String> matches = getMatchingItemNames(compactName);
+    List<EconItemStack> list = new ArrayList<EconItemStack>();
+    
+    String tmp = StringComp.smartPick(matches, compactName);
+    //    System.out.println("tmp: " + tmp);
+    list.add(_inv.get(tmp));
+    //    for (String str : matches)
+    //    {
+    //      list.add(_inv.get(str));
+    //    }
+    //    System.out.println("Looked for \"" + compactName + "\" and found \"" + list.get(0).getCompactName() + "\"");
+    
+    return list;
+  }
+  
+  /**
+   * Attempts to return a direct match in the shops inventory to the given compactName. May return null on no matches.
+   * 
+   * @param compactName
+   * @return {@link EconItemStack} of the match or null if none found.
+   */
+  public EconItemStack getDirectItem(String compactName)
+  {
+    for (EconItemStack iter : _inv.values())
+    {
+      if (iter.getCompactName().equals(compactName))
+      {
+        return iter;
+      }
+    }
+    return null;
+  }
+  
+  /**
+   * Generates a list containing all of the item names in the shops inventory, then performs a {@link StringComp} findMatches using the
+   * given string. Returns the result
+   * 
+   * @param str
+   * @return list containing the matching elements
+   */
+  private List<String> getMatchingItemNames(String str)
+  {
+    List<String> matches = new ArrayList<String>();
+    
+    for (String iter : _inv.keySet())
+    {
+      matches.add(iter);
+    }
+    
+    return StringComp.findMatches(matches, str);
+  }
+  
+  /**
+   * Adds the item to the shop without causing an SQL update
+   * 
+   * @param item
+   */
+  public void addItemNoUpdate(EconItemStack item)
+  {
+    EconItemStack stores = null;
+    
+    if ((stores = _inv.get(item.getCompactName())) != null)
+    {
+      stores.changeAmount(item.getAmount() + stores.getAmount());
+    }
+    else
+    {
+      _inv.put(item.getCompactName(), item);
+    }
+  }
+  
+  /**
+   * Adds the item to the shop causing an SQL update
    * 
    * @param item
    *          to add
    */
   public void addItem(EconItemStack item)
   {
-    boolean itemAdded = false; // True if item added (already in inventory) False if not (not already in inventory)
+    //    boolean itemAdded = false; // True if item added (already in inventory) False if not (not already in inventory)
+    EconItemStack stores = null;
+    int before = 0;
     
-    // Search through the inventory
-    for (EconItemStack iter : inventory)
+    if ((stores = _inv.get(item.getCompactName())) != null)
     {
-      // Check the item id
-      if (iter.getTypeId() == item.getTypeId())
+      before = stores.getAmount();
+      stores.changeAmount(item.getAmount() + stores.getAmount());
+      if (stores.getAmount() != before)
       {
-        // Same item id
-        
-        // Check if subtyped
-        if (item.isSubtyped())
-        {
-          // Subtyped
-          
-          // Check subtype
-          if (iter.getDurability() == item.getDurability())
-          {
-            // Same subtype
-            
-            // Check for infinite amounts
-            if ((iter.getAmount() != -1) && !iter.isInfinite())
-            {
-              // Non infinite
-              
-              // Change the item amount
-              iter.changeAmount(iter.getAmount() + item.getAmount());
-            }
-            
-            itemAdded = true; // Item added, done
-            softUpdateItem(item); // Write the item to sql
-            
-            break; // Done
-          }
-        }
-        else
-        {
-          // Not subtyped
-          
-          // Check for infinite amounts
-          if ((iter.getAmount() != -1) && !iter.isInfinite())
-          {
-            // Non infinite amounts
-            
-            // Change the item amount
-            iter.changeAmount(iter.getAmount() + item.getAmount());
-          }
-          
-          itemAdded = true; // Item added, done
-          softUpdateItem(item); // Write item to sql
-          
-          break; // Done
-        }
+        softUpdateItem(item); // Write to sql
       }
     }
-    
-    // Check if item added
-    if (!itemAdded)
+    else
     {
-      inventory.add(item); // Add the item to the list
+      _inv.put(item.getCompactName(), item);
       softUpdateItem(item); // Write to sql
-      //hardUpdate();
     }
+    
+    //    // Search through the inventory
+    //    for (EconItemStack iter : inventory)
+    //    {
+    //      // Check the item id
+    //      if (iter.getTypeId() == item.getTypeId())
+    //      {
+    //        // Same item id
+    //        
+    //        // Check if subtyped
+    //        if (item.isSubtyped())
+    //        {
+    //          // Subtyped
+    //          
+    //          // Check subtype
+    //          if (iter.getDurability() == item.getDurability())
+    //          {
+    //            // Same subtype
+    //            
+    //            // Check for infinite amounts
+    //            if ((iter.getAmount() != -1) && !iter.isInfinite())
+    //            {
+    //              // Non infinite
+    //              
+    //              // Change the item amount
+    //              iter.changeAmount(iter.getAmount() + item.getAmount());
+    //            }
+    //            
+    //            itemAdded = true; // Item added, done
+    //            softUpdateItem(item); // Write the item to sql
+    //            
+    //            break; // Done
+    //          }
+    //        }
+    //        else
+    //        {
+    //          // Not subtyped
+    //          
+    //          // Check for infinite amounts
+    //          if ((iter.getAmount() != -1) && !iter.isInfinite())
+    //          {
+    //            // Non infinite amounts
+    //            
+    //            // Change the item amount
+    //            iter.changeAmount(iter.getAmount() + item.getAmount());
+    //          }
+    //          
+    //          itemAdded = true; // Item added, done
+    //          softUpdateItem(item); // Write item to sql
+    //          
+    //          break; // Done
+    //        }
+    //      }
+    //    }
+    //    
+    //    // Check if item added
+    //    if (!itemAdded)
+    //    {
+    //      inventory.add(item); // Add the item to the list
+    //      softUpdateItem(item); // Write to sql
+    //      //hardUpdate();
+    //    }
   }
   
   /**

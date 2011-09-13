@@ -20,19 +20,17 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
-import org.bukkitcontrib.player.ContribPlayer;
 
 /**
  * @author Vandolis
  */
 public class EconPlayer
 {
-  private int           sqlID               = 0;
-  private int           balance             = 0;
-  private int           lastShopTransaction = 0;
-  private Player        player              = null;
-  private CodeRedLite   plugin              = null;
-  private ContribPlayer contribPlayer       = null;
+  private int         sqlID               = 0;
+  private int         balance             = 0;
+  private int         lastShopTransaction = 0;
+  private Player      player              = null;
+  private CodeRedLite plugin              = null;
   
   /**
    * Default ctor, makes an EconPlayer with the given player
@@ -42,7 +40,6 @@ public class EconPlayer
   public EconPlayer(Player player, CodeRedLite instance)
   {
     this.player = player;
-    contribPlayer = (ContribPlayer) player;
     plugin = instance;
   }
   
@@ -62,11 +59,6 @@ public class EconPlayer
   public void setSQLID(int int1)
   {
     sqlID = int1;
-  }
-  
-  public boolean isContrib()
-  {
-    return contribPlayer.isEnabledBukkitContribSinglePlayerMod();
   }
   
   /**
@@ -121,8 +113,8 @@ public class EconPlayer
     {
       plugin.getLog().log(
         Level.WARNING,
-          "CodeRedLite could not save " + player.getName() + "\'s player data. SQL Error: "
-            + e.getErrorCode());
+        "CodeRedLite could not save " + player.getName() + "\'s player data. SQL Error: "
+          + e.getErrorCode());
     }
   }
   
@@ -134,14 +126,6 @@ public class EconPlayer
   public int getLastShopTransaction()
   {
     return lastShopTransaction;
-  }
-  
-  /**
-   * @return the contribPlayer
-   */
-  public ContribPlayer getContribPlayer()
-  {
-    return contribPlayer;
   }
   
   public void unload()
